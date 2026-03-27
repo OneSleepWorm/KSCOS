@@ -30,21 +30,20 @@ hardware/
 ├── examples/           # 示例代码
 │   └── example.c       # 基本使用示例
 ├── inc/                # 头文件
-│   ├── Driver_GUI.h    # 硬件驱动头文件（根据具体硬件配置）
+│   ├── TFTDriver.h    # 硬件驱动头文件（根据具体硬件配置）
 │   ├── KSCbasicdrawN.h # 基本绘图功能头文件
 │   ├── KSCconfig.h     # 配置文件
 │   ├── KSCdisplay.h    # 显示驱动头文件
 │   ├── KSCfont.h       # 字体头文件
 │   └── KSCimg.h        # 图像头文件
 ├── src/                # 源文件
-│   ├── Driver_GUI.c    # 硬件驱动实现（根据具体硬件配置）
+│   ├── TFTDriver.c    # 硬件驱动实现（根据具体硬件配置）
 │   ├── KSCbasicdrawN.c # 基本绘图功能实现
 │   ├── KSCdisplay.c    # 显示驱动实现
 │   ├── KSCfont.c       # 字体实现
 │   └── KSCimg.c        # 图像实现
 ├── README.md           # 项目说明
 ├── LICENSE             # 许可证
-└── .gitignore          # Git忽略文件
 ```
 
 ## 快速开始
@@ -123,8 +122,7 @@ kstring(screen, "Hello World", 10, 0);
 
 在`KSCconfig.h`文件中可以配置以下选项：
 
-- `KSC_16color` - 启用16色模式
-- `__USE_CHINESE__` - 启用中文字符支持
+- `__USE_CHINESE__` - 启用中文字符支持(暂未公布)
 
 ## 示例
 
@@ -133,7 +131,7 @@ kstring(screen, "Hello World", 10, 0);
 ## 移植指南
 
 1. 根据你的硬件配置修改`Driver_GUI.c`文件
-2. 确保你的TFT显示屏与STM32正确连接
+2. 确保你的TFT显示屏硬件连线正确连接
 3. 根据需要调整`KSCconfig.h`中的配置选项
 
 ## 贡献
