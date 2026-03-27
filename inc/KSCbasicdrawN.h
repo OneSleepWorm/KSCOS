@@ -109,7 +109,7 @@ KSC_mes kdrawimagebig(KSC_buf* screen,uintxy x,uintxy y,const uint8_t* img
 KSC_mes kchar(KSC_buf* screen,char ch,uintxy x,uintxy y);
 // 绘制字符串
 KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y);
-#ifdef __USE_CHINESE__
+#if __USE_CHINESE__ >0
 // 绘制中文字符串
 KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y);
 #endif

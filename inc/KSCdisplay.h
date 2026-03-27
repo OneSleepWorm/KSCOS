@@ -4,7 +4,7 @@
 #include "KSCconfig.h"
 
 #ifdef __USE_ARMCC__
-#include "Driver_GUI.h"
+#include "TFTDriver.h"
 #endif
 
 void screen_init();

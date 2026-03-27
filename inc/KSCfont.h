@@ -33,7 +33,7 @@ typedef struct {
 #endif
 
 extern KSC_Font1 Systemfont0;
-#ifdef __USE_CHINESE__
+#if __USE_CHINESE__ >0
 extern KSC_FontChinese SystemfontChinese;
 #endif
 

@@ -1,46 +1,14 @@
 ////////////////////////////////////////////////////////////////////////
-// @file KSCbasicdraw.c
-// @brief 基本绘图函数
-// @author OneSleepWorm(一只瞌睡虫)
-// @date 2026/1/31
-//////////////////////////////////////////////////////////////////
-// detail:
-//  1. 基本绘图函数
-//  2. 包括矩形、圆角矩形、填充矩形、圆角填充矩形、线、点、圆、填充圆等
-//  3. 需要包含KSCdisplay.h
-//  4. 在Work1.h的先例上，修改推出了无需大缓冲区的绘图函数，适用于资源受限的嵌入式系统
-//  5. 相对的缺陷，无法获取画布任意像素点的颜色值，不稳定可能失效的动态缓冲区
-//  6. 推荐自主准备静态内存池，避免动态内存分配失败导致的绘图失败，并预设内存大小
-//  7. 即时刷新，无需调用Flashbuf函数
-///////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-/*  program:    屏幕缓冲区映射
- *  author:     一只瞌睡虫(OneSleepWorm)
- *  version:    V1.0.0
- *  Firstdate:  2025/11/12__0:02
- *  Lastdate:   2025/11/16__21:16
+/* @file KSCbasicdraw.c
+ * @brief 基本绘图函数
+ * @author OneSleepWorm(一只瞌睡虫)
+ * @date 2026/1/31
+ * @version 1.0.1
  */
 /////////////////////////////////////////////////////////////////
-
-/*  version:    V2.0.0
- *  Firstdate:  2025/12/07__23:00
- *  Lastdate:   2025/12/17__23:20
- */ 
-//////////////////////////////////////////////////////////////////
-/* V1.0.0 更新；基本实现了基本绘图功能，后续会添加更多功能
- * V2.0.0 更新：像素不再局限于1bit，可以处理2bit，在屏幕结构体中设置像素宽度和像素调色盘
- * V2.1.0 更新：重构了基于旧画线的画线函数
- * V2.1.1 更新：修复了矩形绘制函数的bug，现在不能设置线宽，默认1像素
- * V2.2.0 更新：优化了函数
- */
-
-////////////////////////////////////////////////////////////////
 #include "../inc/KSCbasicdrawN.h"
 
-
-
 #define _abs(x) ((x)<0?-(x):(x))
-#define MAX_Points 64
 
 #define RightUpper 0x01
 #define LeftUpper 0x02
@@ -48,26 +16,6 @@
 #define LeftLower 0x08
 
 KSC_buf os_screen = {0};
-
-/**
- * @brief 将16位RGB565格式颜色转换为24位RGB888格式
- * @param color16 16位RGB565格式颜色值
- * @return 24位RGB888格式颜色值
- */
-uint32_t kconvert16to24(uint16_t color16) {
-    // 提取RGB565各分量
-    uint8_t r5 = (color16 >> 11) & 0x1F;  // 红色分量（5位）
-    uint8_t g6 = (color16 >> 5) & 0x3F;   // 绿色分量（6位）
-    uint8_t b5 = color16 & 0x1F;          // 蓝色分量（5位）
-    
-    // 将分量扩展到8位
-    uint8_t r8 = (r5 << 3) | (r5 >> 2);   // 5位扩展到8位
-    uint8_t g8 = (g6 << 2) | (g6 >> 4);   // 6位扩展到8位
-    uint8_t b8 = (b5 << 3) | (b5 >> 2);   // 5位扩展到8位
-    
-    // 组合为24位RGB888格式
-    return (r8 << 16) | (g8 << 8) | b8;
-}
 
 //比特、像素处理函数
 /**
@@ -84,16 +32,7 @@ uint8_t getBitValue(const uint8_t* array, uint16_t bitPosition) {
     // 返回对应bit位的值(0或1)
     return (array[byteIndex] >> bitOffset) & 0x01;
 }
-// uint8_t K_GetByte_Offset(uintxy x){
-//     switch(COLORBIT){
-//         //这部分有点玄乎，其实，就是取掩码+合理右移,
-//         case 1:  return (7-(x&0x07));break;
-//         case 2:  return (6-((x&0x03)<<1));break;
-//         case 4:  return ((4-((x&0x01)<<2)));break;
-//         case 8:  return 0;break;
-//         default: return 0xFF;
-//     }
-// }
+
 void screen_setcanva_s(KSC_buf* screen,uintxy x,uintxy y,uintxy width,uintxy height){
     screen_setcanvas(x+screen->ssx,y+screen->ssy,width,height);
 }
@@ -395,12 +334,7 @@ KSC_mes kdrawimage(KSC_buf* screen,uintxy x,uintxy y,const uint8_t* img
     uint16_t imgsize = width*height*COLORBYTE;
     for(uint16_t j=0;j<imgsize;j+=COLORBYTE){
         KSCCOLOR ncolor = img[j] << 8 | img[j+1];
-		#if __USE_GCC__
-        ncolor=kconvert16to24(ncolor);
-		#endif
 		screen_setcolorpixel(ncolor);
-        // printf("%d\n",j);
-        // Sleep(50);
     }
     return KSC_OK;
 }
@@ -414,9 +348,6 @@ KSC_mes kdrawimagebig(KSC_buf* screen,uintxy x,uintxy y,const uint8_t* img,uint8
             uint16_t offset = (h * width + w) * COLORBYTE;
             // 提取像素颜色
             KSCCOLOR ncolor = img[offset] << 8 | img[offset+1];
-			#ifdef __USE_GCC__
-            ncolor = kconvert16to24(ncolor);
-            #endif
             // 放大显示该像素
             for(uint8_t sh=0; sh<scale; sh++){
                 for(uint8_t sw=0; sw<scale; sw++){
@@ -486,28 +417,21 @@ KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y){
     
     return KSC_OK;
 }
-#if __USE_CHINESE__ ==1
+#if __USE_CHINESE__ >0
 #include "../inc/UTF8_FlashN.h"
 KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y){
     KSC_FontChinese* font = &SystemfontChinese;
     #ifdef SYSTEMCHINESEFONT
     uint32_t addr_array[32] = {0};
     uint8_t* char_bitmap = NULL;
-    // uint8_t testdata[32]={//"业"//26
-    // 0x00,0x00,0x00,0x00,0x00,0x00,0x02,0xC0,0x06,0xC0,0x26,0xC8,0x36,0xC8,0x16,0xD8,
-    // 0x0E,0xF0,0x06,0xC0,0x7F,0xFF,0x70,0x7E,0x00,0x04,0x00,0x00,0x00,0x00,0x00,0x00};
     uint8_t addr_count = utf8_str_to_addr_array((char*)str, addr_array);
-    //font->Getfontfunc(str[0]);
     for(uint8_t j=0;j<addr_count;j++){
         char_bitmap = font->Getfontfunc(addr_array[j]);
-        //char_bitmap = testdata;
         for(uint8_t i = 0; i < font->height; i++) {
             ksetpixel_s(screen,x+j*font->width,y+i
                 ,char_bitmap+i*((font->width+7)/8),font->width);
             
-            //printf("data:%02X,%02X\n",char_bitmap[i*2],char_bitmap[i*2+1]);
         }
-        printf("\n");
     }
     #endif
     return KSC_OK;

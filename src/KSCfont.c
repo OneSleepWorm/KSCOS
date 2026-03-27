@@ -208,7 +208,7 @@ const uint8_t Font_7X7[665] = {
 
 #endif
 
-#if __USE_CHINESE__ == 1
+#if __USE_CHINESE__ > 0
 #include "../inc/Flash_OS.h"
 uint8_t* GetChinese16(uint32_t add)
 {   

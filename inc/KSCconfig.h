@@ -15,16 +15,9 @@
 #define COLORBIT 2
 #define COLORBYTE 2
 
-// #if KSCCOLOR == uint16_t
-// #define COLORBYTE 2
-// #elif KSCCOLOR == uint32_t
-// #define COLORBYTE 4
-// #endif
-
 #define TFTx 128
 #define TFTy 64
 #define MAX_INPUT_SIZE 255
-
 
 #define uintxy uint16_t
 #define intxy int16_t
@@ -40,7 +33,7 @@
 
 
 
-
+#include <stdint.h>
 
 #ifdef __USE_GCC__
 #include <stdint.h>
@@ -53,11 +46,12 @@
 #define K_malloc(size) malloc(size)
 #define KSCCOLOR uint32_t
 extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
-//#define publicdata publicdatabuf
+
 #endif
 
 #ifdef __USE_ARMCC__
-#include "stm32f1xx_hal.h"
+
+
 #include <stdlib.h>
 #define K_malloc(size) malloc(size)
 #define KSCCOLOR uint16_t
