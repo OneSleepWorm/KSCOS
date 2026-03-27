@@ -22,9 +22,9 @@ typedef struct{
     uint8_t height;
 }Img_File;
 
-extern KSC_Img Systemimg0;
+extern Img_File Systemimg[12];
 extern const uint8_t Wechat[512],QQ[512],Setting[512],Video[512],Photo[512]
 ,Tiktok[512],Qwen[512],Note[512],Game[512],Clock[512],Book[512],Alipay[512];
 Img_File kloadimage(char* name);
-
+extern const uint8_t OneSleepWorm[40*40*2];
 #endif
