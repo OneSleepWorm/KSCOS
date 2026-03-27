@@ -11,44 +11,18 @@
 #include "KSCfont.h"
 #include "KSCdisplay.h"
 
-// 调色盘结构体,从0开始
-typedef struct 
-{
-    KSCCOLOR color0;
-    KSCCOLOR color1;
-    KSCCOLOR color2;
-    KSCCOLOR color3;
-    #ifdef KSC_16color
-    KSCCOLOR color4;
-    KSCCOLOR color5;
-    KSCCOLOR color6;
-    KSCCOLOR color7;
-    KSCCOLOR color8;
-    KSCCOLOR color9;
-    KSCCOLOR color10;
-    KSCCOLOR color11;
-    KSCCOLOR color12;
-    KSCCOLOR color13;
-    KSCCOLOR color14;
-    KSCCOLOR color15;
-    #endif
-
-}KSC_palette;
-
 //屏幕缓冲区结构体
-/* fbuf 屏幕缓冲区地址
- * color_table 调色盘结构体地址
- * bit0_pixel bit0对应的像素值
- * bit1_pixel bit1对应的像素值
- * f_size 屏幕缓冲区总字节数
- * fbx 屏幕缓冲区x宽度
- * fby 屏幕缓冲区Y高度
- * Mode 屏幕模式 {bit7: KSC_buf是否malloc分配;bit6:color_table是否malloc分配;
- * bit5:fbuf是否malloc分配;bit4:保留;bit3:fbuf是否只读;bit2:是否锁定光标;bit1:保留;bit0:保留}
- * ColorBit 颜色位数
- * USE_NOT_BUFFER为1时启用以下成员，否则不启用
- * sx 当前光标X轴位置
- * sy 当前光标Y轴位置
+/**
+ * @brief 屏幕缓冲区结构体
+ * 
+ * @param fbuf 屏幕缓冲区地址
+ * @param pen1 颜色笔1
+ * @param pen0 颜色笔0
+ * @param width 屏幕宽度
+ * @param height 屏幕高度
+ * @param Mode 屏幕模式
+ * @param ssx 屏幕左上角X轴位置
+ * @param ssy 屏幕左上角Y轴位置
  */
 typedef struct {
     uint8_t* fbuf;
@@ -59,10 +33,6 @@ typedef struct {
     uint8_t  Mode;
     uintxy  ssx;//屏幕左上角X轴位置
     uintxy  ssy;//屏幕左上角Y轴位置
-    // #if USE_NOT_BUFFER
-    // uintxy sx;//当前光标X轴位置
-    // uintxy sy;//当前光标Y轴位置
-    // #endif
 }KSC_buf;
 
 typedef enum KSC_mes{
