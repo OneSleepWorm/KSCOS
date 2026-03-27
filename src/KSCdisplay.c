@@ -93,7 +93,7 @@ void screen_setcolorpixel(KSCCOLOR color){
 }
 
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){
-	TFT_Setsursor(Gx, Gy, Gx+width-1, Gy+height-1);
+	TFT_Setcanvas(Gx, Gy, Gx+width-1, Gy+height-1);
 }
 
    
