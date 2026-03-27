@@ -3,11 +3,6 @@
 // anthor: 一只瞌睡虫(OneSleepWorm)
 // date: 2026.01.03
 ///////////////////////////////////////////////////////////
-//显示模块，用来管理各个不同缓冲区的显示
-///////////////////////////////////////////////////////////
-//我们将实现:1.与硬件屏幕对接接口;2.将缓冲区数据发送给硬件屏幕;3.支持多缓冲区写入硬件屏幕
-//4.实现滚动屏幕效果
-///////////////////////////////////////
 
 #include "../inc/KSCdisplay.h"
 
@@ -34,8 +29,6 @@ uint32_t color16to24(uint16_t color16) {
 #include <graphics.h>
 #include <conio.h>
 #include <stdio.h>
-#define GCCx 128
-#define GCCy 64
 
 // #ifdef __MINGW32__
 // extern "C" {
@@ -49,20 +42,12 @@ uint32_t color16to24(uint16_t color16) {
 // }
 // #endif
 
-
 void screen_init(uint16_t width,uint16_t height){ 
     initgraph(width,height);
     setlinecolor(BLACK);
     HWND hwnd = GetHWnd();
     MoveWindow(hwnd, 300, 100,width,height, TRUE);
 }
-// static uint8_t Pix = 3;
-// void setPix(uint8_t _pix){
-//     Pix = _pix;
-// }
-// uint8_t getPix(){
-//     return Pix;
-// }
 static uint16_t sSx,sSy,sEx,sEy,sCx,sCy;
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){
 
