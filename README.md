@@ -48,6 +48,16 @@ hardware/
 
 ## 快速开始
 
+### 0. 核心定义
+
+- `KSCCOLOR` - 颜色定义 （RGB格式565）
+- `uintxy` - 坐标定义 （无符号16位整数）
+
+```c
+#include "KSCbasicdrawN.h"
+```
+
+
 ### 1. 初始化屏幕
 
 ```c
@@ -100,7 +110,6 @@ kstring(screen, "Hello World", 10, 0);
 ### 基本图形绘制
 
 - `KSC_mes ksetpixel(KSC_buf* screen, uintxy x, uintxy y)` - 设置像素点
-- `KSC_mes khline(KSC_buf* screen, uintxy x1, uintxy y1, uintxy x2)` - 绘制水平线段
 - `KSC_mes kline(KSC_buf* screen, uintxy x1, uintxy y1, uintxy x2, uintxy y2)` - 绘制任意方向线段
 - `KSC_mes kfillrect(KSC_buf* screen, uintxy x1, uintxy y1, uintxy x2, uintxy y2)` - 填充矩形区域
 - `KSC_mes karc(KSC_buf* screen, uintxy x0, uintxy y0, uint8_t r, uint8_t Anglediraction)` - 绘制圆弧
@@ -130,7 +139,7 @@ kstring(screen, "Hello World", 10, 0);
 
 ## 移植指南
 
-1. 根据你的硬件配置修改`Driver_GUI.c`文件
+1. 根据你的硬件配置修改`TFTDriver.c`文件
 2. 确保你的TFT显示屏硬件连线正确连接
 3. 根据需要调整`KSCconfig.h`中的配置选项
 
