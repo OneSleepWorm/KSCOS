@@ -58,3 +58,8 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #endif
 
 #endif
+
+#if __USE_FLASH__ > 0
+extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
+
+#endif
