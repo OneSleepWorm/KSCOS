@@ -55,10 +55,20 @@ void serial_init(void)
 }
 
 #ifndef __USE_CONNECT_WRITE_BUFFER__
+/**
+ * @brief 发送字节
+ * 
+ * @param Byte 要发送的字节
+ */
 void Serial_sendbyte(uint8_t Byte)
 {
     HAL_UART_Transmit(&huart1, &Byte, 1, HAL_MAX_DELAY); // 阻塞发送
 }
+/**
+ * @brief 发送字符串
+ * 
+ * @param str 要发送的字符串
+ */
 void Serial_sendstring(char *str)
 {
     while (*str)
@@ -68,10 +78,20 @@ void Serial_sendstring(char *str)
 
 #if __USE_CONNECT_WRITE_BUFFER__ > 0
 uint8_t connect_private_writebuffer[CONNECT_BUFFER_SIZE];
+/**
+ * @brief 发送字节
+ * 
+ * @param Byte 要发送的字节
+ */
 void serial_sendbyte(uint8_t Byte)
 {
     HAL_UART_Transmit_IT(&huart1, &Byte, 1);
 }
+/**
+ * @brief 发送字符串
+ * 
+ * @param str 要发送的字符串
+ */
 void serial_sendstring(char *str)
 {
     if(strlen(str)>=CONNECT_BUFFER_SIZE){
@@ -91,6 +111,12 @@ int fputc(int ch, FILE *f)
 }
 #endif
 
+/**
+ * @brief 发送格式化字符串
+ * 
+ * @param format 格式化字符串
+ * @param ... 格式化字符串的参数
+ */
 void kprintf(char *format, ...)
 {
     char String[100];
@@ -101,6 +127,10 @@ void kprintf(char *format, ...)
     serial_sendstring(String);
 }
 
+/**
+ * @brief 初始化串口接收
+ * 
+ */
 void serial_receive_init(void) {
     // 重置指针
     connect_write = connect_publicdata;
@@ -115,10 +145,18 @@ void serial_receive_init(void) {
     }
 }
 
+/**
+ * @brief 反初始化串口接收
+ * 
+ */
 void serial_receive_deinit(void){
     HAL_UART_Receive_IT(&huart1, NULL, 0);  // 传入NULL和0会禁用中断
 }
-
+/**
+ * @brief 获取字节
+ * 
+ * @return uint8_t 字节
+ */
 uint8_t serial_getbyte(void){
 		static uint8_t te =0;
         if(connect_flag){
@@ -135,10 +173,19 @@ uint8_t serial_getbyte(void){
         }
         return te;
 }
+/**
+ * @brief 获取接收标志位
+ * 
+ * @return uint8_t 接收标志位
+ */
 uint8_t serial_getflag(void){
     return connect_flag;
 }
-
+/**
+ * @brief 获取字符串
+ * 
+ * @return char* 字符串
+ */
 char* serial_fgetc(void){
     static char str[32]={0};
     char* p=str;
@@ -151,6 +198,11 @@ char* serial_fgetc(void){
     return str;
 }
 
+/**
+ * @brief 接收完成回调函数
+ * 
+ * @param huart 串口句柄
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart == &huart1) {
         connect_write++;
