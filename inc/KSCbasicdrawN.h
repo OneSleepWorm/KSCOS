@@ -57,7 +57,7 @@ KSC_mes khline(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2);
 // 绘制任意方向线段
 KSC_mes kline(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2);
 // 填充矩形区域
-KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2);
+KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h);
 // 绘制圆弧（可选方向）
 KSC_mes karc(KSC_buf* screen,uintxy x0,uintxy y0,uint8_t r,uint8_t Anglediraction);
 // 绘制完整圆形
@@ -65,9 +65,9 @@ KSC_mes kcircle(KSC_buf* screen,uintxy x0,uintxy y0,uint8_t r);
 // 绘制矩形边框
 KSC_mes krect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h);
 // 绘制圆角矩形
-KSC_mes kroundrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2,uint8_t r);
+KSC_mes kroundrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h,uint8_t r);
 // 绘制填充圆角矩形
-KSC_mes kfillroundrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2,uint8_t r);
+KSC_mes kfillroundrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h,uint8_t r);
 // 填充圆形区域
 KSC_mes kfillcircle(KSC_buf* screen,uintxy x0,uintxy y0,uint8_t r);
 // 绘制图像

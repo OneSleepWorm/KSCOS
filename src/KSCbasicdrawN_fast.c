@@ -131,13 +131,8 @@ int kfillrect_fast(char* arg){
     int y1 = atoi(argv[1]);
     int w = atoi(argv[2]);
     int h = atoi(argv[3]);
-	kprintf("command:%d,%d,%d,%d\r\n",x1,y1,w,h);
-    if(!kfillrect(kgetscreen(),x1,y1,w,h)){
-		ledturn();
+	//kprintf("command:%d,%d,%d,%d\r\n",x1,y1,w,h);
 	success;
-	}else{
-		kprintf("ERROR");
-	}
 	
     return 0;
 }

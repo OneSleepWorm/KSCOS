@@ -189,8 +189,11 @@ KSC_mes krect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h){
     klines(screen, rectlines, 4);
     return KSC_OK;
 }
-//画有填充矩形,用批量画线实现
-KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2){
+
+//画有填充矩形
+KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h){
+	uintxy y2=y1+h;
+	uintxy x2=x1+h;
     for(uintxy y = y1; y <= y2; y++){
         khline(screen,x1,y,x2);
     }
