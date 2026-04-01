@@ -12,11 +12,11 @@
 #define __USE_PRINTF__ 1
 
 //buffer config
-#define __USE_CONNECT_WRITE_BUFFER__ 0
-
-
 #define TFTx 240
 #define TFTy 320
+
+//small config 
+//#define __USE_CLEAR_SCRREN__ 
 
 
 //data config
@@ -53,9 +53,7 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define KSCCOLOR uint16_t
 #endif
 
-#endif
-
-
+//onlywrite config
 #define COLORBYTE 2
 #define CONNECT_BUFFER_SIZE 256
 #define uintxy uint16_t
@@ -63,4 +61,8 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 extern uint8_t connect_publicdata[CONNECT_BUFFER_SIZE];
 extern uint8_t testnum;
 void ledturn(void);
-#define log(str) printf(str)
+//#define log(str) kprintf(str)
+
+
+
+#endif

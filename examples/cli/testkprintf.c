@@ -1,3 +1,4 @@
+//--locale=english --no-multibyte-chars
 #include "osconnect.h"
 extern UART_HandleTypeDef huart1;
 
@@ -8,7 +9,8 @@ int main(void)
     kprintf("Hello world!\n");
     while(1){
         HAL_Delay(100);
-        kprintf(kfgetc());
+        kconnect_sendstring(kfgetc());
+        //kprintf(kfgetc());
     }
     return 0;
 }

@@ -71,7 +71,7 @@ void serial_sendbyte(uint8_t Byte)
  */
 void serial_sendstring(char *str)
 {
-    HAL_UART_Transmit(&huart1, str,strlen(str) , HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, (const uint8_t*)str,strlen(str) , HAL_MAX_DELAY);
 }
 #endif
 
@@ -118,7 +118,8 @@ int fputc(int ch, FILE *f)
  */
 void kprintf(char *format, ...)
 {
-    char String[100];
+    if(!format)return;
+    char String[64];
     va_list arg;
     va_start(arg, format);
     vsprintf(String, format, arg);

@@ -21,6 +21,7 @@ int kstring_fast(char* arg);
 int kstring_fast(char* arg);
 int kstringchinese_fast(char* arg);
 int drawhelp(char* arg);
+int kimage_fast(char* arg);
 
 // 声明cmd_draw_table为外部变量
 extern cli_node cmd_draw_table[];

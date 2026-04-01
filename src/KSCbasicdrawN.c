@@ -79,8 +79,10 @@ KSC_buf* kinitscreen(uintxy width,uintxy height,uint8_t* Buffer,uintxy ssx,uintx
     screen->height = height;
     ksetscreen(screen);
 	screen_init();
-    //kfillrect(screen,0,0,width,height);
-    screen->pen1 = GREEN;
+	#ifdef __USE_CLEAR_SCRREN__
+    kfillrect(screen,0,0,width,height);
+    #endif
+	screen->pen1 = GREEN;
     return screen;
 }
 

@@ -199,7 +199,25 @@ int kimage_fast(char* arg){
     kdrawimage(kgetscreen(),x,y,img.data,img.width,img.height);
     return 0;
 }
-
+int kimagebig_fast(char* arg){
+    char** argv = cutargv(arg);
+    if(argv == NULL){
+        kprintf("image: 语法错误\r\n");
+        return 1;
+    }
+    char* filename = argv[0];
+    Img_File img = kloadimage(filename);
+    if(img.name == NULL){
+        kprintf("image: 图片不存在\r\n");
+        return 1;
+    }
+    int x = atoi(argv[1]);
+    int y = atoi(argv[2]);
+    int scale =atoi(argv[3]);
+    kdrawimagebig(kgetscreen(),x,y,img.data,img.width,img.height,scale);
+    success;
+    return 0;
+}
 
 
 int drawhelp(char* arg){
@@ -238,6 +256,7 @@ cli_node cmd_draw_table[] = {
     {"fillcircle",kfillcircle_fast,NULL},
     {"string",kstring_fast,NULL},
 	{"image",kimage_fast,NULL},
+    {"imagebig",kimagebig_fast,NULL},
     {"help",drawhelp,NULL},
     {NULL,NULL,NULL}
 };
@@ -349,7 +368,8 @@ cli_node cmd_flash_table[] = {
 };
 #endif
 
-//connect命令行处理
+//connect命令行处理（暂时弃用）
+/*
 #if __USE_UART__ == 2
 int kconnectinit_fast(char* arg){
     kconnect_init();
@@ -437,3 +457,4 @@ cli_node cmd_connect_table[] = {
     {NULL,NULL,NULL}
 };
 #endif
+*/

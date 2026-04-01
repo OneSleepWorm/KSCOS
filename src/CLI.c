@@ -15,10 +15,16 @@ char* ignore_space(char*str){
         str++;
     }return str;
 }
+/*
+ * @brief 切割字符串
+ * 
+ * @param str 原始字符串
+ * @return char*  切割后的字符串(空格或'\0'或'\n'为截断点)
+ */
 char* cut_command(char* str){
 	//return str;
 	char* p=str;
-	while((*p)!=' '&&(*p)!='\0'){
+	while((*p)!=' '&&(*p)!='\0'&&(*p)!='\n'){
 		p++;
 	}
 	*p ='\0';
@@ -52,25 +58,21 @@ char* pip_command(char* str,const char* command){
 cli_node cmd_system_table[] = {
     {NULL,NULL,NULL}
 };
-int systemcommand(char* arg){
-    //匹配是否为print命令
-    char* newarg;
-    for(uint8_t i=0;i<sizeof(cmd_system_table)/sizeof(cli_node);i++){
-        if((newarg=pip_command(arg,cmd_system_table[i].name)) != NULL){
-        return cmd_system_table[i].func(ignore_space(newarg));
-        }
-    }
-    return -1;
-}
 
 cli_node cmd_root_table[] = {
-    {"system",systemcommand,cmd_system_table},
+    {"system",NULL,cmd_system_table},
     {"draw",drawhelp,cmd_draw_table},
     //{"flash",kflashhelp,cmd_flash_table},
     //{"connect",kconnecthelp,cmd_connect_table},
     {NULL,NULL,NULL}
 };
 
+/**
+ * @brief 运行CLI命令
+ * 
+ * @param str 命令字符串
+ * @param table 命令表
+ */
 void run_cli(char* str,cli_node* table){
 	if(str ==NULL){return;}
     if(table == NULL){
@@ -95,13 +97,28 @@ void run_cli(char* str,cli_node* table){
     return;
 }
 static int RUN_cli_callback = 0;
+/**
+ * @brief 设置运行CLI回调函数
+ * 
+ * @param callback 回调函数状态,0:不回调,1:回调到flash
+ */
 void set_run_cli_callback(uint8_t callback){
     RUN_cli_callback = callback;
     return;
 }
+/**
+ * @brief 获取运行CLI回调函数状态
+ * 
+ * @return int 回调函数状态,0:不回调,1:回调到flash
+ */
 int get_run_cli_callback(void){
     return RUN_cli_callback;
 }
+/**
+ * @brief 运行根命令
+ * 
+ * @param str 命令字符串
+ */
 void run_cli_root(char* str){
     switch(get_run_cli_callback()){
         case 0:

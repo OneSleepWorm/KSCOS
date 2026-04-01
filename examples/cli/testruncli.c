@@ -1,5 +1,6 @@
-#include "osconnect.h"
+//--locale=english --no-multibyte-chars
 
+#include "osconnect.h"
 #include "KSCbasicdrawN.h"
 #include "CLI.h"
 
