@@ -15,7 +15,7 @@
 #define RightLower 0x04
 #define LeftLower 0x08
 
-KSC_buf os_screen = {0};
+ KSC_buf* os_screen;
 
 //比特、像素处理函数
 /**
@@ -54,11 +54,11 @@ KSC_mes ksetpixel_s(KSC_buf* screen,const uintxy x, const uintxy y, /*__restrict
     return KSC_OK;
 }
 KSC_mes ksetscreen(KSC_buf* screen){
-	os_screen = *screen;
+	os_screen = screen;
 	return KSC_OK;
 }
 KSC_buf* kgetscreen(){
-	return &os_screen;
+	return os_screen;
 }
 //初始化缓冲区
 KSC_buf* kinitscreen(uintxy width,uintxy height,uint8_t* Buffer,uintxy ssx,uintxy ssy){
@@ -79,7 +79,7 @@ KSC_buf* kinitscreen(uintxy width,uintxy height,uint8_t* Buffer,uintxy ssx,uintx
     screen->height = height;
     ksetscreen(screen);
 	screen_init();
-    kfillrect(screen,0,0,width,height);
+    //kfillrect(screen,0,0,width,height);
     screen->pen1 = GREEN;
     return screen;
 }
@@ -117,7 +117,7 @@ KSC_mes ksetpencolor(KSC_buf* screen,KSCCOLOR color,uint8_t pen){
 //画线简单版，只能画水平线，但是快速
 KSC_mes khline(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2){
     uintxy dx = _abs(x2 - x1)+1;
-    uint8_t bits[TFTx/8*COLORBIT] = {0xFF};
+    uint8_t bits[TFTx/8] = {0xFF};
     for(uintxy i=0;i<=dx/8+1;i++){
         bits[i] = 0xFF;
     }
@@ -195,7 +195,6 @@ KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy x2,uintxy y2){
     return KSC_OK;
 }
 
-//
 //画圆弧
 //修改：支持画部分圆弧
 //Anglediraction: 右上0x01;左上0x02;右下0x04;左下0x08;全圆0x0F;

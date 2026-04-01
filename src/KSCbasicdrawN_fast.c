@@ -4,6 +4,9 @@
 #include "../inc/KSCconfig.h"
 
 #include "../inc/osconnect.h"
+
+//--locale=english --no-multibyte-chars
+
 #define MAX_ARGV 8
 #define success kconnect_sendstring("OK")
 //#define success __nop()
@@ -28,14 +31,14 @@ char** cutargv(char* arg){
 int kinitscreen_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("initscreen: 语法错误\r\n");
+        kprintf("initscreen: 语法错误\r\n");
         return 1;
     }
     int width = atoi(argv[0]);
     int height = atoi(argv[1]);
-    printf("initscreen: %d %d\r\n",width,height);
+    kprintf("initscreen: %d %d\r\n",width,height);
     if(width <= 0 || height <= 0){
-        printf("initscreen: 宽度和高度必须大于0\r\n");
+        kprintf("initscreen: 宽度和高度必须大于0\r\n");
         return 1;
     }
     screen_init();
@@ -52,11 +55,11 @@ int kfreescreen_fast(char* arg){
 int ksetcolor_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("setcolor: 语法错误\r\n");
+        kprintf("setcolor: 语法错误\r\n");
         return 1;
     }
     KSCCOLOR color = (KSCCOLOR)strtol(argv[0],NULL,16);
-    printf("setcolor: %d\r\n",color);
+    kprintf("setcolor: %d\r\n",color);
     int value = atoi(argv[1]);
     ksetpencolor(kgetscreen(),color,value);
 	success;
@@ -66,7 +69,7 @@ int ksetcolor_fast(char* arg){
 int kpixel_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("pixel: 语法错误\r\n");
+        kprintf("pixel: 语法错误\r\n");
         return 1;
     }
     int x = atoi(argv[0]);
@@ -78,7 +81,7 @@ int kpixel_fast(char* arg){
 int kline_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("line: 语法错误\r\n");
+        kprintf("line: 语法错误\r\n");
         return 1;
     }
     int x1 = atoi(argv[0]);
@@ -92,7 +95,7 @@ int kline_fast(char* arg){
 int krect_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("rect: 语法错误\r\n");
+        kprintf("rect: 语法错误\r\n");
         return 1;
     }
     int x1 = atoi(argv[0]);
@@ -107,7 +110,7 @@ int krect_fast(char* arg){
 int kcircle_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("circle: 语法错误\r\n");
+        kprintf("circle: 语法错误\r\n");
         return 1;
     }
     int x0 = atoi(argv[0]);
@@ -121,23 +124,28 @@ int kcircle_fast(char* arg){
 int kfillrect_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("fillrect: 语法错误\r\n");
+        kprintf("fillrect: 缺少参数\r\n");
         return 1;
     }
     int x1 = atoi(argv[0]);
     int y1 = atoi(argv[1]);
     int w = atoi(argv[2]);
     int h = atoi(argv[3]);
-    kfillrect(kgetscreen(),x1,y1,w,h);
-	printf("hihihi");
+	kprintf("command:%d,%d,%d,%d\r\n",x1,y1,w,h);
+    if(!kfillrect(kgetscreen(),x1,y1,w,h)){
+		ledturn();
 	success;
+	}else{
+		kprintf("ERROR");
+	}
+	
     return 0;
 }
 
 int kfillcircle_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("fillcircle: 语法错误\r\n");
+        kprintf("fillcircle: 语法错误\r\n");
         return 1;
     }
     int x0 = atoi(argv[0]);
@@ -151,7 +159,7 @@ int kfillcircle_fast(char* arg){
 int kstring_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("string: 语法错误\r\n");
+        kprintf("string: 语法错误\r\n");
         return 1;
     }
     char* str = argv[0];
@@ -164,7 +172,7 @@ int kstring_fast(char* arg){
 int kstringchinese_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("stringchinese: 语法错误\r\n");
+        kprintf("stringchinese: 语法错误\r\n");
         return 1;
     }
     char* str = argv[1];
@@ -177,13 +185,13 @@ int kstringchinese_fast(char* arg){
 int kimage_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("image: 语法错误\r\n");
+        kprintf("image: 语法错误\r\n");
         return 1;
     }
     char* filename = argv[0];
     Img_File img = kloadimage(filename);
     if(img.name == NULL){
-        printf("image: 图片不存在\r\n");
+        kprintf("image: 图片不存在\r\n");
         return 1;
     }
     int x = atoi(argv[1]);
@@ -195,24 +203,24 @@ int kimage_fast(char* arg){
 
 
 int drawhelp(char* arg){
-    printf("draw cli runner\r\n");
-    printf("Usage:\r\n");
-    printf("draw <command> [args]\r\n");
-    printf("Available commands:\r\n");
-    printf("initscreen <width> <height>  初始化屏幕\r\n");
-    printf("freescreen  释放屏幕缓冲区\r\n");
-    printf("setcolor <color> <value>  设置前景/背景颜色\r\n");
-    printf("pixel <x> <y>  绘制像素点\r\n");
-    printf("line <x1> <y1> <x2> <y2>  绘制线\r\n");
-    printf("rect <x1> <y1> <w> <h>  绘制矩形\r\n");
-    printf("circle <x> <y> <r>  绘制圆\r\n");
-    printf("fillrect <x1> <y1> <w> <h>  填充矩形\r\n");
-    printf("fillcircle <x> <y> <r>  填充圆\r\n");
-    printf("string <str> <x> <y>  绘制字符串\r\n");
-    printf("stringchinese <str> <x> <y>  绘制中文字符串(测试版)\r\n");
-    printf("image <filename> <x> <y>  绘制图片\r\n");
-    printf("help  显示帮助信息\r\n");
-    printf("-------------------------------------------\r\n");
+    kprintf("draw cli runner\r\n");
+    kprintf("Usage:\r\n");
+    kprintf("draw <command> [args]\r\n");
+    kprintf("Available commands:\r\n");
+    kprintf("initscreen <width> <height>  初始化屏幕\r\n");
+    kprintf("freescreen  释放屏幕缓冲区\r\n");
+    kprintf("setcolor <color> <value>  设置前景/背景颜色\r\n");
+    kprintf("pixel <x> <y>  绘制像素点\r\n");
+    kprintf("line <x1> <y1> <x2> <y2>  绘制线\r\n");
+    kprintf("rect <x1> <y1> <w> <h>  绘制矩形\r\n");
+    kprintf("circle <x> <y> <r>  绘制圆\r\n");
+    kprintf("fillrect <x1> <y1> <w> <h>  填充矩形\r\n");
+    kprintf("fillcircle <x> <y> <r>  填充圆\r\n");
+    kprintf("string <str> <x> <y>  绘制字符串\r\n");
+    kprintf("stringchinese <str> <x> <y>  绘制中文字符串(测试版)\r\n");
+    kprintf("image <filename> <x> <y>  绘制图片\r\n");
+    kprintf("help  显示帮助信息\r\n");
+    kprintf("-------------------------------------------\r\n");
     success;
     return 0;
 }
@@ -229,6 +237,7 @@ cli_node cmd_draw_table[] = {
     {"fillrect",kfillrect_fast,NULL},
     {"fillcircle",kfillcircle_fast,NULL},
     {"string",kstring_fast,NULL},
+	{"image",kimage_fast,NULL},
     {"help",drawhelp,NULL},
     {NULL,NULL,NULL}
 };
@@ -254,7 +263,7 @@ int kflashwrite_fast(char* arg){
     if(get_run_cli_callback() == 0){
         char** argv = cutargv(arg);
         if(argv == NULL){
-            printf("write: 语法错误\r\n");
+            kprintf("write: 语法错误\r\n");
             return 1;
         }
         addr = strtol(argv[0],NULL,16);
@@ -287,24 +296,24 @@ int kflashwrite_fast(char* arg){
 int kflashread_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("read: 语法错误\r\n");
+        kprintf("read: 语法错误\r\n");
         return 1;
     }
     uint32_t addr = strtol(argv[0],NULL,16);
     int count = atoi(argv[1]);
-    printf("log:read addr=%d,count=%d\r\n",addr,count);
+    kprintf("log:read addr=%d,count=%d\r\n",addr,count);
     flash_read_data(addr, publicdatabuf, count);
     for(int i=0;i<count;i++){
-        printf("%02x ",publicdatabuf[i]);
+        kprintf("%02x ",publicdatabuf[i]);
     }
-    printf("\r\n");
+    kprintf("\r\n");
     success;
     return 0;
 }
 int kflasherase_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("erase: 语法错误\r\n");
+        kprintf("erase: 语法错误\r\n");
         return 1;
     }
     int addr = atoi(argv[0]);
@@ -315,16 +324,16 @@ int kflasherase_fast(char* arg){
 
 
 int kflashhelp(char* arg){
-    printf("flash cli runner\r\n");
-    printf("Usage:\r\n");
-    printf("flash <command> [args]\r\n");
-    printf("Available commands:\r\n");
-    printf("init  初始化flash\r\n");
-    printf("deinit  释放flash\r\n");
-    printf("write <addr> <count>  向flash写入数据\r\n");
-    printf("read <addr> <count>  从flash读取数据\r\n");
-    printf("erase <addr>  扇区擦除\r\n");
-    printf("-------------------------------------------\r\n");
+    kprintf("flash cli runner\r\n");
+    kprintf("Usage:\r\n");
+    kprintf("flash <command> [args]\r\n");
+    kprintf("Available commands:\r\n");
+    kprintf("init  初始化flash\r\n");
+    kprintf("deinit  释放flash\r\n");
+    kprintf("write <addr> <count>  向flash写入数据\r\n");
+    kprintf("read <addr> <count>  从flash读取数据\r\n");
+    kprintf("erase <addr>  扇区擦除\r\n");
+    kprintf("-------------------------------------------\r\n");
     success;
     return 0;
 }
@@ -354,7 +363,7 @@ int kconnectdeinit_fast(char* arg){
 int kconnectsendstr_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("send str: 语法错误\r\n");
+        kprintf("send str: 语法错误\r\n");
         return 1;
     }
     char* str = argv[0];
@@ -365,7 +374,7 @@ int kconnectsendstr_fast(char* arg){
 int kconnectsendnum_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("send num: 语法错误\r\n");
+        kprintf("send num: 语法错误\r\n");
         return 1;
     }
     int num = atoi(argv[0]);
@@ -376,7 +385,7 @@ int kconnectsendnum_fast(char* arg){
 int kconnectsenddata_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        printf("send data: 语法错误\r\n");
+        kprintf("send data: 语法错误\r\n");
         return 1;
     }
     int count = atoi(argv[0]);
@@ -387,7 +396,7 @@ int kconnectsenddata_fast(char* arg){
 int kconnectrecvdata_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL||strcmp(argv[0], "recv") != 0){
-        printf("recv data: 语法错误\r\n");
+        kprintf("recv data: 语法错误\r\n");
         return 1;
     }
     int count = atoi(argv[1]);
@@ -397,18 +406,18 @@ int kconnectrecvdata_fast(char* arg){
 }
 
 int kconnecthelp(char* arg){
-    printf("connect cli runner\r\n");
-    printf("Usage:\r\n");
-    printf("connect <command> [args]\r\n");
-    printf("Available commands:\r\n");
-    printf("init  初始化连接\r\n");
-    printf("deinit  释放连接\r\n");
-    printf("send str <str>  发送字符串\r\n");
-    printf("send num <num>  发送数字(10进制格式)\r\n");
-    printf("send data <count>  发送数据数组(低于%d字节)\r\n",MAX_INPUT_SIZE);
-    printf("recv data <count>  接收数据数组(低于%d字节)\r\n",MAX_INPUT_SIZE);
-    printf("help  显示帮助信息\r\n");
-    printf("-------------------------------------------\r\n");
+    kprintf("connect cli runner\r\n");
+    kprintf("Usage:\r\n");
+    kprintf("connect <command> [args]\r\n");
+    kprintf("Available commands:\r\n");
+    kprintf("init  初始化连接\r\n");
+    kprintf("deinit  释放连接\r\n");
+    kprintf("send str <str>  发送字符串\r\n");
+    kprintf("send num <num>  发送数字(10进制格式)\r\n");
+    kprintf("send data <count>  发送数据数组(低于%d字节)\r\n",MAX_INPUT_SIZE);
+    kprintf("recv data <count>  接收数据数组(低于%d字节)\r\n",MAX_INPUT_SIZE);
+    kprintf("help  显示帮助信息\r\n");
+    kprintf("-------------------------------------------\r\n");
     success;
     return 0;
 }

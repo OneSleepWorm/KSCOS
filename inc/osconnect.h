@@ -12,11 +12,11 @@ void kconnect_sendbyte(uint8_t Byte);
 void kconnect_sendarray(uint8_t *Array, uint16_t Length);
 void kconnect_sendstring(char *String);
 // 防止意外展开问题
-#define kconnect_receive_init()    do { serial_receive_init(); } while(0)
-#define kconnect_receive_deinit()  do { serial_receive_deinit(); } while(0)
+void kconnect_receive_init(void);
+void kconnect_receive_deinit(void);
 void kprintf(char *format, ...);
 uint8_t kconnect_getbyte(void);
-#define kfgetc() serial_fgetc()
+char* kfgetc(void);
 
 #endif
 

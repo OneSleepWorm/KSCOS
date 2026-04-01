@@ -3,6 +3,7 @@
 #include <string.h>
 #include "../inc/CLI.h"
 #include "../inc/KSCbasicdrawN_fast.h"
+#include "../inc/Serial.h"
 
 //
 //忽略字符串首部空格
@@ -13,6 +14,15 @@ char* ignore_space(char*str){
     while(*str == ' '){
         str++;
     }return str;
+}
+char* cut_command(char* str){
+	//return str;
+	char* p=str;
+	while((*p)!=' '&&(*p)!='\0'){
+		p++;
+	}
+	*p ='\0';
+	return str;
 }
 
 /**
@@ -62,6 +72,7 @@ cli_node cmd_root_table[] = {
 };
 
 void run_cli(char* str,cli_node* table){
+	if(str ==NULL){return;}
     if(table == NULL){
         table = cmd_root_table;
     }
@@ -80,15 +91,16 @@ void run_cli(char* str,cli_node* table){
         }
         i++;
     }
+	kprintf("not found command:%s",cut_command(str));
     return;
 }
-static int run_cli_callback = 0;
+static int RUN_cli_callback = 0;
 void set_run_cli_callback(uint8_t callback){
-    run_cli_callback = callback;
+    RUN_cli_callback = callback;
     return;
 }
 int get_run_cli_callback(void){
-    return run_cli_callback;
+    return RUN_cli_callback;
 }
 void run_cli_root(char* str){
     switch(get_run_cli_callback()){

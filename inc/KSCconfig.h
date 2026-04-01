@@ -6,21 +6,18 @@
 #define __USE_ARMCC__ 
 
 //program config
-#define USE_NOT_BUFFER 1
 #define __USE_CHINESE__ 0
 #define __USE_FLASH__ 0
-#define __USE_UART__ 0
+#define __USE_UART__ 1
+#define __USE_PRINTF__ 1
+
+//buffer config
+#define __USE_CONNECT_WRITE_BUFFER__ 0
 
 
-#define COLORBIT 2
-#define COLORBYTE 2
+#define TFTx 240
+#define TFTy 320
 
-#define TFTx 128
-#define TFTy 64
-#define MAX_INPUT_SIZE 255
-
-#define uintxy uint16_t
-#define intxy int16_t
 
 //data config
 #define SYSTEMFONT 8
@@ -51,7 +48,6 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 
 #ifdef __USE_ARMCC__
 
-
 #include <stdlib.h>
 #define K_malloc(size) malloc(size)
 #define KSCCOLOR uint16_t
@@ -59,7 +55,12 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 
 #endif
 
-#if __USE_FLASH__ > 0
-extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 
-#endif
+#define COLORBYTE 2
+#define CONNECT_BUFFER_SIZE 256
+#define uintxy uint16_t
+#define intxy int16_t
+extern uint8_t connect_publicdata[CONNECT_BUFFER_SIZE];
+extern uint8_t testnum;
+void ledturn(void);
+#define log(str) printf(str)

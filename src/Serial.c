@@ -1,4 +1,4 @@
-#include "Serial.h"
+#include "../inc/Serial.h"
 #include "string.h"
 #include "stdarg.h"
 #include "stdio.h"
@@ -54,13 +54,13 @@ void serial_init(void)
   /* USER CODE END USART1_Init 2 */
 }
 
-#ifndef __USE_CONNECT_WRITE_BUFFER__
+#if __USE_CONNECT_WRITE_BUFFER__ <= 0
 /**
  * @brief 发送字节
  * 
  * @param Byte 要发送的字节
  */
-void Serial_sendbyte(uint8_t Byte)
+void serial_sendbyte(uint8_t Byte)
 {
     HAL_UART_Transmit(&huart1, &Byte, 1, HAL_MAX_DELAY); // 阻塞发送
 }
@@ -69,15 +69,14 @@ void Serial_sendbyte(uint8_t Byte)
  * 
  * @param str 要发送的字符串
  */
-void Serial_sendstring(char *str)
+void serial_sendstring(char *str)
 {
-    while (*str)
-    {serial_sendbyte(*str++);}
+    HAL_UART_Transmit(&huart1, str,strlen(str) , HAL_MAX_DELAY);
 }
 #endif
 
 #if __USE_CONNECT_WRITE_BUFFER__ > 0
-uint8_t connect_private_writebuffer[CONNECT_BUFFER_SIZE];
+static uint8_t connect_private_writebuffer[__USE_CONNECT_WRITE_BUFFER__];
 /**
  * @brief 发送字节
  * 
@@ -189,7 +188,7 @@ uint8_t serial_getflag(void){
 char* serial_fgetc(void){
     static char str[32]={0};
     char* p=str;
-	HAL_Delay(200);
+	if(!serial_getflag())return NULL;
     while(serial_getflag()&&p-str<31){
         *p=serial_getbyte();
         p++;

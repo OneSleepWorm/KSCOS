@@ -3,7 +3,7 @@
 
 extern uint8_t pubilcdatabuf[CONNECT_BUFFER_SIZE];
 #if defined(__USE_UART__) && defined(__USE_ARMCC__)
-#include "Serial.h"
+#include "../inc/Serial.h"
 
 /**
  * @brief 初始化串口连接
@@ -68,20 +68,11 @@ void kconnect_receive_getbyte(void){
 }
 
 /**
- * @brief 获取接收标志位
- * 
- * @return uint8_t 接收标志位
- */
-uint8_t kconnect_receive_getflag(void){
-    return serial_getflag();
-}
-
-/**
  * @brief 获取接收字符串
  * 
  * @return char* 接收的字符字符串
  */
-char* kconnect_receive_fgetc(void){
+char* kfgetc(void){
     return serial_fgetc();
 }
 
