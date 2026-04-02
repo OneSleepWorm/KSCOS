@@ -12,6 +12,7 @@
 - 可选支持中文字符显示
 - 支持自定义颜色设置
 - 与硬件配置分离，易于移植到不同的STM32平台
+- 支持命令行功能，便于调试和交互
 
 ## 硬件要求
 
@@ -37,7 +38,8 @@ hardware/
 │   ├── KSCconfig.h     # 配置文件
 │   ├── KSCdisplay.h    # 显示驱动头文件
 │   ├── KSCfont.h       # 字体头文件
-│   └── KSCimg.h        # 图像头文件
+│   ├── KSCimg.h        # 图像头文件
+│   └── CLI.h           # 命令行功能头文件
 ├── src/                # 源文件
 │   ├── TFTDriver.c    # 硬件驱动实现（根据具体硬件配置）
 │   ├── KSCbasicdrawN.c # 基本绘图功能实现
@@ -128,6 +130,18 @@ kstring(screen, "Hello World", 10, 0);
 - `KSC_mes kchar(KSC_buf* screen, char ch, uintxy x, uintxy y)` - 绘制单个字符
 - `KSC_mes kstring(KSC_buf* screen, const char* str, uintxy x, uintxy y)` - 绘制字符串
 - `KSC_mes kstringchinese(KSC_buf* screen, const char* str, uintxy x, uintxy y)` - 绘制中文字符串（需要定义__USE_CHINESE__）
+
+### 命令行功能
+
+- `void run_cli(char* str, cli_node* table)` - 执行命令
+- `void set_run_cli_callback(uint8_t callback)` - 设置命令行回调状态
+- `int get_run_cli_callback(void)` - 获取命令行回调状态
+- `void run_cli_root(char* str)` - 执行根命令
+
+#### 命令行数据结构
+
+- `typedef int (*cmd_func)(char *argv)` - 命令函数类型
+- `typedef struct cmd_node{ const char *name; cmd_func func; struct cmd_node *cmd_table; }cli_node` - 命令节点结构体
 
 ## 配置选项
 
