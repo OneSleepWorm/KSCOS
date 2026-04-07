@@ -1,3 +1,4 @@
+//--locale=english --no-multibyte-chars
 #include "Serial.h"
 #include <stdint.h>
 #include <string.h>
