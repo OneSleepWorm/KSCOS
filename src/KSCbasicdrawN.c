@@ -7,6 +7,7 @@
  */
 /////////////////////////////////////////////////////////////////
 #include "../inc/KSCbasicdrawN.h"
+//#include "UTF8_FlashN.h"
 
 #define _abs(x) ((x)<0?-(x):(x))
 
@@ -413,6 +414,7 @@ KSC_mes kchar(KSC_buf* screen,char ch,uintxy x,uintxy y){
 }
 KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y){
     KSC_Font1* font=&Systemfont0;
+    if(!screen) screen=kgetscreen();
     while(*str){
         kchar(screen,*str,x,y);
         x += font->width; // 每个字符宽度为8像素
@@ -425,19 +427,16 @@ KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y){
 #include "../inc/UTF8_FlashN.h"
 KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y){
     KSC_FontChinese* font = &SystemfontChinese;
-    #ifdef SYSTEMCHINESEFONT
-    uint32_t addr_array[32] = {0};
+    if(!screen) screen=kgetscreen();
     uint8_t* char_bitmap = NULL;
-    uint8_t addr_count = utf8_str_to_addr_array((char*)str, addr_array);
-    for(uint8_t j=0;j<addr_count;j++){
-        char_bitmap = font->Getfontfunc(addr_array[j]);
+    uint32_t count = utf8get(str, 0,0);
+    for(uint8_t j=0;j<count;j++){
+        char_bitmap = font->Getfontfunc(str,j);
         for(uint8_t i = 0; i < font->height; i++) {
             ksetpixel_s(screen,x+j*font->width,y+i
                 ,char_bitmap+i*((font->width+7)/8),font->width);
-            
         }
     }
-    #endif
     return KSC_OK;
 }
 #endif

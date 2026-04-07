@@ -8,19 +8,19 @@
 
 extern UART_HandleTypeDef huart1;
 
-uint8_t* connect_write=0;
-uint8_t* connect_read=0;
+uint32_t connect_write_num=0;
+uint32_t connect_read_num=0;
 extern uint8_t  connect_publicdata[CONNECT_BUFFER_SIZE];
+//uint8_t  connect_buf_num = 0;
 
 // 接收标志位,用于判断是否有数据可读,0:无数据,1:有数据
-static uint8_t connect_flag=0;
+uint8_t connect_flag=0;
 
 
 void serial_init(void)
 {
   /* USER CODE BEGIN USART1_Init 0 */
   
-  // 手动配置引脚（临时测试）
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_USART1_CLK_ENABLE();
   
@@ -73,6 +73,12 @@ void serial_sendstring(char *str)
 {
     HAL_UART_Transmit(&huart1, (const uint8_t*)str,strlen(str) , HAL_MAX_DELAY);
 }
+
+void serial_sendarray(uint8_t *array, uint16_t size)
+{
+    HAL_UART_Transmit(&huart1, array, size, HAL_MAX_DELAY);
+}
+
 #endif
 
 #if __USE_CONNECT_WRITE_BUFFER__ > 0
@@ -119,7 +125,7 @@ int fputc(int ch, FILE *f)
 void kprintf(char *format, ...)
 {
     if(!format)return;
-    char String[64];
+    char String[257];
     va_list arg;
     va_start(arg, format);
     vsprintf(String, format, arg);
@@ -132,17 +138,14 @@ void kprintf(char *format, ...)
  * 
  */
 void serial_receive_init(void) {
-    // 重置指针
-    connect_write = connect_publicdata;
-    connect_read = connect_publicdata;
-    // 清空缓冲区
-    memset(connect_publicdata, 0, CONNECT_BUFFER_SIZE);
+    // 重置计数
+    connect_write_num = 0;
+    connect_read_num = 0;
     connect_flag=0;
-    // 启动第一次接收
-    HAL_StatusTypeDef status = HAL_UART_Receive_IT(&huart1, connect_write, 1);
-    if (status != HAL_OK) {
-        Error_Handler();
-    }
+    
+    // HAL_UART_Receive_IT(&huart1, connect_publicdata, 1);
+    HAL_UART_Receive_DMA(&huart1, connect_publicdata, CONNECT_BUFFER_SIZE);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 }
 
 /**
@@ -150,7 +153,9 @@ void serial_receive_init(void) {
  * 
  */
 void serial_receive_deinit(void){
-    HAL_UART_Receive_IT(&huart1, NULL, 0);  // 传入NULL和0会禁用中断
+    //HAL_UART_Receive_IT(&huart1, NULL, 0);  // 传入NULL和0会禁用中断
+    HAL_UART_Receive_DMA(&huart1, NULL,0);
+    //__HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
 }
 /**
  * @brief 获取字节
@@ -159,16 +164,10 @@ void serial_receive_deinit(void){
  */
 uint8_t serial_getbyte(void){
 		static uint8_t te =0;
-        if(connect_flag){
-            te=*connect_read;
-        }else {
-			return 0;
-        }
-        connect_read++;
-        if(connect_read>=connect_publicdata+CONNECT_BUFFER_SIZE){
-            connect_read=connect_publicdata;//回绕到开头
-        }
-        if(connect_read==connect_write){
+        if(connect_read_num<connect_write_num){
+            te = connect_publicdata[connect_read_num++];
+            connect_flag=1;
+        }else{
             connect_flag=0;
         }
         return te;
@@ -183,19 +182,29 @@ uint8_t serial_getflag(void){
 }
 /**
  * @brief 获取字符串
- * 
+ * @warning 该函数返回的字符串指针指向的是接收缓冲区，调用者需要尽快处理数据并清空缓冲区，否则可能会被新的接收数据覆盖。
  * @return char* 字符串
  */
 char* serial_fgetc(void){
-    static char str[32]={0};
-    char* p=str;
+    //serial_receive_init();
+    //kprintf("flag:%d", serial_getflag());
 	if(!serial_getflag())return NULL;
-    while(serial_getflag()&&p-str<31){
-        *p=serial_getbyte();
-        p++;
-    }
-    *p='\0';
-    return str;
+    connect_flag=0;
+    *(connect_publicdata+(connect_write_num))='\0';
+    //kprintf("%d",connect_write_num);
+    kreceive_init();
+    return (char*)connect_publicdata;
+}
+
+uint8_t* kfgetc_s(uint16_t size){
+    if(!serial_getflag())return NULL;
+    connect_flag=0;
+    //if(size==connect_write_num){
+    connect_write_num = 0;
+    connect_read_num = 0;
+    return connect_publicdata;
+    //}
+    //return NULL;
 }
 
 /**
@@ -204,12 +213,26 @@ char* serial_fgetc(void){
  * @param huart 串口句柄
  */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-    if (huart == &huart1) {
-        connect_write++;
-        if (connect_write >= connect_publicdata + CONNECT_BUFFER_SIZE) {
-            connect_write = connect_publicdata; 
-        }
-        connect_flag=1;
-        HAL_UART_Receive_IT(huart, connect_write, 1);
-    }
+        //__HAL_UART_CLEAR_IDLEFLAG(&huart1);
+        // 2. 停止DMA传输，防止在计算长度时还有新数据进来
+        //HAL_UART_DMAStop(&huart1);
+        //ledturn();
+}
+
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+  //ledturn();
+  testnum++;
+  connect_flag=1;
+    __HAL_UART_CLEAR_IDLEFLAG(&huart1);
+    HAL_UART_DMAStop(&huart1);
+  connect_write_num = CONNECT_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+  HAL_UART_Receive_DMA(&huart1, connect_publicdata, CONNECT_BUFFER_SIZE);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
 }

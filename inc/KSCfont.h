@@ -11,7 +11,7 @@
  * height 字符高度
  */
 typedef const uint8_t* (*KSC_Font_GetChar)(char ch);
-typedef uint8_t* (*KSC_Font_GetChinese)(uint32_t add);
+typedef uint8_t* (*KSC_Font_GetChinese)(const char* str,uint8_t idx);
 typedef struct {
     KSC_Font_GetChinese Getfontfunc; // 字体数据指针
     uint8_t width;            // 字符宽度

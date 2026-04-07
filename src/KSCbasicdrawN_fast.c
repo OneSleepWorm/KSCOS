@@ -2,29 +2,40 @@
 #include "../inc/KSCimg.h"
 #include "string.h"
 #include "../inc/KSCconfig.h"
-
-#include "../inc/osconnect.h"
+#include "../inc/Serial.h"
+#include "main.h"
+#include "../inc/W25Q64.h"
+#include <stdint.h>
 
 //--locale=english --no-multibyte-chars
 
 #define MAX_ARGV 8
-#define success kconnect_sendstring("OK")
+#define success ksendbyte(0x00)
 //#define success __nop()
 
 #include "stdio.h"
 
 char** cutargv(char* arg){
+    //kprintf("argv: %s\r\n", arg);
     if(arg == NULL){
         return NULL;
     }
     static char* argv[MAX_ARGV]={NULL};
+    memset(argv, 0, sizeof(argv));
     char* p = strtok(arg," ");
+    //kprintf("cutargv: %s\r\n", p);
     int argc = 0;
     while(p != NULL&&argc < MAX_ARGV){
         argv[argc++] = p;
+        //kprintf("argv[%d]: %s\r\n", argc-1, argv[argc-1]);
         p = strtok(NULL," ");
     }
-    argv[argc] = NULL;
+    // 添加边界检查，确保不会越界
+    if(argc < MAX_ARGV){
+        argv[argc] = NULL;
+    } else {
+        argv[MAX_ARGV-1] = NULL;
+    }
     return argv;
 } 
 
@@ -170,11 +181,12 @@ int kstringchinese_fast(char* arg){
         kprintf("stringchinese: 语法错误\r\n");
         return 1;
     }
-    char* str = argv[1];
-    int x = atoi(argv[2]);
-    int y = atoi(argv[3]);
+    char* str = argv[0];
+    int x = atoi(argv[1]);
+    int y = atoi(argv[2]);
     kstringchinese(kgetscreen(),str,x,y);
- return 0;
+    success;
+    return 0;
 }
 #endif
 int kimage_fast(char* arg){
@@ -250,6 +262,7 @@ cli_node cmd_draw_table[] = {
     {"fillrect",kfillrect_fast,NULL},
     {"fillcircle",kfillcircle_fast,NULL},
     {"string",kstring_fast,NULL},
+    {"stringchinese",kstringchinese_fast,NULL},
 	{"image",kimage_fast,NULL},
     {"imagebig",kimagebig_fast,NULL},
     {"help",drawhelp,NULL},
@@ -272,9 +285,7 @@ int kflashdeinit_fast(char* arg){
 }
 int kflashwrite_fast(char* arg){
     static uint32_t addr = 0;
-    static uint16_t count = 0;
-    
-    if(get_run_cli_callback() == 0){
+    static uint32_t count = 0;
         char** argv = cutargv(arg);
         if(argv == NULL){
             kprintf("write: 语法错误\r\n");
@@ -282,60 +293,70 @@ int kflashwrite_fast(char* arg){
         }
         addr = strtol(argv[0],NULL,16);
         count = atoi(argv[1]);
-        set_run_cli_callback(1);
-        //flash_write_data(addr, publicdatabuf, count);
+        uint8_t* pdata =NULL;
+        uint16_t readycount =0;
+        //切成每块小于等于FLASH_BUFFER_SIZE(256)的数据块
+        for(int i=0;count>0;i++){
+            if(count>MAX_FLASH_WRITE_SIZE){
+                readycount = MAX_FLASH_WRITE_SIZE;
+            }else{
+                readycount = count;
+            }
+            kprintf("All data:%d,readycount:%d\r\n",count,readycount);
+            success;
+            for(int timer=0;timer<2000;timer++){
+                HAL_Delay(1);
+                if((pdata =kfgetc_s(readycount))!=NULL){
+                    break;
+                }
+                if(timer==1999){
+                kprintf("kfgetc_s timeout\r\n");
+                return 1;
+                }
+            }
+            flash_writedata(addr, pdata,
+                 readycount);
+            count -=readycount;
+            addr +=readycount;
+            if(i%100==0){
+                ledturn();
+            }
+            success;
+        }
         success;
         return 0;
-    }else{
-        if(count <=MAX_WRITE_COUNT){
-            flash_write_data(addr, (uint8_t*)arg, count);
-            count =0;
-            set_run_cli_callback(0);
-            success;
-            // kconnect_sendbyte(count>>8);
-            // kconnect_sendbyte(count);
-            return 0;
-        }else{
-            flash_write_data(addr, (uint8_t*)arg, MAX_WRITE_COUNT);
-            count -=MAX_WRITE_COUNT;
-            addr +=MAX_WRITE_COUNT;
-            success;
-            // kconnect_sendbyte(count>>8);
-            // kconnect_sendbyte(count);
-            return 0;
-        }
-    }
 }
 
 int kflashread_fast(char* arg){
+    //ledturn();
     char** argv = cutargv(arg);
     if(argv == NULL){
         kprintf("read: 语法错误\r\n");
         return 1;
     }
+    
+    
     uint32_t addr = strtol(argv[0],NULL,16);
     int count = atoi(argv[1]);
-    kprintf("log:read addr=%d,count=%d\r\n",addr,count);
-    flash_read_data(addr, publicdatabuf, count);
+    flash_readdata(addr, publicdatabuf, count);
     for(int i=0;i<count;i++){
-        kprintf("%02x ",publicdatabuf[i]);
+        kprintf("%02X ", publicdatabuf[i]);
     }
-    kprintf("\r\n");
     success;
     return 0;
 }
-int kflasherase_fast(char* arg){
+int kflashclear_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
-        kprintf("erase: 语法错误\r\n");
+        kprintf("clear: 语法错误\r\n");
         return 1;
     }
-    int addr = atoi(argv[0]);
-    flash_sector_erase(addr);
+    int addr = strtol(argv[0],NULL,16);
+    kprintf("addr=%06x\r\n",addr);
+    flash_clear(addr);
     success;
     return 0;
 }
-
 
 int kflashhelp(char* arg){
     kprintf("flash cli runner\r\n");
@@ -346,7 +367,7 @@ int kflashhelp(char* arg){
     kprintf("deinit  释放flash\r\n");
     kprintf("write <addr> <count>  向flash写入数据\r\n");
     kprintf("read <addr> <count>  从flash读取数据\r\n");
-    kprintf("erase <addr>  扇区擦除\r\n");
+    kprintf("clear <addr>  扇区擦除\r\n");
     kprintf("-------------------------------------------\r\n");
     success;
     return 0;
@@ -357,7 +378,7 @@ cli_node cmd_flash_table[] = {
     {"deinit",kflashdeinit_fast,NULL},
     {"write",kflashwrite_fast,NULL},
     {"read",kflashread_fast,NULL},
-    {"erase",kflasherase_fast,NULL},
+    {"clear",kflashclear_fast,NULL},
     {"help",kflashhelp,NULL},
     {NULL,NULL,NULL}
 };

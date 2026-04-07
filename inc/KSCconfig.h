@@ -6,10 +6,10 @@
 #define __USE_ARMCC__ 
 
 //program config
-#define __USE_CHINESE__ 0
-#define __USE_FLASH__ 0
+#define __USE_CHINESE__ 1
+#define __USE_FLASH__ 1
 #define __USE_UART__ 1
-#define __USE_PRINTF__ 1
+#define __USE_PRINTF__ 0
 
 //buffer config
 #define TFTx 240
@@ -28,7 +28,7 @@
 #define SYSTEMCOLOR2 GREEN
 #define SYSTEMCOLOR3 RED
 
-
+#define MAX_FLASH_WRITE_SIZE 256
 
 #include <stdint.h>
 
@@ -42,7 +42,7 @@
 #include <windows.h>
 #define K_malloc(size) malloc(size)
 #define KSCCOLOR uint32_t
-extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
+//extern uint8_t publicdatabuf[FLASH_BUFFER_SIZE];
 
 #endif
 
@@ -55,13 +55,14 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 
 //onlywrite config
 #define COLORBYTE 2
-#define CONNECT_BUFFER_SIZE 256
+#define CONNECT_BUFFER_SIZE 257
+#define FLASH_BUFFER_SIZE 257
 #define uintxy uint16_t
 #define intxy int16_t
 extern uint8_t connect_publicdata[CONNECT_BUFFER_SIZE];
+extern uint8_t publicdatabuf[FLASH_BUFFER_SIZE];
 extern uint8_t testnum;
 void ledturn(void);
-//#define log(str) kprintf(str)
 
 
 

@@ -1,8 +1,8 @@
 #include "../inc/KSCconfig.h"
 #include "main.h"
 
-uint8_t  connect_publicdata[CONNECT_BUFFER_SIZE];
-uint8_t  publicdatabuf[CONNECT_BUFFER_SIZE];
+uint8_t  connect_publicdata[CONNECT_BUFFER_SIZE]={0};
+uint8_t  publicdatabuf[FLASH_BUFFER_SIZE]={0};
 uint8_t  testnum =0;
 
 void ledturn(void){

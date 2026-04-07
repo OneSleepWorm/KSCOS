@@ -1,4 +1,5 @@
 #include "../inc/KSCconfig.h"
+#include <stdint.h>
 #include "../inc/KSCfont.h"
 
 
@@ -209,12 +210,11 @@ const uint8_t Font_7X7[665] = {
 #endif
 
 #if __USE_CHINESE__ > 0
-#include "../inc/Flash_OS.h"
-uint8_t* GetChinese16(uint32_t add)
+#include "../inc/UTF8_FlashN.h"
+
+uint8_t* GetChinese16(const char* str,uint8_t idx)
 {   
-    static uint8_t font[32];
-    flash_read_data(add,font,32);
-    return font;
+    return utf8getufont(str,idx);
 }
 KSC_FontChinese SystemfontChinese = {GetChinese16,16,16};
 

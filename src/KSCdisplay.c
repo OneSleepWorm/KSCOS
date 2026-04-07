@@ -41,12 +41,14 @@ uint32_t color16to24(uint16_t color16) {
 //     }
 // }
 // #endif
+// #define TFTx 240
+// #define TFTy 320
 
-void screen_init(uint16_t width,uint16_t height){ 
-    initgraph(width,height);
+void screen_init(void){ 
+    initgraph(TFTx,TFTy);
     setlinecolor(BLACK);
     HWND hwnd = GetHWnd();
-    MoveWindow(hwnd, 300, 100,width,height, TRUE);
+    MoveWindow(hwnd, 300, 100,TFTx,TFTy, TRUE);
 }
 static uint16_t sSx,sSy,sEx,sEy,sCx,sCy;
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){

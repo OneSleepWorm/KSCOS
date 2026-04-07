@@ -5,6 +5,7 @@
 #include "../inc/KSCbasicdrawN_fast.h"
 #include "../inc/Serial.h"
 
+#define success ksendbyte(0x00)
 //
 //忽略字符串首部空格
 char* ignore_space(char*str){
@@ -62,7 +63,7 @@ cli_node cmd_system_table[] = {
 cli_node cmd_root_table[] = {
     {"system",NULL,cmd_system_table},
     {"draw",drawhelp,cmd_draw_table},
-    //{"flash",kflashhelp,cmd_flash_table},
+    {"flash",kflashhelp,cmd_flash_table},
     //{"connect",kconnecthelp,cmd_connect_table},
     {NULL,NULL,NULL}
 };
@@ -84,9 +85,11 @@ void run_cli(char* str,cli_node* table){
         fcommand =pip_command(str,table[i].name);
         if(fcommand !=NULL){
             if(table[i].cmd_table != NULL){
+                //kprintf("sub command:%s",fcommand);
                 run_cli(fcommand,table[i].cmd_table);
             }
             else{
+                //kprintf("run command:%s",fcommand);
                 table[i].func(fcommand);
             }
             return;
@@ -94,6 +97,7 @@ void run_cli(char* str,cli_node* table){
         i++;
     }
 	kprintf("not found command:%s",cut_command(str));
+    success;
     return;
 }
 static int RUN_cli_callback = 0;
@@ -120,15 +124,13 @@ int get_run_cli_callback(void){
  * @param str 命令字符串
  */
 void run_cli_root(char* str){
+    char bufstr[256]={0};
+    if(str == NULL){return;}
+    strcpy(bufstr,str);
     switch(get_run_cli_callback()){
         case 0:
-            run_cli(str,cmd_root_table);
+            run_cli(bufstr,cmd_root_table);
             return;
-		#if __USE_FLASH__ ==1
-        case 1:
-            kflashwrite_fast(str);
-            break;
-		#endif
         default:
             break;
     }
