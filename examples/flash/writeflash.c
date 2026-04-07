@@ -8,6 +8,9 @@ extern UART_HandleTypeDef huart1;
 #include "W25Q64.h"
 extern SPI_HandleTypeDef hspi1;
 
+//stm32f1xx_it.c
+#include "KSCconfig.h"
+
 int main(void)
 {
   KSC_buf* screen=kinitscreen(240,320,NULL,0,0);

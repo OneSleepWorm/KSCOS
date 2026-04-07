@@ -271,7 +271,7 @@ cli_node cmd_draw_table[] = {
 
 #if __USE_FLASH__ > 0
 //flash命令行处理
-#include "../inc/Flash_OS.h"
+#include "../inc/W25Q64.h"
 
 int kflashinit_fast(char* arg){
     flash_init();
