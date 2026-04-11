@@ -80,9 +80,9 @@ KSC_buf* kinitscreen(uintxy width,uintxy height,uint8_t* Buffer,uintxy ssx,uintx
     screen->height = height;
     ksetscreen(screen);
 	screen_init();
-	#ifdef __USE_CLEAR_SCRREN__
+	//#ifdef __USE_CLEAR_SCRREN__
     kfillrect(screen,0,0,width,height);
-    #endif
+    //#endif
 	screen->pen1 = GREEN;
     return screen;
 }
@@ -193,8 +193,8 @@ KSC_mes krect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h){
 
 //画有填充矩形
 KSC_mes kfillrect(KSC_buf* screen,uintxy x1,uintxy y1,uintxy w,uintxy h){
-	uintxy y2=y1+h;
-	uintxy x2=x1+h;
+	uintxy y2=y1+h-1;
+	uintxy x2=x1+w-1;
     for(uintxy y = y1; y <= y2; y++){
         khline(screen,x1,y,x2);
     }
