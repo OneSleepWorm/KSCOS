@@ -10,8 +10,8 @@ int main(void)
   flash_init();
   kconnect_init();
   kreceive_init();
-    key_init();
     menu_init(screen);
+        key_init();
     uint8_t key;
     while(1){
         key=key_read();
