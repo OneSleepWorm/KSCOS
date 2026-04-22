@@ -1,89 +1,139 @@
 #include "../inc/KSCobj.h"
-#include <stdlib.h>
-#define k_malloc(size) malloc(size)
 
-void kobjdraw(KSC_buf* screen,ksc_style_t* obj,uintxy x,uintxy y){
-    if(!obj)
-    return;
+void kdrawimagefile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y){
+    if(!imgfile){return;}
+    //解析图片数据
+    #ifndef __USE_IMGNAME__
+        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        uint8_t width = *((uint8_t*)imgfile->data+3);
+        uint8_t height = *((uint8_t*)imgfile->data+5);
+        kdrawimage(screen,imgbuf,x,y,width,height);
+    #else
+    const char* imgname = imgfile->name;//1,通过图片文件名获取图片属性
+    if(!imgname){printf("imgname is null\n");return;}
+    uint8_t namelen = strlen(imgname);
+    //扫描文件名后四位
+    if(strcmp(imgname+namelen-4,".bmp")==0)return;
+    else if(strcmp(imgname+namelen-4,".jpg")==0)return;
+    else if(strcmp(imgname+namelen-4,".png")==0)return;
+    else if(strcmp(imgname+namelen-4,".gif")==0)return;
+    else if(strcmp(imgname+namelen-4,".img")==0){
+        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        uint8_t width = *((uint8_t*)imgfile->data+3);
+        uint8_t height = *((uint8_t*)imgfile->data+5);
+        kdrawimage(screen,imgbuf,x,y,width,height);
+    }else {printf("imgname:%s is not img file\n",imgname+namelen-4);}
+    #endif
+}
+
+void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8_t scale){
+    if(!imgfile){return;}
+    //解析图片数据
+    #ifndef __USE_IMGNAME__
+        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        uint8_t width = *((uint8_t*)imgfile->data+3);
+        uint8_t height = *((uint8_t*)imgfile->data+5);
+        kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
+    #else
+    const char* imgname = imgfile->name;//1,通过图片文件名获取图片属性
+    if(!imgname){printf("imgname is null\n");return;}
+    uint8_t namelen = strlen(imgname);
+    //扫描文件名后四位
+    if(strcmp(imgname+namelen-4,".bmp")==0)return;
+    else if(strcmp(imgname+namelen-4,".jpg")==0)return;
+    else if(strcmp(imgname+namelen-4,".png")==0)return;
+    else if(strcmp(imgname+namelen-4,".gif")==0)return;
+    else if(strcmp(imgname+namelen-4,".img")==0){
+        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        uint8_t width = *((uint8_t*)imgfile->data+3);
+        uint8_t height = *((uint8_t*)imgfile->data+5);
+        kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
+    }else {printf("imgname:%s is not img file\n",imgname+namelen-4);}
+    #endif
+}
+
+void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
+    if(!obj)return;
+    // x = obj->x;
+    // y = obj->y;
+    if(obj->state&0x01)return;
     switch(obj->_type){
         case _circle:
-            kcircle(screen,obj->colorck,x,y,obj->d_and_r&0x1F);
+            kcircle(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
             break;
         case _box:
-            kbox(screen,obj->colorck,x,y,obj->width,obj->height);
+            kbox(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
             break;
         case _string:
-            kstring(screen,(char*)obj->data,x,y,obj->colorbk,obj->colorck);
+            kstring(screen,(char*)obj->data,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
             break;
         case _image:
-            kdrawimage(screen,(uint16_t*)obj->data,x,y,obj->width,obj->height);
+            kdrawimagefile(screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy);
             break;
         case _roundrect:
-            kroundrect(screen,obj->colorck,x,y,obj->width,obj->height,obj->d_and_r&0x1F);
+            kroundrect(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
             break;
         case _fillroundrect:
-            kfillroundrect(screen,obj->colorck,x,y,obj->width,obj->height,obj->d_and_r&0x1F);
+            kfillroundrect(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
             break;
         case _fillbox:
-            kfillbox(screen,obj->colorck,x,y,obj->width,obj->height);
+            kfillbox(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
             break;
         case _fillcircle:
-            kfillcircle(screen,obj->colorck,x,y,obj->d_and_r&0x1F);
+            kfillcircle(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
             break;
         case _line:
-            kline(screen,obj->colorck,x,y,x+obj->width,y+obj->height);
+            kline(screen,obj->colorck,x+obj->sdx,y+obj->sdy,x+obj->sdx+obj->width,y+obj->sdy+obj->height);
             break;
         case _imagebig:
-            kdrawimagebig(screen,(uint16_t*)obj->data,x,y,obj->width,obj->height,(obj->d_and_r>>5));
+            kdrawimagebigfile(screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
+            break;
+        case _string_extra:
+            kstring(screen,(char*)extradata,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
+            break;
+        case _image_extra:
+            kdrawimagefile(screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy);
+            break;
+        case _imagebig_extra:
+            kdrawimagebigfile(screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
             break;
         default:
             break;
     }
 }
 
-void* list_data(Img_File* list,uint8_t index){
-    return list[index].data;
-}
-
-ksc_menu_t* KSC_menu_addfile(ksc_style_t* style,uint8_t style_num,Img_File* list,ku8 list_type,ku8 list_num){
-    if(!style) return NULL;
-    ksc_menu_t* menu = k_malloc(sizeof(ksc_menu_t));
-    ksc_obj_t obj[list_num]=k_malloc(sizeof(ksc_obj_t)*list_num);
-    menu->style = style;
-    //menu->config = config;
-    switch(list_type){
-        case l_file:
-        for(uint8_t i=0;i<list_num;i++){
-            if(style[i]._type == _image)
-                obj[i]
-        }
-        case l_string:
-            list->name;
-        default:
-            break;
-    }
-    
-}   
+// void KSC_menu_loadxy(ksc_menu_t* menu){
+//     uint8_t hnum = menu->config->menu_hnum;
+//     uint8_t wnum = menu->config->menu_wnum;
+//     uint8_t stylenum =menu->config->menu_obj_num;
+//     for(uint8_t j=0;j<hnum;j++){
+//         for(uint8_t i=0;i<wnum;i++){
+//             if(j*wnum+i>=stylenum)return;
+//             menu->style[j*wnum+i].x = i*menu->config->mdw;
+//             menu->style[j*wnum+i].y = j*menu->config->mdh;
+//         }
+//     }
+// }
 
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
     for(uint8_t j=0;j<hnum;j++){
         for(uint8_t i=0;i<wnum;i++){
-            //printf("index:%d\r\n",j*wnum+i);
-            if(menu->config->menu_use_img)
-            kdrawimage(screen,(uint16_t*)menu->list[j*wnum+i].data+4
-                ,x+menu->config->mdw*i+menu->config->mimgsdx
-                ,y+menu->config->mdh*j+menu->config->mimgsdy
-                ,*(menu->list[j*menu->config->menu_wnum+i].data+3)
-                ,*(menu->list[j*menu->config->menu_wnum+i].data+5));
-            if(menu->config->menu_use_str)
-            kstring(screen,menu->list[j*wnum+i].name
-                ,x+menu->config->mdw*i+menu->config->mstrsdx
-                ,y+menu->config->mdh*j+menu->config->mstrsdy
-                ,menu->style->colorck,menu->style->colorbk);
-            // if(j*menu->menu_wnum+i>=menu->menu_num)
-            // return;
+            for(uint8_t k=0;k<menu->config->menu_obj_num;k++){
+                void* extradata = NULL;
+                if(menu->style[k]._type==_image_extra)
+                    extradata = (void*)&menu->list[i+wnum*j];
+                else if(menu->style[k]._type==_string_extra)
+                    extradata = (void*)menu->list[i+wnum*j].name;
+                    //extradata = (void*)"Hello";
+                else
+                    extradata = NULL;
+                kobjdraw(screen,&menu->style[k]
+                    ,x+menu->config->mdw*i
+                    ,y+menu->config->mdh*j,
+                    extradata);
+            }
         }
     }
     kbox(screen,menu->style->colorck

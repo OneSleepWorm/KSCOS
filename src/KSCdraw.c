@@ -104,7 +104,7 @@ void memset_16(void* buf, size_t size_bytes, uint16_t pattern) {
 /* 公共函数：保留原接口，内部进行指针和位宽优化 */
 void imgchange(const uint8_t* imgbuf,
                uint16_t* imgbuf2,
-               const uint16_t length,
+               const uint16_t length,//bit位长度
                uint16_t bit,
                const uint16_t* colortable)
 {
@@ -127,17 +127,17 @@ void imgchange(const uint8_t* imgbuf,
             uint16_t c7 = colortable[(byte >> 0) & 0x01];
             
             // 32位合并写入（小端）
-            #if __LITTLE_END_COLOR__ > 0
+            //#if __LITTLE_END_COLOR__ > 0
             *pDst32++ = ((uint32_t)c1 << 16) | c0;
             *pDst32++ = ((uint32_t)c3 << 16) | c2;
             *pDst32++ = ((uint32_t)c5 << 16) | c4;
             *pDst32++ = ((uint32_t)c7 << 16) | c6;
-            #else
-            *pDst32++ = ((uint32_t)c0 << 16) | c1;
-            *pDst32++ = ((uint32_t)c2 << 16) | c3;
-            *pDst32++ = ((uint32_t)c4 << 16) | c5;
-            *pDst32++ = ((uint32_t)c6 << 16) | c7;
-            #endif
+            // #else
+            // *pDst32++ = ((uint32_t)c0 << 16) | c1;
+            // *pDst32++ = ((uint32_t)c2 << 16) | c3;
+            // *pDst32++ = ((uint32_t)c4 << 16) | c5;
+            // *pDst32++ = ((uint32_t)c6 << 16) | c7;
+            // #endif
         }
         pDst = (uint16_t*)pDst32;
         
@@ -164,13 +164,13 @@ void imgchange(const uint8_t* imgbuf,
             uint16_t c2 = colortable[(byte >> 2) & 0x03];
             uint16_t c3 = colortable[(byte >> 0) & 0x03];
             
-            #if __LITTLE_END_COLOR__ > 0
+            //#if __LITTLE_END_COLOR__ > 0
             *pDst32++ = ((uint32_t)c1 << 16) | c0;
             *pDst32++ = ((uint32_t)c3 << 16) | c2;
-            #else 
-            *pDst32++ = ((uint32_t)c0 << 16) | c1;
-            *pDst32++ = ((uint32_t)c2 << 16) | c3;
-            #endif
+            // #else 
+            // *pDst32++ = ((uint32_t)c0 << 16) | c1;
+            // *pDst32++ = ((uint32_t)c2 << 16) | c3;
+            // #endif
         }
         pDst = (uint16_t*)pDst32;
         
@@ -472,6 +472,7 @@ KSC_mes kdrawimage(KSC_buf* screen,const uint16_t* img,uintxy x,uintxy y
 KSC_mes kdrawimagebig(KSC_buf* screen,const uint16_t* img,uintxy x,uintxy y
     ,uint8_t width,uint8_t height,uint8_t scale){
     // 遍历原图像的每个像素
+    //uint16_t* img = (uint16_t*)img_file+4;
     for(uint8_t h=0; h<height; h++){
         for(uint8_t w=0; w<width; w++){
             // 计算当前像素在图像数据中的偏移量
@@ -544,6 +545,7 @@ KSC_mes kimagebin(KSC_buf* screen,const uint8_t* img,uintxy x,uintxy y
     if(!imgbuf) return KSC_ERR;
     uint16_t colortable[2] = {colorbk,colorck};
     imgchange(img,imgbuf,width*height,1,colortable);
+    //kdrawimage(screen,imgbuf,x,y,width,height);
     kdrawimage(screen,imgbuf,x,y,width,height);
     k_free(imgbuf);
     return KSC_OK;
@@ -562,7 +564,7 @@ KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR color
         kchar(screen,*str,x,y,colorck,colorbk);
         #if SYSTEMFONT == 7
         x += font->width-1;
-        #else  
+        #else
         x += font->width;
         #endif
         str++;
