@@ -352,7 +352,8 @@ KSC_mes kdrawimagebig(KSC_buf* screen,uintxy x,uintxy y,const uint8_t* img,uint8
             // 计算当前像素在图像数据中的偏移量
             uint16_t offset = (h * width + w) * COLORBYTE;
             // 提取像素颜色
-            KSCCOLOR ncolor = img[offset] << 8 | img[offset+1];
+            //KSCCOLOR ncolor = img[offset] << 8 | img[offset+1];
+            KSCCOLOR ncolor = *(((uint16_t*)img)++);
             // 放大显示该像素
             for(uint8_t sh=0; sh<scale; sh++){
                 for(uint8_t sw=0; sw<scale; sw++){

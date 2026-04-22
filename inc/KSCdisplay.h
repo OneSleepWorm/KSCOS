@@ -8,7 +8,7 @@
 #endif
 
 void screen_init(void);
-void screen_setcolorpixel(KSCCOLOR color);
+void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num);
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height);
 // void setPix(uint8_t _pix);
 // uint8_t getPix();

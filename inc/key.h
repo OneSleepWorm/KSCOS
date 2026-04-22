@@ -35,6 +35,11 @@
 #define _USE_KEY_KEEP_ 0
 
 void key_init(void);
+uint8_t key_scan(void);
 uint8_t key_read(void);
+
+#ifdef __USE_INPUT_KEY_SIMU__
+#include <graphics.h>
+#endif
 
 #endif

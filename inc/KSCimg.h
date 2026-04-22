@@ -23,8 +23,8 @@ typedef struct{
 }Img_File;
 
 extern Img_File Systemimg[12];
-extern const uint8_t Wechat[512],QQ[512],Setting[512],Video[512],Photo[512]
-,Tiktok[512],Qwen[512],Note[512],Game[512],Clock[512],Book[512],Alipay[512];
+extern const uint8_t Wechat[520],QQ[520],Setting[520],Video[520],Photo[520]
+,Tiktok[520],Qwen[520],Note[520],Game[520],Clock[520],Book[520],Alipay[520];
 Img_File kloadimage(char* name);
 extern const uint8_t OneSleepWorm[40*40*2];
 #endif

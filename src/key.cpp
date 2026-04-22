@@ -1,5 +1,6 @@
-#include "main.h"
-#include "key.h"
+//#include "main.h"
+#include "../inc/key.h"
+#ifdef __USE_INPUT_KEY__
 
 void key_init(void)
 {
@@ -69,7 +70,56 @@ uint8_t key_scan(void)
 
     return key;
 }
+#endif
 
+#ifdef __USE_INPUT_KEY_SIMU__
+
+
+ExMessage key_msg;
+
+uint8_t key_scan(void){
+    if (!peekmessage(&key_msg,EX_KEY)) return KEY_NONE;
+    if(key_msg.message == WM_KEYDOWN){
+        switch (key_msg.vkcode){
+            case VK_NUMPAD0:
+                return KEY_A0;
+                break;
+            case VK_NUMPAD1:
+                return KEY_A1;
+                break;
+            case VK_NUMPAD2:
+                return KEY_A2;
+                break;
+            case VK_NUMPAD3:
+                return KEY_A3;
+                break;
+            case VK_NUMPAD4:
+                return KEY_A4;
+                break;
+            case VK_NUMPAD5:
+                return KEY_A5;
+                break;
+            case VK_NUMPAD6:
+                return KEY_A6;
+                break;
+            case VK_NUMPAD7:
+                return KEY_A7;
+                break;
+            case VK_NUMPAD8:
+                return KEY_A8;
+                break;
+            case VK_NUMPAD9:
+                return KEY_A9;
+                break;
+            default:
+                return KEY_NONE;
+                break;
+        }
+    }
+    return KEY_NONE;
+}
+
+#endif
 
 //按键读取,获取按键持续状态
 uint8_t key_read(void){
@@ -103,4 +153,5 @@ uint8_t key_read(void){
     lastkey = nowkey;
     return realkey;
 }
+
 
