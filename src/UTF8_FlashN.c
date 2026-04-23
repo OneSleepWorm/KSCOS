@@ -1,7 +1,7 @@
 #include "../inc/UTF8_FlashN.h"
-#include "Serial.h"
+//#include "Serial.h"
 
-//#define NULL ((void*)0)
+#if __USE_CHINESE__ > 0
 /**
  * @brief 检测UTF-8字符串中指定位置的字符编码长度
  * @param str UTF-8编码的字符串指针
@@ -267,103 +267,4 @@ uint32_t utf8get(const char* str, uint8_t idx,uint8_t mode){
             return 0;
     }
 }
-
-// /**
-//  * @brief 获取字符串中指定位置的Unicode字符的Flash地址
-//  * @param str UTF-8编码的字符串指针
-//  * @param idx 要获取的字符索引(从0开始)
-//  * @return 对应的Flash存储地址
-//  */
-// uint32_t utf8_get_char_addr(char* str, uint8_t idx) {
-//     if (str == NULL) {
-//         return 0x200000;  // 空指针返回安全地址
-//     }
-    
-//     uint8_t current_idx = 0;
-//     uint8_t char_count = 0;
-    
-//     while (str[current_idx] != '\0' && char_count <= idx) {
-//         uint8_t len = utf8_len(str, current_idx);
-//         if (len == 0) {
-//             // 无效编码，跳过
-//             current_idx++;
-//             continue;
-//         }
-        
-//         if (char_count == idx) {
-//             // 找到目标字符
-//             uint32_t code = utf8_to_code(str, current_idx, len);
-//             return code_to_addr(code);
-//         }
-        
-//         current_idx += len;
-//         char_count++;
-//     }
-    
-//     return 0x200000;  // 索引超出范围，返回安全地址
-// }
-
-// /**
-//  * @brief 将UTF-8字符串转换为Flash地址数组
-//  * @param str UTF-8编码的字符串指针
-//  * @param addr_array 存储地址的数组指针(至少32个元素)
-//  * @return 解析的字符数量，异常返回0
-//  */
-// uint8_t utf8_str_to_addr_array(char* str, uint32_t* addr_array) {
-//     if (str == NULL || addr_array == NULL) {
-//         return 0;  // 空指针返回0
-//     }
-    
-//     uint8_t current_idx = 0;
-//     uint8_t char_count = 0;
-    
-//     while (str[current_idx] != '\0' && char_count < 32) {
-//         uint8_t len = utf8_len(str, current_idx);
-//         if (len == 0) {
-//             // 无效编码，跳过
-//             current_idx++;
-//             continue;
-//         }
-        
-//         uint32_t code = utf8_to_code(str, current_idx, len);
-//         addr_array[char_count] = code_to_addr(code);
-        
-//         current_idx += len;
-//         char_count++;
-//     }
-    
-//     return char_count;
-// }
-
-// // /**
-// //  * @brief 向Flash写入字模数据
-// //  * @param addr 写入的起始地址
-// //  * @param data 要写入的字模数据
-// //  * @param count 字模数量
-// //  */
-// // void flash_write_big(uint32_t addr, uint8_t* data, uint16_t count) {
-// //     uint16_t byte_count = count * UTF8_FLASH_NUM_SIZE;
-// //     flash_writedata_big(addr, data, byte_count);
-// // }
-
-
-
-// /**
-//  * @brief 直接获取字符串对应的字模数据
-//  * @param str UTF-8编码的字符串指针
-//  * @param font_data 存储字模数据的数组指针
-//  */
-// void utf8_get_font_data(char* str, uint8_t* font_data) {
-//     if (str == NULL || font_data == NULL) {
-//         return;  // 空指针直接返回
-//     }
-    
-//     //uint32_t addr_array[UTF8_FLASH_MAX_STRING_SIZE + 2];
-//     uint32_t addr = utf8_get_char_addr(str, 0);
-    
-//     if (addr == 0x200000) {
-//         return;  // 解析失败直接返回
-//     }
-//     // 读取字符的字模数据
-//         flash_read(addr, font_data);
-// }
+#endif

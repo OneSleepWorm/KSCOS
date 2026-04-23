@@ -7,6 +7,7 @@
 //#define __USE_ESP32__ 
 
 //program config
+#define __USE_LCD__ 0
 #define USE_NOT_BUFFER 1
 #define __USE_CHINESE__ 0
 #define __USE_FLASH__ 0
@@ -41,12 +42,12 @@
 
 #ifdef __USE_GCC__
 #include <stdint.h>
-#include <graphics.h>
+// #include <graphics.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <time.h>
-#include <windows.h>
+// #include <unistd.h>
+// #include <time.h>
+// #include <windows.h>
 #define K_malloc(size) malloc(size)
 //#define KSCCOLOR uint32_t
 extern uint8_t publicdatabuf[MAX_INPUT_SIZE];

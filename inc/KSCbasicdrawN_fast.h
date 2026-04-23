@@ -1,8 +1,10 @@
 #ifndef __KSCBASEICDRAWN_FAST_H__
 #define __KSCBASEICDRAWN_FAST_H__   
 
-#include "KSCbasicdrawN.h"
 #include "KSCconfig.h"
+
+#if  __USE_LCD__ ==1
+#include "KSCdraw.h"
 #include "KSCdisplay.h"
 #include <string.h>
 #include "../inc/CLI.h"
@@ -26,6 +28,8 @@ int kimage_fast(char* arg);
 // 声明cmd_draw_table为外部变量
 extern cli_node cmd_draw_table[];
 
+#endif
+
 #if __USE_FLASH__ ==1
 //flash烧写数据命令
 int kflashinit_fast(char* arg);
@@ -47,6 +51,11 @@ int kconnectsenddata_fast(char* arg);
 int kconnectrecvdata_fast(char* arg);
 int kconnecthelp(char* arg);
 extern cli_node cmd_connect_table[];
+#endif
+
+#if __USE_LITTLEFS__ ==1
+#include "../littlefs/lfs.h"
+
 #endif
 
 #endif

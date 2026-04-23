@@ -36,32 +36,6 @@ void MySPI_Init(void)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-//    /* 配置 SCK(PA5) 和 MOSI(PA7) - 复用推挽输出 */
-//    GPIO_InitStruct.Pin = GPIO_PIN_5 | GPIO_PIN_7;
-//    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-//    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-//    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-//    /* 配置 MISO(PA6) - 上拉输入 */
-//    GPIO_InitStruct.Pin = GPIO_PIN_6;
-//    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-//    GPIO_InitStruct.Pull = GPIO_PULLUP; // 可选：上拉
-//    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-//    /* 配置 SPI1 外设 */
-//    hspi1.Instance = SPI1;
-//    hspi1.Init.Mode = SPI_MODE_MASTER;                    // 主机模式
-//    hspi1.Init.Direction = SPI_DIRECTION_2LINES;          // 全双工2线
-//    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;              // 8位数据
-//    hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;            // CPOL = 0 (空闲时SCK为低)
-//    hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;                // CPHA = 1 (第一个边沿采样) → 模式0
-//    hspi1.Init.NSS = SPI_NSS_SOFT;                        // 软件管理NSS
-//    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128; // 波特率预分频128
-//    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;               // 高位先行
-//    hspi1.Init.TIMode = DISABLE;
-//    hspi1.Init.CRCCalculation = DISABLE;
-//    hspi1.Init.CRCPolynomial = 7;
-
     if (HAL_SPI_Init(&hspi1) != HAL_OK)
     {
         // 初始化错误处理（可选：进入错误状态）
@@ -115,13 +89,3 @@ uint8_t MySPI_SwapByte(uint8_t ByteSend)
 
     return ByteReceive;
 }
-
-///* ----------------------- 可选：错误处理函数 ----------------------- */
-//__weak void Error_Handler(void)
-//{
-//    /* 用户可以在此添加自己的错误处理逻辑 */
-//    while (1)
-//    {
-//        // 进入死循环
-//    }
-//}

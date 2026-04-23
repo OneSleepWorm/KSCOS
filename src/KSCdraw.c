@@ -9,6 +9,9 @@
 
 
 #include "../inc/KSCdraw.h"
+
+#if __USE_LCD__ ==1
+
 void* r_malloc(size_t size){
     return malloc(size);
 }
@@ -581,4 +584,6 @@ KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLO
     }
     return KSC_OK;
 }
+#endif
+
 #endif

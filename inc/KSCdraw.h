@@ -1,12 +1,10 @@
 #ifndef _KSCbasicdraw_H_
 #define _KSCbasicdraw_H_
 
-
-#include <stdint.h>
-#include <string.h>
-
-#include "KSCdisplay.h"
 #include "KSCconfig.h"
+
+#if __USE_LCD__ ==1
+#include "KSCdisplay.h"
 #include "KSCimg.h"
 #include "KSCfont.h"
 
@@ -77,6 +75,8 @@ KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR color
 #if __USE_CHINESE__ >0
 // 绘制中文字符串
 KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR color1,KSCCOLOR color2);
+#endif
+
 #endif
 
 #endif

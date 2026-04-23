@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "KSCconfig.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __USE_ARMCC__
 void W25Q64_Init(void);
 void W25Q64_DeInit(void);
@@ -30,4 +34,8 @@ void W25Q64_ReadData(uint32_t Address, uint8_t *DataArray, uint32_t Count);
 #define flash_read  W25Q64_ReadData
 #define flash_clear  W25Q64_SectorErase
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
