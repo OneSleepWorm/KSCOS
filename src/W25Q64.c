@@ -1,3 +1,83 @@
+#include "../inc/W25Q64.h"
+
+#ifdef __USE_GCC__
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define W25Q64_TOTAL_SIZE   (8 * 1024 * 1024)  // 8MB
+#define W25Q64_SECTOR_SIZE  (4 * 1024)         // 4KB 扇区
+#define W25Q64_PAGE_SIZE    (256)              // 256 字节页
+
+static FILE* g_flash_file = NULL;
+static const char* FLASH_FILE_PATH = "E:\\CProject\\KSCdraw\\KSCdraw\\.data\\w25q64_sim.bin";
+
+void W25Q64_Init(void)
+{
+    g_flash_file = fopen(FLASH_FILE_PATH, "rb+");
+    if (g_flash_file == NULL) {
+        g_flash_file = fopen(FLASH_FILE_PATH, "wb");
+        if (g_flash_file != NULL) {
+            uint8_t* buffer = (uint8_t*)malloc(W25Q64_TOTAL_SIZE);
+            memset(buffer, 0xFF, W25Q64_TOTAL_SIZE);
+            fwrite(buffer, 1, W25Q64_TOTAL_SIZE, g_flash_file);
+            free(buffer);
+            fclose(g_flash_file);
+            g_flash_file = fopen(FLASH_FILE_PATH, "rb+");
+        }
+    }
+}
+
+void W25Q64_DeInit(void)
+{
+    if (g_flash_file) {
+        fclose(g_flash_file);
+        g_flash_file = NULL;
+    }
+}
+
+void W25Q64_PageProgram(uint32_t Address, uint8_t *DataArray, uint16_t Count)
+{
+    // 读取原有数据
+    uint8_t* old = (uint8_t*)malloc(Count);
+    fseek(g_flash_file, Address, SEEK_SET);
+    fread(old, 1, Count, g_flash_file);
+    
+    // 计算实际要写入的数据：原有数据 & 新数据（只能将1变0，不能将0变1）
+    uint8_t* real_data = (uint8_t*)malloc(Count);
+    for (uint16_t i = 0; i < Count; i++) {
+        real_data[i] = old[i] & DataArray[i];
+    }
+    free(old);
+    
+    // 写入计算结果
+    fseek(g_flash_file, Address, SEEK_SET);
+    fwrite(real_data, 1, Count, g_flash_file);
+    fflush(g_flash_file);
+    free(real_data);
+}
+
+void W25Q64_SectorErase(uint32_t Address)
+{
+    // 对齐到扇区起始地址（虽然用户没要求判断，但擦除必须是4KB对齐，按硬件行为自动对齐）
+    uint32_t sector_start = Address & ~(W25Q64_SECTOR_SIZE - 1);
+    uint8_t* erase_buf = (uint8_t*)malloc(W25Q64_SECTOR_SIZE);
+    memset(erase_buf, 0xFF, W25Q64_SECTOR_SIZE);
+    fseek(g_flash_file, sector_start, SEEK_SET);
+    fwrite(erase_buf, 1, W25Q64_SECTOR_SIZE, g_flash_file);
+    fflush(g_flash_file);
+    free(erase_buf);
+}
+
+void W25Q64_ReadData(uint32_t Address, uint8_t *DataArray, uint32_t Count)
+{
+    fseek(g_flash_file, Address, SEEK_SET);
+    fread(DataArray, 1, Count, g_flash_file);
+}
+#endif
+#ifdef __USE_ARMCC__
+
 #include "main.h"                  // Device header
 #include "MySPI2.h"
 #include "W25Q64_Ins.h"
@@ -157,3 +237,5 @@ void W25Q64_ReadData(uint32_t Address, uint8_t *DataArray, uint32_t Count)
 	}
 	MySPI_Stop();								//SPI终止
 }
+#endif
+

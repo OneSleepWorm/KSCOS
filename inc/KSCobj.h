@@ -67,6 +67,19 @@ typedef struct ksc_menu_t{
     ksc_menu_config_t* config;
 }ksc_menu_t;//size:12
 
+#if __LITTLE_END_COLOR__ == 0
+#define rred 0xF100
+#define bblue 0x001F
+#define ggreen 0x07E0
+#else
+#define rred 0x00F1
+#define bblue 0x1F00
+#define ggreen 0xE007
+//#define yyellow 0xE0F1
+#define bblack 0x0000
+#define wwhite 0xFFFF
+#endif
+
 void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata);
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);

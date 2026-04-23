@@ -233,7 +233,6 @@ KSC_buf* kgetscreen(){
 KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height){
     KSC_buf* screen = (KSC_buf*)r_malloc(sizeof(KSC_buf));
     if(screen == NULL){
-        log("malloc screen failed");
         return NULL;
        }
 
@@ -248,7 +247,6 @@ KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height){
     // kfull(screen,0xFFFF,0,0,width,240);
     // kfull(screen,0xFFFF,0,240,width,80);
     kfull(screen,0xFFFF,0,0,width,height);
-    log("kinitscreen done");
     return screen;
 }
 
@@ -272,14 +270,12 @@ KSC_mes kfull(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy w,uintxy
     uint16_t* buf = (uint16_t*)k_malloc(_STATICBUF_SIZE);
     uint16_t staticbuf_pixel = (_STATICBUF_SIZE>>1);
     if(buf == NULL){
-        log("malloc buf failed");
         return KSC_ERR;
     }
     memset_16(buf,512,color);
     while(pixelnum>staticbuf_pixel){
         screen_setcolorpixels(buf,staticbuf_pixel);
         pixelnum -= staticbuf_pixel;
-        log("pixelnum = %d",pixelnum);
     }
     screen_setcolorpixels(buf,pixelnum);
 
