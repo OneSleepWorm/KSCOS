@@ -5,19 +5,7 @@
 #if __USE_FLASH__ ==1
 #include "W25Q64.h"
 #endif
-#ifndef __USE_FLASH__
 
-#endif
-//分配各个功能块的内存大小
-// #define OS_Flash_SYSTEM_Size       0x000000
-// #define OS_Flash_Font_GB_Size      0x100000
-// #define OS_Flash_Font_UTF8_Size    0x100000
-// #define OS_Flash_User_Size         0x300000
-// //分配各个功能块的首地址
-// #define OS_Flash_SYSTEM_Address    0x000000
-// #define OS_Flash_Font_GB_Address   0x100000
-// #define OS_Flash_Font_UTF8_Address 0x200000
-// #define OS_Flash_User_Address      0x500000
 //最大写入数据大小
 #define Max_Write_Count 256
 

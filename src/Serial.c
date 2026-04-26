@@ -1,4 +1,7 @@
 #include "../inc/Serial.h"
+
+#if __USE_UART__ > 0
+#include "../inc/Serial.h"
 #include "string.h"
 #include "stdarg.h"
 #include "stdio.h"
@@ -236,3 +239,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
 //   /* USER CODE END USART1_IRQn 1 */
 // }
+
+#endif
+

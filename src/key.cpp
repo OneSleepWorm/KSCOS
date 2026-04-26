@@ -73,7 +73,7 @@ uint8_t key_scan(void)
 #endif
 
 #ifdef __USE_INPUT_KEY_SIMU__
-
+#include <graphics.h>
 
 ExMessage key_msg;
 

@@ -1,6 +1,6 @@
 #include "../inc/W25Q64.h"
 
-#ifdef __USE_GCC__
+#if __USE_PC__
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,7 +85,7 @@ void W25Q64_ReadData(uint32_t Address, uint8_t *DataArray, uint32_t Count)
 }
 #endif
 
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 
 #include "main.h"                  // Device header
 #include "W25Q64_Ins.h"

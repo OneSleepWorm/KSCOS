@@ -24,7 +24,7 @@ void* k_malloc(size_t size){
 void k_free(void* ptr){
     free(ptr);
 }
-#ifdef __USE_GCC__
+#if __USE_PC__
 #include <graphics.h>
 #include <conio.h>
 #include <stdio.h>
@@ -68,7 +68,7 @@ void k_free(void* ptr){
 
 #endif
 
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 void screen_init(){
     TFT_Init();
 }
@@ -80,7 +80,7 @@ void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){
 	TFT_Setcanvas(Gx, Gy, Gx+width-1, Gy+height-1);
 }
 #endif
-#ifdef __USE_ESP32__
+#if __USE_ESP32__
 void screen_init(){
     TFT_Init();
 }

@@ -1,11 +1,6 @@
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include "../inc/CLI.h"
-#include "../inc/KSCbasicdrawN_fast.h"
-#include "../inc/Serial.h"
-
-#define success ksendbyte(0x00)
+#include "string.h"
+#define success kprintf("\n")
 //
 //忽略字符串首部空格
 char* ignore_space(char*str){
@@ -60,10 +55,15 @@ cli_node cmd_system_table[] = {
     {NULL,NULL,NULL}
 };
 
+#include "../inc/KSCbasicdrawN_fast.h"
 cli_node cmd_root_table[] = {
     {"system",NULL,cmd_system_table},
+    #if __USE_LCD__
     {"draw",drawhelp,cmd_draw_table},
+    #endif
+    #if __USE_FLASH__ == 1
     {"flash",kflashhelp,cmd_flash_table},
+    #endif
     //{"connect",kconnecthelp,cmd_connect_table},
     {NULL,NULL,NULL}
 };

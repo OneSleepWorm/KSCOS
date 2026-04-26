@@ -26,7 +26,7 @@ uint32_t color16to24(uint16_t color16) {
     // 组合为24位RGB888格式
     return (b8 << 16) | (g8 << 8) | r8;
 }
-#ifdef __USE_GCC__
+#if __USE_PC__
 #include <graphics.h>
 #include <conio.h>
 #include <stdio.h>
@@ -81,7 +81,7 @@ void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num){
 
 #endif
 
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 void screen_init(){
     TFT_Init();
 }

@@ -1,3 +1,4 @@
+
 // lfs_config.h
 #ifndef LFS_CONFIG_H
 #define LFS_CONFIG_H
@@ -5,6 +6,7 @@
 // 使用自定义的配置结构体，而不是默认的
 #define LFS_CONFIG_USE_CUSTOM_CONFIG 1
 
+extern const struct lfs_config cfg;
 // 硬件配置宏
 #define LFS_READ_SIZE      256  // 匹配W25Q64的页大小
 #define LFS_PROG_SIZE      256  // 匹配W25Q64的页大小

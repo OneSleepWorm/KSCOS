@@ -1,6 +1,8 @@
 #ifndef __CLI_H__
 #define __CLI_H__
 
+#include "KSCconfig.h"
+#include "Serial.h"
 
 typedef int (*cmd_func)(char *argv);
 typedef struct cmd_node{

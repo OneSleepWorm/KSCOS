@@ -2,6 +2,8 @@
 #define __KEY_H
 #include "KSCconfig.h"
 
+#if __USE_KEY__ > 0
+
 #define KEY_NONE  0xFF
 
 #define KEY_A0    0
@@ -34,12 +36,20 @@
 
 #define _USE_KEY_KEEP_ 0
 
+#ifdef __cplusplus__
+extern "C" {
+#endif
+
+
 void key_init(void);
 uint8_t key_scan(void);
 uint8_t key_read(void);
 
-#ifdef __USE_INPUT_KEY_SIMU__
-#include <graphics.h>
+#ifdef __cplusplus__
+}//extern "C"
 #endif
 
-#endif
+
+#endif//__USE_KEY__ > 0
+
+#endif//__KEY_H

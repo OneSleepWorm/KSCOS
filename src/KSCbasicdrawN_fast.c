@@ -1,17 +1,26 @@
 #include "../inc/KSCbasicdrawN_fast.h"
-#include "../inc/KSCimg.h"
-#include "string.h"
-#include "../inc/KSCconfig.h"
 #include "../inc/Serial.h"
-#include "main.h"
-#include "../inc/W25Q64.h"
-#include <stdint.h>
-
 //--locale=english --no-multibyte-chars
 
 #define MAX_ARGV 8
-#define success ksendbyte(0x00)
+#define success kprintf("\n")
 //#define success __nop()
+
+
+static void __placeholder_handler(void) {}
+REGISTER_CMD("", __placeholder_handler);  // 空字符串，理论上用户不会输入空行
+void list_cmds(void) {
+    const cmd_t *p = &__start_cmd_table;
+    const cmd_t *end = &__stop_cmd_table;
+    if(p == NULL || end == NULL){
+        printf("No commands registered.\n");
+        return;
+    }
+    while (p < end) {
+        printf("Cmd: %s\n", p->name);
+        p++;
+    }
+}
 
 #include "stdio.h"
 
@@ -38,6 +47,33 @@ char** cutargv(char* arg){
     }
     return argv;
 } 
+#if __USE_LCD__ > 0
+#include "../inc/KSCimg.h"
+#include "../inc/KSCdraw.h"
+
+//匹配字符串是否为有效字符串，返回0或KSCCOLOR
+KSCCOLOR kturncolor(char* str){
+    KSCCOLOR color = 0;
+    if(str == NULL){
+        return color;
+    }
+    if(strcmp(str,"green") == 0){
+        color = ggreen;
+    }else if(strcmp(str,"red") == 0){
+        color = rred;
+    }else if(strcmp(str,"blue") == 0){
+        color = bblue;
+    }else if(strcmp(str,"black") == 0){
+        color = bblack;
+    }else if(strcmp(str,"white") == 0){
+        color = wwhite;
+    }else {
+        color = 0;
+    }
+    return color;
+}
+
+
 
 int kinitscreen_fast(char* arg){
     char** argv = cutargv(arg);
@@ -53,8 +89,7 @@ int kinitscreen_fast(char* arg){
         return 1;
     }
     screen_init();
-    kinitscreen(width,height,NULL,0,0);
-    ksetpencolor(kgetscreen(),GREEN,1);
+    kinitscreen(width,height,0,0);
     return 0;
 }
 
@@ -63,32 +98,7 @@ int kfreescreen_fast(char* arg){
     return 0;
 }
 
-int ksetcolor_fast(char* arg){
-    char** argv = cutargv(arg);
-    if(argv == NULL){
-        kprintf("setcolor: 语法错误\r\n");
-        return 1;
-    }
-    KSCCOLOR color = (KSCCOLOR)strtol(argv[0],NULL,16);
-    kprintf("setcolor: %d\r\n",color);
-    int value = atoi(argv[1]);
-    ksetpencolor(kgetscreen(),color,value);
-	success;
-    return 0;
-}
 
-int kpixel_fast(char* arg){
-    char** argv = cutargv(arg);
-    if(argv == NULL){
-        kprintf("pixel: 语法错误\r\n");
-        return 1;
-    }
-    int x = atoi(argv[0]);
-    int y = atoi(argv[1]);
-    ksetpixel(kgetscreen(),x,y);
-	success;
-    return 0;
-}
 int kline_fast(char* arg){
     char** argv = cutargv(arg);
     if(argv == NULL){
@@ -99,7 +109,8 @@ int kline_fast(char* arg){
     int y1 = atoi(argv[1]);
     int x2 = atoi(argv[2]);
     int y2 = atoi(argv[3]);
-    kline(kgetscreen(),x1,y1,x2,y2);
+    KSCCOLOR color = kturncolor(argv[4]);
+    kline(kgetscreen(),color,x1,y1,x2,y2);
 	success;
     return 0;
 }
@@ -113,7 +124,8 @@ int krect_fast(char* arg){
     int y1 = atoi(argv[1]);
     int w = atoi(argv[2]);
     int h = atoi(argv[3]);
-    krect(kgetscreen(),x1,y1,w,h);
+    KSCCOLOR color = kturncolor(argv[4]);
+    kbox(kgetscreen(),color,x1,y1,w,h);
 	success;
     return 0;
 }
@@ -127,7 +139,8 @@ int kcircle_fast(char* arg){
     int x0 = atoi(argv[0]);
     int y0 = atoi(argv[1]);
     int r = atoi(argv[2]);
-    kcircle(kgetscreen(),x0,y0,r);
+    KSCCOLOR color = kturncolor(argv[3]);
+    kcircle(kgetscreen(),color,x0,y0,r);
 	success;
     return 0;
 }
@@ -142,7 +155,8 @@ int kfillrect_fast(char* arg){
     int y1 = atoi(argv[1]);
     int w = atoi(argv[2]);
     int h = atoi(argv[3]);
-	kfillrect(kgetscreen(),x1,y1,w,h);
+    KSCCOLOR color = kturncolor(argv[4]);
+    //kfillrect(kgetscreen(),color,x1,y1,w,h);
 	success;
 	
     return 0;
@@ -157,7 +171,8 @@ int kfillcircle_fast(char* arg){
     int x0 = atoi(argv[0]);
     int y0 = atoi(argv[1]);
     int r = atoi(argv[2]);
-    kfillcircle(kgetscreen(),x0,y0,r);
+    KSCCOLOR color = kturncolor(argv[3]);
+    kfillcircle(kgetscreen(),color,x0,y0,r);
 	success;
     return 0;
 }
@@ -171,7 +186,10 @@ int kstring_fast(char* arg){
     char* str = argv[0];
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
-    kstring(kgetscreen(),str,x,y);
+    KSCCOLOR colorck = kturncolor(argv[3]);
+    KSCCOLOR colorbk = kturncolor(argv[4]);
+    kstring(kgetscreen(),str,x,y,colorck,colorbk);
+	success;
     return 0;
 }
 #if __USE_CHINESE__ == 1
@@ -184,8 +202,9 @@ int kstringchinese_fast(char* arg){
     char* str = argv[0];
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
-    kstringchinese(kgetscreen(),str,x,y);
-    success;
+    KSCCOLOR color = kturncolor(argv[3]);
+    kstringchinese(kgetscreen(),color,str,x,y);
+	success;
     return 0;
 }
 #endif
@@ -203,7 +222,7 @@ int kimage_fast(char* arg){
     }
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
-    kdrawimage(kgetscreen(),x,y,img.data,img.width,img.height);
+    //kdrawimage(kgetscreen(),img.data,x,y,img.width,img.height);
     return 0;
 }
 int kimagebig_fast(char* arg){
@@ -221,7 +240,7 @@ int kimagebig_fast(char* arg){
     int x = atoi(argv[1]);
     int y = atoi(argv[2]);
     int scale =atoi(argv[3]);
-    kdrawimagebig(kgetscreen(),x,y,img.data,img.width,img.height,scale);
+    //kdrawimagebig(kgetscreen(),x,y,img.data,img.width,img.height,scale);
     success;
     return 0;
 }
@@ -234,16 +253,16 @@ int drawhelp(char* arg){
     kprintf("Available commands:\r\n");
     kprintf("initscreen <width> <height>  初始化屏幕\r\n");
     kprintf("freescreen  释放屏幕缓冲区\r\n");
-    kprintf("setcolor <color> <value>  设置前景/背景颜色\r\n");
-    kprintf("pixel <x> <y>  绘制像素点\r\n");
-    kprintf("line <x1> <y1> <x2> <y2>  绘制线\r\n");
-    kprintf("rect <x1> <y1> <w> <h>  绘制矩形\r\n");
-    kprintf("circle <x> <y> <r>  绘制圆\r\n");
-    kprintf("fillrect <x1> <y1> <w> <h>  填充矩形\r\n");
-    kprintf("fillcircle <x> <y> <r>  填充圆\r\n");
-    kprintf("string <str> <x> <y>  绘制字符串\r\n");
-    kprintf("stringchinese <str> <x> <y>  绘制中文字符串(测试版)\r\n");
-    kprintf("image <filename> <x> <y>  绘制图片\r\n");
+    kprintf("line <x1> <y1> <x2> <y2> <color>  绘制线\r\n");
+    kprintf("rect <x1> <y1> <w> <h> <color>  绘制矩形\r\n");
+    kprintf("circle <x> <y> <r> <color>  绘制圆\r\n");
+    kprintf("fillcircle <x> <y> <r> <color>  填充圆\r\n");
+    kprintf("fillrect <x1> <y1> <w> <h> <color>  填充矩形\r\n");
+    kprintf("fillcircle <x> <y> <r> <color>  填充圆\r\n");
+    kprintf("string <str> <x> <y> <color>  绘制字符串\r\n");
+    kprintf("stringchinese <str> <x> <y> <color>  绘制中文字符串(测试版)\r\n");
+    kprintf("image <filename> <x> <y> <scale>  绘制图片\r\n");
+    kprintf("imagebig <filename> <x> <y> <scale>  绘制图片(缩放)\r\n");
     kprintf("help  显示帮助信息\r\n");
     kprintf("-------------------------------------------\r\n");
     success;
@@ -254,20 +273,22 @@ int drawhelp(char* arg){
 cli_node cmd_draw_table[] = {
     {"initscreen",kinitscreen_fast,NULL},
     {"freescreen",kfreescreen_fast,NULL},
-    {"setcolor",ksetcolor_fast,NULL},
-    {"pixel",kpixel_fast,NULL},
     {"line",kline_fast,NULL},
     {"rect",krect_fast,NULL},
     {"circle",kcircle_fast,NULL},
     {"fillrect",kfillrect_fast,NULL},
     {"fillcircle",kfillcircle_fast,NULL},
     {"string",kstring_fast,NULL},
+#if __USE_CHINESE__ == 1
     {"stringchinese",kstringchinese_fast,NULL},
+#endif
 	{"image",kimage_fast,NULL},
     {"imagebig",kimagebig_fast,NULL},
     {"help",drawhelp,NULL},
     {NULL,NULL,NULL}
 };
+#endif
+
 
 #if __USE_FLASH__ > 0
 //flash命令行处理
@@ -382,6 +403,379 @@ cli_node cmd_flash_table[] = {
     {"help",kflashhelp,NULL},
     {NULL,NULL,NULL}
 };
+#endif
+
+#if __USE_LITTLEFS__ > 0
+#include "../littlefs/lfs.h"
+#include "../littlefs/lfs_config.h"
+
+k_lfs_t k_lfs = {
+    .mounted = 0,
+    .cwd = "/"
+};
+
+static int lfs_resolve_path(char *dest, const char *path) {
+    if (path == NULL) {
+        strcpy(dest, k_lfs.cwd);
+        return 0;
+    }
+    if (path[0] == '/') {
+        strncpy(dest, path, LFS_MAX_PATH - 1);
+        dest[LFS_MAX_PATH - 1] = 0;
+    } else {
+        if (strcmp(k_lfs.cwd, "/") == 0) {
+            snprintf(dest, LFS_MAX_PATH, "/%s", path);
+        } else {
+            snprintf(dest, LFS_MAX_PATH, "%s/%s", k_lfs.cwd, path);
+        }
+    }
+    char *p = dest;
+    char *q = dest;
+    while (*p) {
+        if (*p == '/' && *(p+1) == '/') {
+            p++;
+        } else if (*p == '/' && *(p+1) == '.' && *(p+2) == '/') {
+            p += 3;
+        } else if (*p == '/' && *(p+1) == '.' && *(p+2) == 0) {
+            p += 2;
+        } else {
+            *q++ = *p++;
+        }
+    }
+    *q = 0;
+    if (strlen(dest) > 1 && dest[strlen(dest)-1] == '/') {
+        dest[strlen(dest)-1] = 0;
+    }
+    if (strlen(dest) == 0) {
+        strcpy(dest, "/");
+    }
+    return 0;
+}
+
+int klfs_init_fast(char* arg) {
+    (void)arg;
+    if (k_lfs.mounted) {
+        kprintf("lfs: already mounted\r\n");
+        return 0;
+    }
+    int err = lfs_mount(&k_lfs.lfs, k_lfs.cfg);
+    if (err < 0) {
+        kprintf("lfs: mount failed %d\r\n", err);
+        return 1;
+    }
+    k_lfs.mounted = 1;
+    strcpy(k_lfs.cwd, "/");
+    kprintf("lfs: mounted\r\n");
+    success;
+    return 0;
+}
+
+int klfs_deinit_fast(char* arg) {
+    (void)arg;
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 0;
+    }
+    lfs_unmount(&k_lfs.lfs);
+    k_lfs.mounted = 0;
+    kprintf("lfs: unmounted\r\n");
+    success;
+    return 0;
+}
+
+int klfs_format_fast(char* arg) {
+    (void)arg;
+    if (k_lfs.mounted) {
+        kprintf("lfs: unmount first\r\n");
+        return 1;
+    }
+    int err = lfs_format(&k_lfs.lfs, k_lfs.cfg);
+    if (err < 0) {
+        kprintf("lfs: format failed %d\r\n", err);
+        return 1;
+    }
+    kprintf("lfs: formatted\r\n");
+    success;
+    return 0;
+}
+
+int klfsls_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    lfs_resolve_path(path, arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    lfs_dir_t dir;
+    int err = lfs_dir_open(&k_lfs.lfs, &dir, path);
+    if (err < 0) {
+        kprintf("lfs ls: cannot open '%s' %d\r\n", path, err);
+        return 1;
+    }
+
+    struct lfs_info info;
+    kprintf("  %-24s %8s\r\n", "name", "size");
+    kprintf("--------------------------\r\n");
+    while (lfs_dir_read(&k_lfs.lfs, &dir, &info) > 0) {
+        if (info.name[0] == 0) continue;
+        if (info.type == LFS_TYPE_DIR) {
+            kprintf("  %-24s %8s\r\n", info.name, "<DIR>");
+        } else {
+            kprintf("  %-24s %8d\r\n", info.name, (int)info.size);
+        }
+    }
+    lfs_dir_close(&k_lfs.lfs, &dir);
+    success;
+    return 0;
+}
+
+int klfscd_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL) {
+        strcpy(k_lfs.cwd, "/");
+        kprintf("lfs: cwd -> /\r\n");
+        return 0;
+    }
+
+    lfs_resolve_path(path, argv[0]);
+
+    lfs_dir_t dir;
+    int err = lfs_dir_open(&k_lfs.lfs, &dir, path);
+    if (err < 0) {
+        kprintf("lfs cd: '%s' not found\r\n", path);
+        return 1;
+    }
+    lfs_dir_close(&k_lfs.lfs, &dir);
+
+    strncpy(k_lfs.cwd, path, LFS_MAX_PATH - 1);
+    k_lfs.cwd[LFS_MAX_PATH - 1] = 0;
+    kprintf("lfs: cwd -> %s\r\n", k_lfs.cwd);
+    success;
+    return 0;
+}
+
+int klfspwd_fast(char* arg) {
+    (void)arg;
+    kprintf("%s\r\n", k_lfs.cwd);
+    success;
+    return 0;
+}
+
+int klfsmkdir_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL) {
+        kprintf("lfs mkdir: missing path\r\n");
+        return 1;
+    }
+
+    lfs_resolve_path(path, argv[0]);
+
+    int err = lfs_mkdir(&k_lfs.lfs, path);
+    if (err < 0) {
+        kprintf("lfs mkdir: failed %d\r\n", err);
+        return 1;
+    }
+    kprintf("lfs: created dir '%s'\r\n", path);
+    success;
+    return 0;
+}
+
+int klfstouch_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL) {
+        kprintf("lfs touch: missing path\r\n");
+        return 1;
+    }
+
+    lfs_resolve_path(path, argv[0]);
+
+    lfs_file_t file;
+    int err = lfs_file_open(&k_lfs.lfs, &file, path, LFS_O_WRONLY | LFS_O_CREAT);
+    if (err < 0) {
+        kprintf("lfs touch: failed %d\r\n", err);
+        return 1;
+    }
+    lfs_file_close(&k_lfs.lfs, &file);
+    kprintf("lfs: created file '%s'\r\n", path);
+    success;
+    return 0;
+}
+
+int klfsrm_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL) {
+        kprintf("lfs rm: missing path\r\n");
+        return 1;
+    }
+
+    lfs_resolve_path(path, argv[0]);
+
+    int err = lfs_remove(&k_lfs.lfs, path);
+    if (err < 0) {
+        kprintf("lfs rm: failed %d\r\n", err);
+        return 1;
+    }
+    kprintf("lfs: removed '%s'\r\n", path);
+    success;
+    return 0;
+}
+
+int klfscat_fast(char* arg) {
+    char path[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL) {
+        kprintf("lfs cat: missing path\r\n");
+        return 1;
+    }
+
+    lfs_resolve_path(path, argv[0]);
+
+    lfs_file_t file;
+    int err = lfs_file_open(&k_lfs.lfs, &file, path, LFS_O_RDONLY);
+    if (err < 0) {
+        kprintf("lfs cat: cannot open '%s' %d\r\n", path, err);
+        return 1;
+    }
+
+    char buf[LFS_READ_BUF_SIZE];
+    lfs_ssize_t read;
+    while ((read = lfs_file_read(&k_lfs.lfs, &file, buf, sizeof(buf))) > 0) {
+        for (lfs_ssize_t i = 0; i < read; i++) {
+            kprintf("%c", buf[i]);
+        }
+    }
+    kprintf("\r\n");
+    lfs_file_close(&k_lfs.lfs, &file);
+    success;
+    return 0;
+}
+
+int klfscp_fast(char* arg) {
+    char src[LFS_MAX_PATH];
+    char dst[LFS_MAX_PATH];
+    char **argv = cutargv(arg);
+
+    if (!k_lfs.mounted) {
+        kprintf("lfs: not mounted\r\n");
+        return 1;
+    }
+
+    if (argv == NULL || argv[0] == NULL || argv[1] == NULL) {
+        kprintf("lfs cp: missing src or dst\r\n");
+        return 1;
+    }
+
+    lfs_resolve_path(src, argv[0]);
+    lfs_resolve_path(dst, argv[1]);
+
+    lfs_file_t src_file, dst_file;
+    int err = lfs_file_open(&k_lfs.lfs, &src_file, src, LFS_O_RDONLY);
+    if (err < 0) {
+        kprintf("lfs cp: cannot open src '%s' %d\r\n", src, err);
+        return 1;
+    }
+
+    err = lfs_file_open(&k_lfs.lfs, &dst_file, dst, LFS_O_WRONLY | LFS_O_CREAT | LFS_O_TRUNC);
+    if (err < 0) {
+        kprintf("lfs cp: cannot create dst '%s' %d\r\n", dst, err);
+        lfs_file_close(&k_lfs.lfs, &src_file);
+        return 1;
+    }
+
+    char buf[LFS_READ_BUF_SIZE];
+    lfs_ssize_t read;
+    while ((read = lfs_file_read(&k_lfs.lfs, &src_file, buf, sizeof(buf))) > 0) {
+        lfs_ssize_t wrote = lfs_file_write(&k_lfs.lfs, &dst_file, buf, read);
+        if (wrote < 0) {
+            kprintf("lfs cp: write failed %d\r\n", (int)wrote);
+            lfs_file_close(&k_lfs.lfs, &src_file);
+            lfs_file_close(&k_lfs.lfs, &dst_file);
+            return 1;
+        }
+    }
+
+    lfs_file_close(&k_lfs.lfs, &src_file);
+    lfs_file_close(&k_lfs.lfs, &dst_file);
+    kprintf("lfs: copied '%s' -> '%s'\r\n", src, dst);
+    success;
+    return 0;
+}
+
+int klfshelp_fast(char* arg) {
+    (void)arg;
+    kprintf("lfs cli runner\r\n");
+    kprintf("Usage:\r\n");
+    kprintf("lfs <command> [args]\r\n");
+    kprintf("Available commands:\r\n");
+    kprintf("init            mount filesystem\r\n");
+    kprintf("deinit          unmount filesystem\r\n");
+    kprintf("format          format flash\r\n");
+    kprintf("ls [path]       list directory\r\n");
+    kprintf("cd [path]       change directory\r\n");
+    kprintf("pwd             print working directory\r\n");
+    kprintf("mkdir <path>    create directory\r\n");
+    kprintf("touch <path>    create file\r\n");
+    kprintf("rm <path>       remove file/dir\r\n");
+    kprintf("cat <path>      display file content\r\n");
+    kprintf("cp <src> <dst>  copy file\r\n");
+    kprintf("help            show this help\r\n");
+    kprintf("-------------------------------------------\r\n");
+    success;
+    return 0;
+}
+
+cli_node cmd_lfs_table[] = {
+    {"init", klfs_init_fast, NULL},
+    {"deinit", klfs_deinit_fast, NULL},
+    {"format", klfs_format_fast, NULL},
+    {"ls", klfsls_fast, NULL},
+    {"cd", klfscd_fast, NULL},
+    {"pwd", klfspwd_fast, NULL},
+    {"mkdir", klfsmkdir_fast, NULL},
+    {"touch", klfstouch_fast, NULL},
+    {"rm", klfsrm_fast, NULL},
+    {"cat", klfscat_fast, NULL},
+    {"cp", klfscp_fast, NULL},
+    {"help", klfshelp_fast, NULL},
+    {NULL, NULL, NULL}
+};
+
 #endif
 
 //connect命令行处理（暂时弃用）

@@ -2,16 +2,18 @@
 #define KSCconfig_h
 
 //编译器系统配置
-#define __USE_GCC__ 
-//#define __USE_ARMCC__ 
-//#define __USE_ESP32__ 
+#define __USE_PC__ 1
+#define __USE_ARMCC__ 0 
+#define __USE_ESP32__ 0
 
 //program config
-#define __USE_LCD__ 0
+#define __USE_LCD__ 1
 #define USE_NOT_BUFFER 1
 #define __USE_CHINESE__ 0
 #define __USE_FLASH__ 0
 #define __USE_UART__ 0
+#define __USE_LITTLEFS__ 0
+#define __USE_KEY__ 1
 
 #define __LITTLE_END_COLOR__ 1
 
@@ -40,7 +42,7 @@
 
 #include <stdint.h>
 
-#ifdef __USE_GCC__
+#if __USE_PC__
 #include <stdint.h>
 // #include <graphics.h>
 #include <stdlib.h>
@@ -55,14 +57,14 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define __USE_INPUT_KEY_SIMU__ 
 #endif
 
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 
 #include <stdlib.h>
 #define K_malloc(size) malloc(size)
 #define __USE_INPUT_KEY__ 
 #endif
 
-#ifdef __USE_ESP32__
+#if __USE_ESP32__
 #include "esp_err.h"
 #include "esp_log.h"
 
@@ -71,5 +73,6 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define log(...) ESP_LOGW(PPTAG, __VA_ARGS__)
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif
+
 
 #endif

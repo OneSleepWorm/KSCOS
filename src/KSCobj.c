@@ -102,19 +102,6 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
     }
 }
 
-// void KSC_menu_loadxy(ksc_menu_t* menu){
-//     uint8_t hnum = menu->config->menu_hnum;
-//     uint8_t wnum = menu->config->menu_wnum;
-//     uint8_t stylenum =menu->config->menu_obj_num;
-//     for(uint8_t j=0;j<hnum;j++){
-//         for(uint8_t i=0;i<wnum;i++){
-//             if(j*wnum+i>=stylenum)return;
-//             menu->style[j*wnum+i].x = i*menu->config->mdw;
-//             menu->style[j*wnum+i].y = j*menu->config->mdh;
-//         }
-//     }
-// }
-
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
@@ -142,6 +129,8 @@ void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
         ,menu->config->mdw
         ,menu->config->mdh);
 }
+
+#if __USE_KEY__ > 0
 
 void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!menu) return;
@@ -179,3 +168,5 @@ void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     // if(menu->config->menu_index<wnum*hnum)
     // menu->config->menu_index%=wnum*hnum;
 }
+
+#endif
