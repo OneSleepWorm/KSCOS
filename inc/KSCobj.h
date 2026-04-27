@@ -18,11 +18,18 @@
 #define _fillcircle 7
 #define _line 8
 #define _imagebig 9
+#define _extra (1<<4)
 
+#define _string_extra (_extra|_string)
+#define _image_extra (_extra|_image)
+#define _imagebig_extra (_extra|_imagebig)
 
-#define _string_extra (0x82)
-#define _image_extra (0x83)
-#define _imagebig_extra (0x89)
+#define _type_mask (0x1F)
+#define _custom_mask (0xE0)
+
+#define _custom_label1 (1<<5)
+#define _custom_label2 (1<<6)
+#define _custom_label3 (1<<7)
 
 typedef uint8_t ku8;
 typedef uint16_t ku16;
@@ -34,14 +41,18 @@ typedef struct ksc_obj_t{
     KSCCOLOR colorbk;//对象背景颜色
     ku8 width;//对象宽度
     ku8 height;//对象高度
-    ku8 state;//对象状态
-    ku8 y;//对象y坐标
+    ku8 state;//对象状态,bit0:0,正常,1,隐藏
+    ku8 custom;//对象自定义属性
     ku8 sdx;//对象x偏移量
     ku8 sdy;//对象y偏移量
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
     ku8 _type;//对象类型
 }ksc_obj_t;//size:12
 
+/* 0, 菜单项样式定义,文件名和文件属性需要特殊处理
+ * 1. 文件名需要加上_custom_label1,
+ * 2. 文件属性需要加上_custom_label2
+ */
 #define ksc_style_t ksc_obj_t
 
 
@@ -50,12 +61,9 @@ typedef struct ksc_menu_config_t{
     ku8 mdh;//菜单项高度
     ku8 menu_wnum;//菜单项行最大数量
     ku8 menu_hnum;//菜单项列最大数量
-    // ku8 mimgsdx;//图片与顶点之间的x间距
-    // ku8 mimgsdy;//图片与顶点之间的y间距
-    // ku8 mstrsdx;//字符串与顶点之间的x间距
-    // ku8 mstrsdy;//字符串与顶点之间的y间距
-    ku8 menu_list_num;
-    ku8 menu_obj_num;
+    
+    ku8 menu_list_num;//菜单项列表缓冲区数量
+    ku8 menu_obj_num;//菜单项对象数量
     ku8 menu_num;//菜单项数量
 
     ku8 menu_index;//当前选中项索引
@@ -72,10 +80,10 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 #endif
 
-
+void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 #if __USE_KEY__ > 0
 #include "key.h"
-void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);
+void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t key);
 #endif
 
 #endif

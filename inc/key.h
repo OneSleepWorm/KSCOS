@@ -36,7 +36,7 @@
 
 #define _USE_KEY_KEEP_ 0
 
-#ifdef __cplusplus__
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -45,7 +45,7 @@ void key_init(void);
 uint8_t key_scan(void);
 uint8_t key_read(void);
 
-#ifdef __cplusplus__
+#ifdef __cplusplus
 }//extern "C"
 #endif
 

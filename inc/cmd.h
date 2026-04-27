@@ -4,7 +4,7 @@
 #include "../inc/KSCconfig.h"
 
 
-typedef void (*cmd_handler_t)(int* argc, char** argv);
+typedef int (*cmd_handler_t)(int* argc, char** argv);
 typedef struct {
     const char *name;
     cmd_handler_t handler;
@@ -56,6 +56,6 @@ extern const cmd_t __start_cmd_table ;
 extern const cmd_t __stop_cmd_table ;
 
 void list_cmds(void);
-void run_command(char* cmd);
+int run_command(const char* cmd);
 void show_dir(void);
 #endif

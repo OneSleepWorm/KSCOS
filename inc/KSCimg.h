@@ -16,10 +16,10 @@ typedef struct  {
 }KSC_Img;
 
 typedef struct{
-    const char* name;
-    const uint8_t* data;
-    uint8_t width;
-    uint8_t height;
+    char name[16];
+    uint8_t* data;
+    uint16_t size;
+    uint8_t type;
 }Img_File;
 
 extern Img_File Systemimg[12];

@@ -83,11 +83,12 @@ int split_command_string(char* str, int* argc, char*** argv) {
 
 
 
-void system_cmd(int* argc, char** argv){
+int system_cmd(int* argc, char** argv){
     printf("system reveice: ");
     for(int i = 0; i < *argc; i++){
         printf("%s ", argv[i]);
     }
+    return 0;
 }
 REGISTER_CMD("system", system_cmd);
 
@@ -131,20 +132,20 @@ static void file_resolve_path(char* dest, const char* path) {
     }
 }
 
-void ls_cmd(int* argc, char** argv) {
+int ls_cmd(int* argc, char** argv) {
     char path[FILE_LFS_NAME_MAX + 2];
     const char* target = (*argc > 1) ? argv[1] : NULL;
     file_resolve_path(path, target);
 
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     lfs_dir_t dir;
     int err = lfs_dir_open(&file_lfs, &dir, path);
     if (err < 0) {
         printf("ls: cannot open '%s' %d\r\n", path, err);
-        return;
+        return err;
     }
 
     struct lfs_info info;
@@ -161,12 +162,13 @@ void ls_cmd(int* argc, char** argv) {
         }
     }
     lfs_dir_close(&file_lfs, &dir);
+    return 0;
 }
 REGISTER_CMD("ls", ls_cmd);
 
-void cd_cmd(int* argc, char** argv) {
+int cd_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -180,30 +182,32 @@ void cd_cmd(int* argc, char** argv) {
     int err = lfs_dir_open(&file_lfs, &dir, path);
     if (err < 0) {
         printf("cd: '%s' not found\r\n", path);
-        return;
+        return err;
     }
     lfs_dir_close(&file_lfs, &dir);
 
     strncpy(file_lfs_cwd, path, FILE_LFS_NAME_MAX);
     file_lfs_cwd[FILE_LFS_NAME_MAX] = 0;
+    return 0;
 }
 REGISTER_CMD("cd", cd_cmd);
 
-void pwd_cmd(int* argc, char** argv) {
+int pwd_cmd(int* argc, char** argv) {
     (void)argc;
     (void)argv;
     printf("%s\r\n", file_lfs_cwd);
+    return 0;
 }
 REGISTER_CMD("pwd", pwd_cmd);
 
-void mkdir_cmd(int* argc, char** argv) {
+int mkdir_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     if (*argc < 2) {
         printf("mkdir: missing path\r\n");
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -212,20 +216,21 @@ void mkdir_cmd(int* argc, char** argv) {
     int err = lfs_mkdir(&file_lfs, path);
     if (err < 0) {
         printf("mkdir: failed %d\r\n", err);
-        return;
+        return err;
     }
     printf("mkdir: created dir '%s'\r\n", path);
+    return 0;
 }
 REGISTER_CMD("mkdir", mkdir_cmd);
 
-void touch_cmd(int* argc, char** argv) {
+int touch_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     if (*argc < 2) {
         printf("touch: missing path\r\n");
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -235,21 +240,22 @@ void touch_cmd(int* argc, char** argv) {
     int err = lfs_file_open(&file_lfs, &file, path, LFS_O_WRONLY | LFS_O_CREAT);
     if (err < 0) {
         printf("touch: failed %d\r\n", err);
-        return;
+        return err;
     }
     lfs_file_close(&file_lfs, &file);
     printf("touch: created file '%s'\r\n", path);
+    return 0;
 }
 REGISTER_CMD("touch", touch_cmd);
 
-void rm_cmd(int* argc, char** argv) {
+int rm_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     if (*argc < 2) {
         printf("rm: missing path\r\n");
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -258,20 +264,21 @@ void rm_cmd(int* argc, char** argv) {
     int err = lfs_remove(&file_lfs, path);
     if (err < 0) {
         printf("rm: failed %d\r\n", err);
-        return;
+        return err;
     }
     printf("rm: removed '%s'\r\n", path);
+    return 0;
 }
 REGISTER_CMD("rm", rm_cmd);
 
-void cp_cmd(int* argc, char** argv) {
+int cp_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     if (*argc < 3) {
         printf("cp: usage: cp <src> <dst>\r\n");
-        return;
+        return -1;
     }
 
     char src[FILE_LFS_NAME_MAX + 2];
@@ -283,7 +290,7 @@ void cp_cmd(int* argc, char** argv) {
     int err = lfs_file_open(&file_lfs, &src_file, src, LFS_O_RDONLY);
     if (err < 0) {
         printf("cp: cannot open src '%s' %d\r\n", src, err);
-        return;
+        return err;
     }
 
     lfs_file_t dst_file;
@@ -291,7 +298,7 @@ void cp_cmd(int* argc, char** argv) {
     if (err < 0) {
         printf("cp: cannot open dst '%s' %d\r\n", dst, err);
         lfs_file_close(&file_lfs, &src_file);
-        return;
+        return err;
     }
 
     char buf[64];
@@ -302,24 +309,25 @@ void cp_cmd(int* argc, char** argv) {
             printf("cp: write failed %d\r\n", (int)wrote);
             lfs_file_close(&file_lfs, &src_file);
             lfs_file_close(&file_lfs, &dst_file);
-            return;
+            return (int)wrote;
         }
     }
 
     lfs_file_close(&file_lfs, &src_file);
     lfs_file_close(&file_lfs, &dst_file);
     printf("cp: copied '%s' -> '%s'\r\n", src, dst);
+    return 0;
 }
 REGISTER_CMD("cp", cp_cmd);
 
-void mv_cmd(int* argc, char** argv) {
+int mv_cmd(int* argc, char** argv) {
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     if (*argc < 3) {
         printf("mv: usage: mv <src> <dst>\r\n");
-        return;
+        return -1;
     }
 
     char src[FILE_LFS_NAME_MAX + 2];
@@ -330,31 +338,32 @@ void mv_cmd(int* argc, char** argv) {
     int err = lfs_rename(&file_lfs, src, dst);
     if (err < 0) {
         printf("mv: failed %d\r\n", err);
-        return;
+        return err;
     }
     printf("mv: '%s' -> '%s'\r\n", src, dst);
+    return 0;
 }
 REGISTER_CMD("mv", mv_cmd);
 
-void df_cmd(int* argc, char** argv) {
+int df_cmd(int* argc, char** argv) {
     (void)argc;
     (void)argv;
 
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     struct lfs_fsinfo info;
     int err = lfs_fs_stat(&file_lfs, &info);
     if (err < 0) {
         printf("df: cannot get fs info %d\r\n", err);
-        return;
+        return err;
     }
 
     lfs_ssize_t used_blocks = lfs_fs_size(&file_lfs);
     if (used_blocks < 0) {
         printf("df: cannot get used size %d\r\n", (int)used_blocks);
-        return;
+        return (int)used_blocks;
     }
 
     lfs_size_t total = info.block_size * info.block_count;
@@ -364,17 +373,18 @@ void df_cmd(int* argc, char** argv) {
     printf("  total: %lu bytes\r\n", (unsigned long)total);
     printf("  used:  %lu bytes\r\n", (unsigned long)used);
     printf("  free:  %lu bytes\r\n", (unsigned long)free);
+    return 0;
 }
 REGISTER_CMD("df", df_cmd);
 
-void cat_cmd(int* argc, char** argv) {
+int cat_cmd(int* argc, char** argv) {
     if (*argc < 2) {
         printf("cat: missing path\r\n");
-        return;
+        return -1;
     }
 
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -384,7 +394,7 @@ void cat_cmd(int* argc, char** argv) {
     int err = lfs_file_open(&file_lfs, &file, path, LFS_O_RDONLY);
     if (err < 0) {
         printf("cat: cannot open '%s' %d\r\n", path, err);
-        return;
+        return err;
     }
 
     char buf[64];
@@ -396,17 +406,18 @@ void cat_cmd(int* argc, char** argv) {
     }
     printf("\r\n");
     lfs_file_close(&file_lfs, &file);
+    return 0;
 }
 REGISTER_CMD("cat", cat_cmd);
 
-void echo_cmd(int* argc, char** argv) {
+int echo_cmd(int* argc, char** argv) {
     if (*argc < 4) {
         printf("echo: usage: echo [-n] \"text\" > file\r\n");
-        return;
+        return -1;
     }
 
     if (file_ensure_mount() < 0) {
-        return;
+        return -1;
     }
 
     int no_newline = 0;
@@ -416,7 +427,7 @@ void echo_cmd(int* argc, char** argv) {
         content_idx = 2;
         if (*argc < 5) {
             printf("echo: usage: echo [-n] \"text\" > file\r\n");
-            return;
+            return -1;
         }
     }
 
@@ -428,7 +439,7 @@ void echo_cmd(int* argc, char** argv) {
         append = 0;
     } else {
         printf("echo: expected > or >> before file path\r\n");
-        return;
+        return -1;
     }
 
     char path[FILE_LFS_NAME_MAX + 2];
@@ -445,7 +456,7 @@ void echo_cmd(int* argc, char** argv) {
     int err = lfs_file_open(&file_lfs, &file, path, flags);
     if (err < 0) {
         printf("echo: cannot open '%s' %d\r\n", path, err);
-        return;
+        return err;
     }
 
     const char* content = argv[content_idx];
@@ -457,33 +468,35 @@ void echo_cmd(int* argc, char** argv) {
 
     if (written < 0) {
         printf("echo: write failed %d\r\n", (int)written);
+        return (int)written;
     }
+    return 0;
 }
 REGISTER_CMD("echo", echo_cmd);
 
-void run_command(char* cmd){
+int run_command(const char* cmd){
     int argc = 0;
     char** argv = NULL;
 
-    if(split_command_string(cmd, &argc, &argv) != 0){
+    if(split_command_string((char*)cmd, &argc, &argv) != 0){
         printf("split_command_string failed.\n");
-        return;
+        return -1;
     }
 
     if (argc == 0) {
-        return;
+        return 0;
     }
 
     const cmd_t *p = &__start_cmd_table;
     const cmd_t *end = &__stop_cmd_table;
     while (p < end) {
         if (strcmp(p->name, argv[0]) == 0) {
-            p->handler(&argc, argv);
-            return;
+            return p->handler(&argc, argv);
         }
         p++;
     }
     printf("unknown command: %s\r\n", argv[0]);
+    return -1;
 }
 
 void show_dir(void){

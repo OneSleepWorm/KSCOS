@@ -74,5 +74,18 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif
 
+#if __LITTLE_END_COLOR__ == 0
+#define rred 0xF100
+#define bblue 0x001F
+#define ggreen 0x07E0
+#else
+#define rred 0x00F1
+#define bblue 0x1F00
+#define ggreen 0xE007
+//#define yyellow 0xE0F1
+#define bblack 0x0000
+#define wwhite 0xFFFF
+#endif
+
 
 #endif

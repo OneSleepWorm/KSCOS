@@ -77,6 +77,11 @@ uint8_t key_scan(void)
 
 ExMessage key_msg;
 
+void key_init(void){
+    // initgraph(160,80);
+    return;
+}
+
 uint8_t key_scan(void){
     if (!peekmessage(&key_msg,EX_KEY)) return KEY_NONE;
     if(key_msg.message == WM_KEYDOWN){

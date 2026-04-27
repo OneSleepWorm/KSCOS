@@ -415,18 +415,18 @@ const uint8_t Alipay[520] = {0X10,0X10,0X00,0X10,0X00,0X10,0X01,0X1B,
 
 
 Img_File Systemimg[12] = {
-{"Wechat",Wechat,16,16},
-{"QQ",QQ,16,16},
-{"Setting",Setting,16,16},
-{"Video",Video,16,16},
-{"Photo",Photo,16,16},
-{"Tiktok",Tiktok,16,16},
-{"Qwen",Qwen,16,16},
-{"Note",Note,16,16},
-{"Game",Game,16,16},
-{"Clock",Clock,16,16},
-{"Book",Book,16,16},
-{"Alipay",Alipay,16,16},
+{"Wechat",Wechat,520,1},
+{"QQ",QQ,520,1},
+{"Setting",Setting,520,1},
+{"Video",Video,520,1},
+{"Photo",Photo,520,1},
+{"Tiktok",Tiktok,520,1},
+{"Qwen",Qwen,520,1},
+{"Note",Note,520,1},
+{"Game",Game,520,1},
+{"Clock",Clock,520,1},
+{"Book",Book,520,1},
+{"Alipay",Alipay,520,1},
 };
 
 Img_File kloadimage(char* name){

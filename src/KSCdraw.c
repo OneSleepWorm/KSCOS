@@ -9,6 +9,7 @@
 
 
 #include "../inc/KSCdraw.h"
+#include <string.h>
 
 #if __USE_LCD__ ==1
 
@@ -25,9 +26,9 @@ void k_free(void* ptr){
     free(ptr);
 }
 #if __USE_PC__
-#include <graphics.h>
-#include <conio.h>
-#include <stdio.h>
+// #include <graphics.h>
+// #include <conio.h>
+// #include <stdio.h>
 
 // #ifdef __MINGW32__
 // extern "C" {
@@ -233,7 +234,7 @@ KSC_buf* kgetscreen(){
 	return &os_screen;
 }
 //初始化缓冲区
-KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height){
+KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk){
     KSC_buf* screen = (KSC_buf*)r_malloc(sizeof(KSC_buf));
     if(screen == NULL){
         return NULL;
@@ -245,11 +246,12 @@ KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height){
     screen->ssy = ssy;
     screen->width = width;
     screen->height = height;
+    screen->bk = bk;
     ksetscreen(screen);
 	screen_init();
     // kfull(screen,0xFFFF,0,0,width,240);
     // kfull(screen,0xFFFF,0,240,width,80);
-    kfull(screen,0xFFFF,0,0,width,height);
+    kfull(screen,bk,0,0,width,height);
     return screen;
 }
 

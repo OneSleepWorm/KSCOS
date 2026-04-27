@@ -57,7 +57,7 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
     // x = obj->x;
     // y = obj->y;
     if(obj->state&0x01)return;
-    switch(obj->_type){
+    switch(obj->_type&_type_mask){
         case _circle:
             kcircle(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
             break;
@@ -102,19 +102,45 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
     }
 }
 
+void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
+    uint8_t hnum = menu->config->menu_hnum;
+    uint8_t wnum = menu->config->menu_wnum;
+    kbox(screen,screen->bk
+        ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
+        ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
+        ,menu->config->mdw
+        ,menu->config->mdh);
+}
+
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
+    kbox(screen,rred
+        ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
+        ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
+        ,menu->config->mdw
+        ,menu->config->mdh);
     for(uint8_t j=0;j<hnum;j++){
         for(uint8_t i=0;i<wnum;i++){
+            if(menu->config->menu_num<=i+wnum*j) return;
             for(uint8_t k=0;k<menu->config->menu_obj_num;k++){
                 void* extradata = NULL;
-                if(menu->style[k]._type==_image_extra)
-                    extradata = (void*)&menu->list[i+wnum*j];
-                else if(menu->style[k]._type==_string_extra)
+                if(menu->style[k]._type==_image_extra&_type_mask)
+                    extradata = (void*)&menu->list[i+wnum*j].data;
+                else if(menu->style[k]._type==_string_extra&_type_mask 
+                    && menu->style[k]._type&_custom_mask==_custom_label1){
                     extradata = (void*)menu->list[i+wnum*j].name;
-                    //extradata = (void*)"Hello";
-                else
+                    // printf("test2");
+                    // printf("drawname:%s\n",extradata);
+                }else if(menu->style[k]._type==_string_extra&_type_mask 
+                    && menu->style[k]._type&_custom_mask==_custom_label2){
+                        //文件属性
+                        if(menu->list[i+wnum*j].type==1){//文件
+                            extradata = "[dir]";
+                        }else if(menu->list[i+wnum*j].type==2){//文件
+                            extradata = "[file]"; 
+                        }
+                    }
                     extradata = NULL;
                 kobjdraw(screen,&menu->style[k]
                     ,x+menu->config->mdw*i
@@ -123,18 +149,15 @@ void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
             }
         }
     }
-    kbox(screen,menu->style->colorck
-        ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
-        ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
-        ,menu->config->mdw
-        ,menu->config->mdh);
+    
+    
 }
 
 #if __USE_KEY__ > 0
 
-void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
+void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t key){
     if(!menu) return;
-    uint8_t key = key_scan();
+    // uint8_t key = key_scan();
     if(key==KEY_NONE)return;
     uint8_t wnum = menu->config->menu_wnum;
     uint8_t hnum = menu->config->menu_hnum;
