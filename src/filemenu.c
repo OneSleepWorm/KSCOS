@@ -1,4 +1,5 @@
 #include "../inc/filemenu.h"
+#include "../inc/filetxt.h"
 #include "../inc/key.h"
 #include "../littlefs/lfs.h"
 #include "../littlefs/lfs_config.h"
@@ -62,6 +63,7 @@ Img_File mfile[MAX_FILE_LIST] = {0};
 
 lfs_t     lfs;
 lfs_dir_t dir;
+static KSC_buf* menu_screen = NULL;
 
 static int filedir(ksc_menu_t* menu);
 
@@ -80,6 +82,7 @@ ksc_menu_t* filemenu_init(KSC_buf* screen) {
     if (screen == NULL) {
         screen = kgetscreen();
     }
+    menu_screen = screen;
 
     filemenu.config->menu_obj_num = sizeof(style) / sizeof(style[0]);
 
@@ -215,8 +218,22 @@ int filemenu_update(ksc_menu_t* menu, uint8_t key) {
         }
 
         if (menu->list[idx].type != LFS_TYPE_DIR) {
-            printf("filemenu: '%s' is not a directory\n",
-                   menu->list[idx].name);
+            // 进入文本查看器
+            char fullpath[MAX_PATH_LEN * 2];
+            if (strcmp(path, "/") == 0) {
+                snprintf(fullpath, sizeof(fullpath), "/%s", menu->list[idx].name);
+            } else {
+                snprintf(fullpath, sizeof(fullpath), "%s/%s", path, menu->list[idx].name);
+            }
+
+            if (filetxt_open(menu_screen, &lfs, fullpath, 30, 30) == 0) {
+                while (filetxt_is_active()) {
+                    uint8_t k = key_scan();
+                    if (k != KEY_NONE) filetxt_update(k);
+                }
+                // 退出文本查看器后恢复菜单显示
+                KSC_menu_draw(menu_screen, menu, 10, 10);
+            }
             return 0;
         }
 
@@ -269,4 +286,10 @@ int filemenu_update(ksc_menu_t* menu, uint8_t key) {
 
     printf("path:%s\n", path);
     return ret;
+}
+
+void filemenu_flashscreen(KSC_buf* screen, ksc_menu_t* menu,uint8_t key, uint8_t x, uint8_t y) {
+    KSC_menu_clear(screen,menu,10,10);
+    filemenu_update(menu,key);
+    KSC_menu_draw(screen,menu,10,10);
 }
