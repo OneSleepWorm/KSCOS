@@ -105,47 +105,53 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
 void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
-    kbox(screen,screen->bk
-        ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
-        ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
-        ,menu->config->mdw
-        ,menu->config->mdh);
+    kfull(screen,screen->bk,x,y
+        ,menu->config->mdw*menu->config->menu_wnum
+        ,menu->config->mdh*menu->config->menu_hnum);
 }
 
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
-    kbox(screen,rred
-        ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
-        ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
-        ,menu->config->mdw
-        ,menu->config->mdh);
+    KSCCOLOR obk;
+    KSCCOLOR nbk;
     for(uint8_t j=0;j<hnum;j++){
         for(uint8_t i=0;i<wnum;i++){
             if(menu->config->menu_num<=i+wnum*j) return;
+            KSCCOLOR bk = screen->bk;
             for(uint8_t k=0;k<menu->config->menu_obj_num;k++){
                 void* extradata = NULL;
-                if(menu->style[k]._type==_image_extra&_type_mask)
+                if(menu->style[k]->_type==(_image_extra&_type_mask))
                     extradata = (void*)&menu->list[i+wnum*j].data;
-                else if(menu->style[k]._type==_string_extra&_type_mask 
-                    && menu->style[k]._type&_custom_mask==_custom_label1){
+                else if(menu->style[k]->_type==(_string_extra|_custom_label1)){
                     extradata = (void*)menu->list[i+wnum*j].name;
-                    // printf("test2");
                     // printf("drawname:%s\n",extradata);
-                }else if(menu->style[k]._type==_string_extra&_type_mask 
-                    && menu->style[k]._type&_custom_mask==_custom_label2){
+                }else if(menu->style[k]->_type==(_string_extra|_custom_label2)){
                         //文件属性
-                        if(menu->list[i+wnum*j].type==1){//文件
+                        if(menu->list[i+wnum*j].type==2){//文件
                             extradata = "[dir]";
-                        }else if(menu->list[i+wnum*j].type==2){//文件
+                        }else if(menu->list[i+wnum*j].type==1){//文件
                             extradata = "[file]"; 
                         }
+                }else if((menu->style[k]->_type&_custom_mask)==_custom_label3){
+                    //复选框，判断是否选中
+                    if(menu->config->menu_index!=i+wnum*j){
+                        continue;
                     }
+                    nbk = menu->style[k]->colorbk;
+                    obk = menu->style[k]->colorck;
+                    uint8_t objnum = menu->config->menu_obj_num;
+                }else{
                     extradata = NULL;
-                kobjdraw(screen,&menu->style[k]
+                }
+                // printf("extradata:%s\n",extradata);
+                //menu->style[k]->colorbk = bk;
+                kobjdraw(screen,menu->style[k]
                     ,x+menu->config->mdw*i
                     ,y+menu->config->mdh*j,
                     extradata);
+                
+
             }
         }
     }
@@ -161,7 +167,7 @@ void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t 
     if(key==KEY_NONE)return;
     uint8_t wnum = menu->config->menu_wnum;
     uint8_t hnum = menu->config->menu_hnum;
-    kbox(screen,menu->style->colorbk
+    kbox(screen,screen->bk
         ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
         ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
         ,menu->config->mdw
@@ -183,7 +189,7 @@ void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t 
         default:
             break;
     }
-    kbox(screen,menu->style->colorck
+    kbox(screen,screen->bk
         ,x-1+(menu->config->menu_index%wnum)*menu->config->mdw
         ,y-1+(menu->config->menu_index/wnum)*menu->config->mdh
         ,menu->config->mdw

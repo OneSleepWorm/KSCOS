@@ -70,7 +70,7 @@ typedef struct ksc_menu_config_t{
 } ksc_menu_config_t;//size:12
 
 typedef struct ksc_menu_t{
-    ksc_style_t* style;
+    ksc_style_t** style;
     Img_File* list;
     ksc_menu_config_t* config;
 }ksc_menu_t;//size:12
