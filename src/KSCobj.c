@@ -53,7 +53,7 @@ void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8
 }
 
 void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
-    if(!obj)return;
+    if(!screen || !obj)return;
     // x = obj->x;
     // y = obj->y;
     if(obj->state&0x01)return;
@@ -103,14 +103,14 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
 }
 
 void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
-    uint8_t hnum = menu->config->menu_hnum;
-    uint8_t wnum = menu->config->menu_wnum;
-    kfull(screen,screen->bk,x,y
-        ,menu->config->mdw*menu->config->menu_wnum
-        ,menu->config->mdh*menu->config->menu_hnum);
+    if(!screen || !menu || !menu->config) return;
+    kfull(screen, screen->bk, x, y,
+          menu->config->mdw * menu->config->menu_wnum,
+          menu->config->mdh * menu->config->menu_hnum);
 }
 
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
+    if(!screen || !menu || !menu->config || !menu->style || !menu->list) return;
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
     KSCCOLOR obk;
@@ -162,7 +162,7 @@ void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
 #if __USE_KEY__ > 0
 
 void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t key){
-    if(!menu) return;
+    if(!screen || !menu || !menu->config) return;
     // uint8_t key = key_scan();
     if(key==KEY_NONE)return;
     uint8_t wnum = menu->config->menu_wnum;
