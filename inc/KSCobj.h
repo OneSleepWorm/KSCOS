@@ -77,6 +77,7 @@ typedef struct ksc_menu_t{
 
 #if __USE_LCD__ > 0
 void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata);
+void kobjsdraw(KSC_buf* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num);
 void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 #endif
 

@@ -72,7 +72,7 @@ KSC_mes kdrawimagebig(KSC_buf* screen,const uint16_t* img,uintxy x,uintxy y,uint
 // 绘制二值化图像
 KSC_mes kimagebin(KSC_buf* screen,const uint8_t* img,uintxy x,uintxy y
     ,uint8_t width,uint8_t height,KSCCOLOR colorck,KSCCOLOR colorbk);// 绘制单个字符
-KSC_mes kchar(KSC_buf* screen,char ch,uintxy x,uintxy y,KSCCOLOR colorbk,KSCCOLOR colordefault);
+KSC_mes kchar(KSC_buf* screen,char ch,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
 // 绘制字符串
 KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
 #if __USE_CHINESE__ >0

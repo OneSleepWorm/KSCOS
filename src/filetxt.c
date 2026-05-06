@@ -25,7 +25,7 @@ static int        txt_is_open = 0;
 static lfs_soff_t txt_line_off[MAX_LINES];
 
 static KSCCOLOR txt_fg = bblack;
-static KSCCOLOR txt_bg = wwhite;
+static KSCCOLOR txt_bg = ggreen;
 
 // ---- 预留文件过滤器 ----
 static int (*txt_filter)(const char* path) = NULL;

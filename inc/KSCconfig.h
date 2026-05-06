@@ -3,7 +3,7 @@
 
 //编译器系统配置
 #define __USE_PC__ 1
-#define __USE_ARMCC__ 0 
+#define __USE_ARMCC__ 0
 #define __USE_ESP32__ 0
 
 //program config
@@ -38,30 +38,18 @@
 #define SYSTEMCOLOR2 0x001F
 #define SYSTEMCOLOR3 0xF800
 
-
-
 #include <stdint.h>
 
 #if __USE_PC__
-#include <stdint.h>
-// #include <graphics.h>
 #include <stdlib.h>
 #include <stdio.h>
-// #include <unistd.h>
-// #include <time.h>
-// #include <windows.h>
-#define K_malloc(size) malloc(size)
-//#define KSCCOLOR uint32_t
-extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define log(...) 0
-#define __USE_INPUT_KEY_SIMU__ 
+#define __USE_INPUT_KEY_SIMU__
 #endif
 
 #if __USE_ARMCC__
-
 #include <stdlib.h>
-#define K_malloc(size) malloc(size)
-#define __USE_INPUT_KEY__ 
+#define __USE_INPUT_KEY__
 #endif
 
 #if __USE_ESP32__
@@ -69,7 +57,6 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #include "esp_log.h"
 
 #define PPTAG "KSCdraw"
-// 支持任意参数，和 ESP_LOGW 用法完全一样
 #define log(...) ESP_LOGW(PPTAG, __VA_ARGS__)
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif
@@ -82,10 +69,8 @@ extern uint8_t publicdatabuf[MAX_INPUT_SIZE];
 #define rred 0x00F1
 #define bblue 0x1F00
 #define ggreen 0xE007
-//#define yyellow 0xE0F1
 #define bblack 0x0000
 #define wwhite 0xFFFF
 #endif
-
 
 #endif

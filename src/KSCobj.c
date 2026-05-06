@@ -4,7 +4,7 @@ void kdrawimagefile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y){
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
-        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimage(screen,imgbuf,x,y,width,height);
@@ -18,7 +18,7 @@ void kdrawimagefile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y){
     else if(strcmp(imgname+namelen-4,".png")==0)return;
     else if(strcmp(imgname+namelen-4,".gif")==0)return;
     else if(strcmp(imgname+namelen-4,".img")==0){
-        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimage(screen,imgbuf,x,y,width,height);
@@ -30,7 +30,7 @@ void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
-        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
@@ -44,7 +44,7 @@ void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8
     else if(strcmp(imgname+namelen-4,".png")==0)return;
     else if(strcmp(imgname+namelen-4,".gif")==0)return;
     else if(strcmp(imgname+namelen-4,".img")==0){
-        uint16_t* imgbuf = (uint16_t*)imgfile->data+4;
+        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
@@ -102,6 +102,13 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
     }
 }
 
+void kobjsdraw(KSC_buf* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num){
+    if(!screen || !obj || !extradata || !num)return;
+    for(uint8_t i=0;i<num;i++){
+        kobjdraw(screen,obj[i],x,y,extradata[i]);
+    }
+}
+
 void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!screen || !menu || !menu->config) return;
     kfull(screen, screen->bk, x, y,
@@ -113,39 +120,28 @@ void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!screen || !menu || !menu->config || !menu->style || !menu->list) return;
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
-    KSCCOLOR obk;
-    KSCCOLOR nbk;
     for(uint8_t j=0;j<hnum;j++){
         for(uint8_t i=0;i<wnum;i++){
             if(menu->config->menu_num<=i+wnum*j) return;
-            KSCCOLOR bk = screen->bk;
             for(uint8_t k=0;k<menu->config->menu_obj_num;k++){
                 void* extradata = NULL;
                 if(menu->style[k]->_type==(_image_extra&_type_mask))
                     extradata = (void*)&menu->list[i+wnum*j].data;
                 else if(menu->style[k]->_type==(_string_extra|_custom_label1)){
                     extradata = (void*)menu->list[i+wnum*j].name;
-                    // printf("drawname:%s\n",extradata);
                 }else if(menu->style[k]->_type==(_string_extra|_custom_label2)){
-                        //文件属性
-                        if(menu->list[i+wnum*j].type==2){//文件
+                        if(menu->list[i+wnum*j].type==2){
                             extradata = "[dir]";
-                        }else if(menu->list[i+wnum*j].type==1){//文件
-                            extradata = "[file]"; 
+                        }else if(menu->list[i+wnum*j].type==1){
+                            extradata = "[file]";
                         }
                 }else if((menu->style[k]->_type&_custom_mask)==_custom_label3){
-                    //复选框，判断是否选中
                     if(menu->config->menu_index!=i+wnum*j){
                         continue;
                     }
-                    nbk = menu->style[k]->colorbk;
-                    obk = menu->style[k]->colorck;
-                    uint8_t objnum = menu->config->menu_obj_num;
                 }else{
                     extradata = NULL;
                 }
-                // printf("extradata:%s\n",extradata);
-                //menu->style[k]->colorbk = bk;
                 kobjdraw(screen,menu->style[k]
                     ,x+menu->config->mdw*i
                     ,y+menu->config->mdh*j,
