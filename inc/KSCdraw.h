@@ -30,7 +30,7 @@ typedef struct {
     uint8_t  Mode;
     uintxy  ssx;//屏幕左上角X轴位置
     uintxy  ssy;//屏幕左上角Y轴位置
-}KSC_buf;
+}KSC_window;
 
 typedef enum KSC_mes{
     KSC_OK = 0,
@@ -40,44 +40,46 @@ typedef enum KSC_mes{
 }KSC_mes;
 
 // 更新kinitscreen函数声明，添加背景色参数
-KSC_buf* kinitscreen(uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
-void kfreescreen(KSC_buf* screen);
-KSC_buf* kgetscreen(void);
-KSC_mes ksetscreen(KSC_buf* screen);
+
+void kscreenmount(void);
+KSC_window* kscreeninit(uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
+void kscreenfree(KSC_window* screen);
+KSC_window* kgetscreen(void);
+KSC_mes ksetscreen(KSC_window* screen);
 
 // 在指定坐标设置像素点
-KSC_mes ksetpixel(KSC_buf* screen,KSCCOLOR color,uintxy x,uintxy y);
+KSC_mes ksetpixel(KSC_window* screen,KSCCOLOR color,uintxy x,uintxy y);
 // 填充矩形区域
-KSC_mes kfull(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy w,uintxy h);
+KSC_mes kfull(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy w,uintxy h);
 // 绘制任意方向线段
-KSC_mes kline(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy x2,uintxy y2);
+KSC_mes kline(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy x2,uintxy y2);
 // 绘制矩形边框
-KSC_mes kbox(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy w,uintxy h);
+KSC_mes kbox(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy w,uintxy h);
 // 填充矩形区域
-KSC_mes kfillbox(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height);
+KSC_mes kfillbox(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height);
 // 绘制圆弧（可选方向）
-KSC_mes karc(KSC_buf* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r,uint8_t Anglediraction);
+KSC_mes karc(KSC_window* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r,uint8_t Anglediraction);
 // 绘制完整圆形
-KSC_mes kcircle(KSC_buf* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r);
+KSC_mes kcircle(KSC_window* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r);
 // 填充圆形区域
-KSC_mes kfillcircle(KSC_buf* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r);
+KSC_mes kfillcircle(KSC_window* screen,KSCCOLOR color,uintxy x0,uintxy y0,uint8_t r);
 // 绘制圆角矩形
-KSC_mes kroundrect(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height,uint8_t r);
+KSC_mes kroundrect(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height,uint8_t r);
 // 绘制填充圆角矩形
-KSC_mes kfillroundrect(KSC_buf* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height,uint8_t r);
+KSC_mes kfillroundrect(KSC_window* screen,KSCCOLOR color,uintxy x1,uintxy y1,uintxy width,uintxy height,uint8_t r);
 // 绘制图像
-KSC_mes kdrawimage(KSC_buf* screen,const uint16_t* img,uintxy x,uintxy y,uint8_t width,uint8_t height);
+KSC_mes kdrawimage(KSC_window* screen,const uint16_t* img,uintxy x,uintxy y,uint8_t width,uint8_t height);
 // 绘制图像（缩放）
-KSC_mes kdrawimagebig(KSC_buf* screen,const uint16_t* img,uintxy x,uintxy y,uint8_t width,uint8_t height,uint8_t scale);
+KSC_mes kdrawimagebig(KSC_window* screen,const uint16_t* img,uintxy x,uintxy y,uint8_t width,uint8_t height,uint8_t scale);
 // 绘制二值化图像
-KSC_mes kimagebin(KSC_buf* screen,const uint8_t* img,uintxy x,uintxy y
+KSC_mes kimagebin(KSC_window* screen,const uint8_t* img,uintxy x,uintxy y
     ,uint8_t width,uint8_t height,KSCCOLOR colorck,KSCCOLOR colorbk);// 绘制单个字符
-KSC_mes kchar(KSC_buf* screen,char ch,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
+KSC_mes kchar(KSC_window* screen,char ch,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
 // 绘制字符串
-KSC_mes kstring(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
+KSC_mes kstring(KSC_window* screen,const char* str,uintxy x,uintxy y,KSCCOLOR colorck,KSCCOLOR colorbk);
 #if __USE_CHINESE__ >0
 // 绘制中文字符串
-KSC_mes kstringchinese(KSC_buf* screen,const char* str,uintxy x,uintxy y,KSCCOLOR color1,KSCCOLOR color2);
+KSC_mes kstringchinese(KSC_window* screen,const char* str,uintxy x,uintxy y,KSCCOLOR color1,KSCCOLOR color2);
 #endif
 
 #endif

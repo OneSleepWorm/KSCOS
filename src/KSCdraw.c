@@ -130,27 +130,36 @@ void imgchange(const uint8_t* imgbuf,
 #define RightLower 0x04
 #define LeftLower 0x08
 
-KSC_buf os_screen = {0};
+KSC_window os_screen = {0};
 
-KSC_mes ksetpixel(KSC_buf* screen, KSCCOLOR color, uintxy x, uintxy y){
+void window_setcanvas(KSC_window* screen, uintxy x, uintxy y, uintxy w, uintxy h){
+    uintxy rx = x + screen->ssx;
+    uintxy ry = y + screen->ssy;
+    screen_setcanvas(rx, ry, w, h);
+}
+
+KSC_mes ksetpixel(KSC_window* screen, KSCCOLOR color, uintxy x, uintxy y){
     if (!screen) return KSC_ERR;
-    screen_setcanvas(x, y, 1, 1);
+    window_setcanvas(screen, x, y, 1, 1);
     screen_setcolorpixels(&color, 1);
     return KSC_OK;
 }
 
-KSC_mes ksetscreen(KSC_buf* screen){
+KSC_mes ksetscreen(KSC_window* screen){
     if (!screen) return KSC_ERR;
     os_screen = *screen;
     return KSC_OK;
 }
 
-KSC_buf* kgetscreen(){
+KSC_window* kgetscreen(){
     return &os_screen;
 }
+void kscreenmount(void){
+    screen_init();
+}
 
-KSC_buf* kinitscreen(uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOLOR bk){
-    KSC_buf* screen = (KSC_buf*)malloc(sizeof(KSC_buf));
+KSC_window* kscreeninit(uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOLOR bk){
+    KSC_window* screen = (KSC_window*)malloc(sizeof(KSC_window));
     if (screen == NULL){
         return NULL;
     }
@@ -163,12 +172,12 @@ KSC_buf* kinitscreen(uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOL
     screen->height = height;
     screen->bk = bk;
     ksetscreen(screen);
-    screen_init();
+    
     kfull(screen, bk, 0, 0, width, height);
     return screen;
 }
 
-void kfreescreen(KSC_buf* screen){
+void kscreenfree(KSC_window* screen){
     if (!screen) return;
     if (screen->Mode & (1<<5)){
         free(screen->fbuf);
@@ -179,10 +188,10 @@ void kfreescreen(KSC_buf* screen){
     }
 }
 
-KSC_mes kfull(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
+KSC_mes kfull(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
     if (!screen) return KSC_ERR;
     if (w == 0 || h == 0) return KSC_OK;
-    screen_setcanvas(x1, y1, w, h);
+    window_setcanvas(screen, x1, y1, w, h);
     uint32_t pixelnum = w * h;
     uint16_t* buf = (uint16_t*)draw_buf;
     uint16_t staticbuf_pixel = (_STATICBUF_SIZE >> 1);
@@ -197,7 +206,7 @@ KSC_mes kfull(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, u
     return KSC_OK;
 }
 
-KSC_mes kline(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy x2, uintxy y2){
+KSC_mes kline(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy x2, uintxy y2){
     if (!screen) return KSC_ERR;
 
     if (x1 == x2) {
@@ -237,7 +246,7 @@ KSC_mes kline(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy x2, 
     return KSC_OK;
 }
 
-KSC_mes kbox(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
+KSC_mes kbox(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
     if (!screen) return KSC_ERR;
     if (w == 0 || h == 0) return KSC_OK;
 
@@ -248,11 +257,11 @@ KSC_mes kbox(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, ui
     return KSC_OK;
 }
 
-KSC_mes kfillbox(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy height){
+KSC_mes kfillbox(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy height){
     return kfull(screen, color, x1, y1, w, height);
 }
 
-KSC_mes karc(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r, uint8_t Anglediraction){
+KSC_mes karc(KSC_window* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r, uint8_t Anglediraction){
     if (!screen) return KSC_ERR;
     if ((Anglediraction & 0xF0) != 0) return KSC_ERR;
 
@@ -290,11 +299,11 @@ KSC_mes karc(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r, u
     return KSC_OK;
 }
 
-KSC_mes kcircle(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r){
+KSC_mes kcircle(KSC_window* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r){
     return karc(screen, color, x0, y0, r, 0x0F);
 }
 
-KSC_mes kfillcircle(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r){
+KSC_mes kfillcircle(KSC_window* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8_t r){
     if (!screen) return KSC_ERR;
     if (r == 0) {
         return ksetpixel(screen, color, x0, y0);
@@ -335,16 +344,16 @@ KSC_mes kfillcircle(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8
     return KSC_OK;
 }
 
-KSC_mes kdrawimage(KSC_buf* screen, const uint16_t* img, uintxy x, uintxy y,
+KSC_mes kdrawimage(KSC_window* screen, const uint16_t* img, uintxy x, uintxy y,
     uint8_t width, uint8_t height){
     if (!screen || !img) return KSC_ERR;
-    screen_setcanvas(x, y, width, height);
+    window_setcanvas(screen, x, y, width, height);
     uint16_t imgsize = width * height;
     screen_setcolorpixels(img, imgsize);
     return KSC_OK;
 }
 
-KSC_mes kdrawimagebig(KSC_buf* screen, const uint16_t* img, uintxy x, uintxy y,
+KSC_mes kdrawimagebig(KSC_window* screen, const uint16_t* img, uintxy x, uintxy y,
     uint8_t width, uint8_t height, uint8_t scale){
     if (!screen || !img) return KSC_ERR;
     if (scale == 0) return KSC_ERR;
@@ -358,7 +367,7 @@ KSC_mes kdrawimagebig(KSC_buf* screen, const uint16_t* img, uintxy x, uintxy y,
     return KSC_OK;
 }
 
-KSC_mes kroundrect(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy width, uintxy height, uint8_t r){
+KSC_mes kroundrect(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy width, uintxy height, uint8_t r){
     if (!screen) return KSC_ERR;
     if (r == 0){
         return kbox(screen, color, x1, y1, width, height);
@@ -384,7 +393,7 @@ KSC_mes kroundrect(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy
     return KSC_OK;
 }
 
-KSC_mes kfillroundrect(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy width, uintxy height, uint8_t r){
+KSC_mes kfillroundrect(KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy width, uintxy height, uint8_t r){
     if (!screen) return KSC_ERR;
     if (r == 0){
         return kfillbox(screen, color, x1, y1, width, height);
@@ -408,7 +417,7 @@ KSC_mes kfillroundrect(KSC_buf* screen, KSCCOLOR color, uintxy x1, uintxy y1, ui
     return KSC_OK;
 }
 
-KSC_mes kimagebin(KSC_buf* screen, const uint8_t* img, uintxy x, uintxy y,
+KSC_mes kimagebin(KSC_window* screen, const uint8_t* img, uintxy x, uintxy y,
     uint8_t width, uint8_t height, KSCCOLOR colorck, KSCCOLOR colorbk){
     if (!screen || !img) return KSC_ERR;
 
@@ -423,7 +432,7 @@ KSC_mes kimagebin(KSC_buf* screen, const uint8_t* img, uintxy x, uintxy y,
     return KSC_OK;
 }
 
-KSC_mes kchar(KSC_buf* screen, char ch, uintxy x, uintxy y, KSCCOLOR colorck, KSCCOLOR colorbk){
+KSC_mes kchar(KSC_window* screen, char ch, uintxy x, uintxy y, KSCCOLOR colorck, KSCCOLOR colorbk){
     if (!screen) return KSC_ERR;
     KSC_Font1* font = &Systemfont0;
     const uint8_t* char_bitmap = font->Getfontfunc(ch);
@@ -431,7 +440,7 @@ KSC_mes kchar(KSC_buf* screen, char ch, uintxy x, uintxy y, KSCCOLOR colorck, KS
     return KSC_OK;
 }
 
-KSC_mes kstring(KSC_buf* screen, const char* str, uintxy x, uintxy y, KSCCOLOR colorck, KSCCOLOR colorbk){
+KSC_mes kstring(KSC_window* screen, const char* str, uintxy x, uintxy y, KSCCOLOR colorck, KSCCOLOR colorbk){
     if (!screen || !str) return KSC_ERR;
     KSC_Font1* font = &Systemfont0;
     while (*str){
@@ -447,7 +456,7 @@ KSC_mes kstring(KSC_buf* screen, const char* str, uintxy x, uintxy y, KSCCOLOR c
 }
 
 #if __USE_CHINESE__ >0
-KSC_mes kstringchinese(KSC_buf* screen, const char* str, uintxy x, uintxy y, KSCCOLOR color1, KSCCOLOR color2){
+KSC_mes kstringchinese(KSC_window* screen, const char* str, uintxy x, uintxy y, KSCCOLOR color1, KSCCOLOR color2){
     if (!screen || !str) return KSC_ERR;
     KSC_FontChinese* font = &SystemfontChinese;
     uint8_t* char_bitmap = NULL;

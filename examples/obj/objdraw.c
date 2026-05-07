@@ -1,7 +1,7 @@
 #include "../inc/KSCobj.h"
 
 void obj_demo(void){
-    KSC_buf* screen = kinitscreen(0,0,240,160);
+    KSC_window* screen = kscreeninit(0,0,240,160,0xFFFF);
     ksc_obj_t obj;
     obj._type = _string;
     obj.state=0x00;
@@ -67,7 +67,8 @@ void obj_demo(void){
 
     KSC_menu_draw(screen,&menu,10,10);
     while(1){
-        KSC_menu_update(screen,&menu,10,10);
+        uint8_t key = key_scan();
+        KSC_menu_update(screen,&menu,10,10,key);
         //printf("%s\r\n",key==KEY_NONE?"":"key);
         
     }

@@ -5,7 +5,7 @@ extern SPI_HandleTypeDef hspi1;
 
 int main(void)
 {
-    KSC_buf* screen = kinitscreen(240, 320, NULL, 0, 0);
+    KSC_window* screen = kscreeninit(240, 320, NULL, 0, 0);
   //kfillrect(screen,0,0,239,319);
   flash_init();
   kconnect_init();

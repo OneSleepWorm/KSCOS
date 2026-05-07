@@ -14,6 +14,18 @@ typedef struct  {
     uint8_t Colorbit;
 } KSC_Img;
 
+
+typedef enum{
+    IMG_TYPE_FILE = 0,
+    IMG_TYPE_DIR  = 1,
+} Img_Type;
+
+/* @brief 图片文件结构体
+ * @param name:图片文件名
+ * @param data:图片数据指针
+ * @param size:图片数据大小
+ * @param type:图片类型
+ */
 typedef struct{
     char name[16];
     const uint8_t* data;

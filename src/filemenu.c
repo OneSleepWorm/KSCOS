@@ -11,35 +11,36 @@
 #define MAX_FILE_LIST 8
 #define MAX_PATH_LEN  128
 
+//文件名样式
 ksc_style_t menu_style0 = {
     .colorck = rred,
     .colorbk = wwhite,
     .width   = 80,
-    .height  = 20,
+    .height  = 10,
     .state   = 0,
     .custom  = 0,
     .sdx     = 1,
     .sdy     = 1,
     .d_and_r = 0,
-    ._type   = _string_extra | _custom_label1,
+    ._type   = _string_extra,
 };
-
+//文件类型样式
 ksc_style_t menu_style1 = {
     .colorck = rred,
     .colorbk = wwhite,
     .width   = 80,
-    .height  = 20,
+    .height  = 10,
     .state   = 0,
     .custom  = 0,
     .sdx     = 100,
     .sdy     = 1,
     .d_and_r = 0,
-    ._type   = _string_extra | _custom_label2,
+    ._type   = _string_extra,
 };
-
+//文件框样式
 ksc_style_t menu_style2 = {
     .colorck = bblue,
-    .colorbk = bblue,
+    .colorbk = wwhite,
     .width   = 80,
     .height  = 10,
     .state   = 0,
@@ -47,7 +48,7 @@ ksc_style_t menu_style2 = {
     .sdx     = 0,
     .sdy     = 0,
     .d_and_r = 0,
-    ._type   = _box | _custom_label3,
+    ._type   = _box,
 };
 
 ksc_menu_config_t filemenu_config = {
@@ -63,15 +64,18 @@ Img_File mfile[MAX_FILE_LIST] = {0};
 
 lfs_t     lfs;
 lfs_dir_t dir;
-static KSC_buf* menu_screen = NULL;
+static KSC_window* menu_screen = NULL;
 
 static int filedir(ksc_menu_t* menu);
 
-ksc_menu_t* filemenu_init(KSC_buf* screen) {
+ksc_menu_t* filemenu_init(KSC_window* screen) {
+    if(menu_screen != NULL){
+        return NULL;
+    }
     static ksc_style_t* style[3] = {
-        &menu_style2,
         &menu_style0,
         &menu_style1,
+        &menu_style2,
     };
     static ksc_menu_t filemenu = {
         .config = &filemenu_config,
@@ -232,7 +236,7 @@ int filemenu_update(ksc_menu_t* menu, uint8_t key) {
                     if (k != KEY_NONE) filetxt_update(k);
                 }
                 // 退出文本查看器后恢复菜单显示
-                KSC_menu_draw(menu_screen, menu, 10, 10);
+                kmenu_draw(menu_screen, menu);
             }
             return 0;
         }
@@ -287,9 +291,88 @@ int filemenu_update(ksc_menu_t* menu, uint8_t key) {
     printf("path:%s\n", path);
     return ret;
 }
-
-void filemenu_flashscreen(KSC_buf* screen, ksc_menu_t* menu,uint8_t key, uint8_t x, uint8_t y) {
-    KSC_menu_clear(screen,menu,10,10);
-    filemenu_update(menu,key);
-    KSC_menu_draw(screen,menu,10,10);
+void kmenu_clear(KSC_window* screen, ksc_menu_t* menu) {
+    if(menu == NULL || menu->config == NULL){
+        return;
+    }
+    KSCCOLOR ncolorbk = screen->bk;
+    printf("ncolorbk:%04x\n",ncolorbk);
+    //覆盖旧的菜单框
+    kfull(screen,ncolorbk,
+        0,0,screen->width,screen->height
+    );
 }
+
+void kmenu_draw(KSC_window* screen, ksc_menu_t* menu) {
+    if(menu == NULL || menu->config == NULL){
+        return;
+    }
+    KSCCOLOR ncolorck,ncolorbk;
+    uint8_t nheight;
+    uint8_t nsx,nsy;
+    // 绘制菜单文件名
+    ncolorck = menu->style[0]->colorck;
+    ncolorbk = menu->style[0]->colorbk;
+    // nwidth = menu->style[0]->width;
+    nheight = menu->style[0]->height;
+    nsx = menu->style[0]->sdx;
+    nsy = menu->style[0]->sdy;
+    for(uint8_t i=0;i<menu->config->menu_num;i++){
+        kstring(screen,menu->list[i].name,nsx,nsy+i*nheight,ncolorck,ncolorbk);
+    }
+    // 绘制菜单类型
+    ncolorck = menu->style[1]->colorck;
+    ncolorbk = menu->style[1]->colorbk;
+    // nwidth = menu->style[1]->width;
+    nheight = menu->style[1]->height;
+    nsx = menu->style[1]->sdx;
+    nsy = menu->style[1]->sdy;
+    for(uint8_t i=0;i<menu->config->menu_num;i++){
+        kstring(screen,menu->list[i].type==LFS_TYPE_DIR?"DIR":"FILE"
+            ,nsx,nsy+i*nheight,ncolorck,ncolorbk);
+    }
+    
+    nsy = menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
+    //绘制新的菜单框
+    kbox(screen,menu->style[2]->colorck
+        ,menu->style[2]->sdx
+        ,nsy
+        ,menu->style[2]->width
+        ,menu->style[2]->height
+    );
+}
+void kmenu_update(KSC_window* screen, ksc_menu_t* menu){
+    uint8_t key = key_scan();
+    if(key == KEY_NONE) return;
+    uint8_t nsy =menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
+    //覆盖旧的菜单框
+    kbox(screen,menu->style[2]->colorbk
+        ,menu->style[2]->sdx
+        ,nsy
+        ,menu->style[2]->width
+        ,menu->style[2]->height
+    );
+    //
+    filemenu_update(menu, key);
+    if(key != KEY_UP && key != KEY_DOWN) {
+        kmenu_clear(screen,menu);
+        kmenu_draw(screen,menu);
+    }
+    nsy = menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
+    //绘制新的菜单框
+    kbox(screen,menu->style[2]->colorck
+        ,menu->style[2]->sdx
+        ,nsy
+        ,menu->style[2]->width
+        ,menu->style[2]->height
+    );
+}
+
+
+
+// void filemenu_flashscreen(KSC_window* screen, ksc_menu_t* menu,uint8_t key, uint8_t x, uint8_t y) {
+//     KSC_menu_clear(screen,menu,10,10);
+//     kmenu_update(screen,menu,key);
+//     kmenudraw(screen,menu);
+// }
+

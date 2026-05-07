@@ -1,6 +1,6 @@
 #include "../inc/KSCobj.h"
 
-void kdrawimagefile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y){
+void kdrawimagefile(KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y){
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
@@ -8,25 +8,10 @@ void kdrawimagefile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y){
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimage(screen,imgbuf,x,y,width,height);
-    #else
-    const char* imgname = imgfile->name;//1,通过图片文件名获取图片属性
-    if(!imgname){printf("imgname is null\n");return;}
-    uint8_t namelen = strlen(imgname);
-    //扫描文件名后四位
-    if(strcmp(imgname+namelen-4,".bmp")==0)return;
-    else if(strcmp(imgname+namelen-4,".jpg")==0)return;
-    else if(strcmp(imgname+namelen-4,".png")==0)return;
-    else if(strcmp(imgname+namelen-4,".gif")==0)return;
-    else if(strcmp(imgname+namelen-4,".img")==0){
-        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
-        uint8_t width = *((uint8_t*)imgfile->data+3);
-        uint8_t height = *((uint8_t*)imgfile->data+5);
-        kdrawimage(screen,imgbuf,x,y,width,height);
-    }else {printf("imgname:%s is not img file\n",imgname+namelen-4);}
     #endif
 }
 
-void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8_t scale){
+void kdrawimagebigfile(KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y,uint8_t scale){
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
@@ -34,25 +19,10 @@ void kdrawimagebigfile(KSC_buf* screen,Img_File* imgfile,uintxy x,uintxy y,uint8
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
         kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
-    #else
-    const char* imgname = imgfile->name;//1,通过图片文件名获取图片属性
-    if(!imgname){printf("imgname is null\n");return;}
-    uint8_t namelen = strlen(imgname);
-    //扫描文件名后四位
-    if(strcmp(imgname+namelen-4,".bmp")==0)return;
-    else if(strcmp(imgname+namelen-4,".jpg")==0)return;
-    else if(strcmp(imgname+namelen-4,".png")==0)return;
-    else if(strcmp(imgname+namelen-4,".gif")==0)return;
-    else if(strcmp(imgname+namelen-4,".img")==0){
-        const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
-        uint8_t width = *((uint8_t*)imgfile->data+3);
-        uint8_t height = *((uint8_t*)imgfile->data+5);
-        kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
-    }else {printf("imgname:%s is not img file\n",imgname+namelen-4);}
     #endif
 }
 
-void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
+void kobjdraw(KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
     if(!screen || !obj)return;
     // x = obj->x;
     // y = obj->y;
@@ -102,21 +72,21 @@ void kobjdraw(KSC_buf* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void*
     }
 }
 
-void kobjsdraw(KSC_buf* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num){
+void kobjsdraw(KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num){
     if(!screen || !obj || !extradata || !num)return;
     for(uint8_t i=0;i<num;i++){
         kobjdraw(screen,obj[i],x,y,extradata[i]);
     }
 }
-
-void KSC_menu_clear(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
+/*我想到了一个更好的方法
+void KSC_menu_clear(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!screen || !menu || !menu->config) return;
     kfull(screen, screen->bk, x, y,
           menu->config->mdw * menu->config->menu_wnum,
           menu->config->mdh * menu->config->menu_hnum);
 }
 
-void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
+void KSC_menu_draw(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!screen || !menu || !menu->config || !menu->style || !menu->list) return;
     uint8_t hnum = menu->config->menu_hnum;
     uint8_t wnum = menu->config->menu_wnum;
@@ -151,13 +121,11 @@ void KSC_menu_draw(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y){
             }
         }
     }
-    
-    
 }
 
 #if __USE_KEY__ > 0
 
-void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t key){
+void KSC_menu_update(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t key){
     if(!screen || !menu || !menu->config) return;
     // uint8_t key = key_scan();
     if(key==KEY_NONE)return;
@@ -195,3 +163,8 @@ void KSC_menu_update(KSC_buf* screen,ksc_menu_t* menu,uintxy x,uintxy y,uint8_t 
 }
 
 #endif
+*/
+
+
+
+

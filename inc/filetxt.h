@@ -10,7 +10,7 @@
 // path: 文件完整路径
 // box_x, box_y: 文本框左上角坐标
 // 返回 0 成功, -1 失败
-int filetxt_open(KSC_buf* screen, lfs_t* lfs, const char* path, uintxy box_x, uintxy box_y);
+int filetxt_open(KSC_window* screen, lfs_t* lfs, const char* path, uintxy box_x, uintxy box_y);
 
 // 处理按键，返回 0 继续, -1 已退出
 int filetxt_update(uint8_t key);

@@ -14,7 +14,7 @@
 #define BUF_SIZE    256
 
 // ---- 静态状态 ----
-static KSC_buf*   txt_screen = NULL;
+static KSC_window*   txt_screen = NULL;
 static lfs_t*     txt_lfs = NULL;
 static lfs_file_t txt_file;
 static uintxy     txt_box_x, txt_box_y;
@@ -143,7 +143,7 @@ static void render_page(void) {
 }
 
 // ---- 公开接口 ----
-int filetxt_open(KSC_buf* screen, lfs_t* lfs, const char* path, uintxy box_x, uintxy box_y) {
+int filetxt_open(KSC_window* screen, lfs_t* lfs, const char* path, uintxy box_x, uintxy box_y) {
     if (!screen || !lfs || !path) return -1;
     if (!filetxt_can_open(path)) return -1;
 
