@@ -300,17 +300,13 @@ KSC_mes kfillcircle(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8
         return ksetpixel(screen, color, x0, y0);
     }
 
-    int left[256];
-    int i;
-    for (i = 0; i <= r; i++) left[i] = -1;
-
     int x = 0;
     int y = r;
     int d = 3 - 2 * r;
 
     while (x <= y) {
-        if (x > left[y]) left[y] = x;
-        if (y > left[x]) left[x] = y;
+        int old_x = x;
+        int old_y = y;
 
         if (d < 0) {
             d += 4 * x + 6;
@@ -319,17 +315,21 @@ KSC_mes kfillcircle(KSC_buf* screen, KSCCOLOR color, uintxy x0, uintxy y0, uint8
             y--;
         }
         x++;
-    }
 
-    for (int dy = 0; dy <= r; dy++) {
-        int dx = left[dy];
-        if (dx >= 0) {
-            int w = 2 * dx + 1;
-            kfull(screen, color, x0 - dx, y0 - dy, w, 1);
-            if (dy > 0) {
-                kfull(screen, color, x0 - dx, y0 + dy, w, 1);
-            }
+        // y下降时,上一行闭合: 画出 y=old_y 的扫描线,宽度由 old_x 决定
+        if (y < old_y) {
+            int w = 2 * old_x + 1;
+            kfull(screen, color, x0 - old_x, y0 - old_y, w, 1);
+            if (old_y > 0)
+                kfull(screen, color, x0 - old_x, y0 + old_y, w, 1);
         }
+
+        // 对称行: 总是画出 x=old_x 的扫描线,宽度由 old_y 决定
+        // 这覆盖了 rows 0..r/√2 (这些行永远不会触发 y 下降的闭合绘制)
+        int ws = 2 * old_y + 1;
+        kfull(screen, color, x0 - old_y, y0 - old_x, ws, 1);
+        if (old_x > 0)
+            kfull(screen, color, x0 - old_y, y0 + old_x, ws, 1);
     }
 
     return KSC_OK;
