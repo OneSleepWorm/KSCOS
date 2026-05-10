@@ -81,6 +81,7 @@ ksc_menu_t* filemenu_init(k_draw_device* dev,KSC_window* screen) {
         .config = &filemenu_config,
         .list   = mfile,
         .style  = style,
+        .input_func = input_get,
     };
     // menu_screen = screen;
 
@@ -293,7 +294,7 @@ void kmenu_clear(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
         return;
     }
     KSCCOLOR ncolorbk = screen->bk;
-    printf("ncolorbk:%04x\n",ncolorbk);
+    //printf("ncolorbk:%04x\n",ncolorbk);
     //覆盖旧的菜单框
     kfull(dev,screen,ncolorbk,
         0,0,screen->width,screen->height
@@ -339,8 +340,10 @@ void kmenu_draw(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
     );
 }
 void kmenu_update(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu){
-    uint8_t key = key_scan();
-    if(key == KEY_NONE) return;
+    input_t* input = menu->input_func();
+    if(input == NULL) return;
+    uint8_t key = input->key;
+    if(key == KEY_NONE) return;    
     uint8_t nsy =menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
     //覆盖旧的菜单框
     kbox(dev,screen,menu->style[2]->colorbk

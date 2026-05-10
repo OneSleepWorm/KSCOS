@@ -40,10 +40,15 @@
 extern "C" {
 #endif
 typedef int (* BOTTON_CALLBACK)(void);
-
+typedef struct {
+    uint8_t key;
+}input_t;
+extern input_t input_queue[KEY_QUEUE_SIZE];
 void key_init(void);
 uint8_t key_scan(void);
 uint8_t key_read(void);
+input_t* input_get(void);
+typedef input_t* (*INPUT_FUNC)(void);
 
 #ifdef __cplusplus
 }//extern "C"

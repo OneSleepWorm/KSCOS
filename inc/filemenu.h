@@ -22,6 +22,7 @@ typedef struct ksc_menu_t{
     ksc_style_t** style;
     Img_File* list;
     ksc_menu_config_t* config;
+    INPUT_FUNC input_func;
 }ksc_menu_t;//size:12
 
 ksc_menu_t* filemenu_init(k_draw_device* dev,KSC_window* screen);

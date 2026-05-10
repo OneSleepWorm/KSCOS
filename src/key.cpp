@@ -125,12 +125,15 @@ uint8_t key_scan(void){
 }
 
 #endif
-
-
+static input_t now_input;
 //按键读取,获取按键持续状态
 uint8_t key_read(void){
+    
     #if __BUTTON_SIMU__
-    return key_scan();
+    
+    now_input.key = key_scan();
+    
+    return 0;
     #else 
     static uint8_t lastkey= KEY_NONE;
     static uint8_t nowkey=KEY_NONE;
@@ -163,5 +166,10 @@ uint8_t key_read(void){
     return realkey;
     #endif
 }
-
+input_t* input_get(void){
+    key_read();
+    input_t* input = &now_input;
+    if(input->key == KEY_NONE) return NULL;
+    return input;
+}
 

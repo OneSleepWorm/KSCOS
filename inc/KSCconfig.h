@@ -15,6 +15,7 @@
 #define __USE_LITTLEFS__ 0
 #define __USE_KEY__ 1
 //细节配置
+#define KEY_QUEUE_SIZE 5
 #define __BUTTON_SIMU__ 1
 #define __LITTLE_END_COLOR__ 1
 
