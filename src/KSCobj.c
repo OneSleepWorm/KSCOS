@@ -1,84 +1,84 @@
 #include "../inc/KSCobj.h"
 
-void kdrawimagefile(KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y){
+void kdrawimagefile(k_draw_device* dev,KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y){
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
         const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
-        kdrawimage(screen,imgbuf,x,y,width,height);
+        kdrawimage(dev,screen,imgbuf,x,y,width,height);
     #endif
 }
 
-void kdrawimagebigfile(KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y,uint8_t scale){
+void kdrawimagebigfile(k_draw_device* dev,KSC_window* screen,Img_File* imgfile,uintxy x,uintxy y,uint8_t scale){
     if(!imgfile){return;}
     //解析图片数据
     #ifndef __USE_IMGNAME__
         const uint16_t* imgbuf = (const uint16_t*)imgfile->data+4;
         uint8_t width = *((uint8_t*)imgfile->data+3);
         uint8_t height = *((uint8_t*)imgfile->data+5);
-        kdrawimagebig(screen,imgbuf,x,y,width,height,scale);
+        kdrawimagebig(dev,screen,imgbuf,x,y,width,height,scale);
     #endif
 }
 
-void kobjdraw(KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
+void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata){
     if(!screen || !obj)return;
     // x = obj->x;
     // y = obj->y;
     if(obj->state&0x01)return;
     switch(obj->_type&_type_mask){
         case _circle:
-            kcircle(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
+            kcircle(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
             break;
         case _box:
-            kbox(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
+            kbox(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
             break;
         case _string:
-            kstring(screen,(char*)obj->data,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
+            kstring(dev,screen,(char*)obj->data,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
             break;
         case _image:
-            kdrawimagefile(screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy);
+            kdrawimagefile(dev,screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy);
             break;
         case _roundrect:
-            kroundrect(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
+            kroundrect(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
             break;
         case _fillroundrect:
-            kfillroundrect(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
+            kfillroundrect(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height,obj->d_and_r&0x1F);
             break;
         case _fillbox:
-            kfillbox(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
+            kfillbox(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->width,obj->height);
             break;
         case _fillcircle:
-            kfillcircle(screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
+            kfillcircle(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,obj->d_and_r&0x1F);
             break;
         case _line:
-            kline(screen,obj->colorck,x+obj->sdx,y+obj->sdy,x+obj->sdx+obj->width,y+obj->sdy+obj->height);
+            kline(dev,screen,obj->colorck,x+obj->sdx,y+obj->sdy,x+obj->sdx+obj->width,y+obj->sdy+obj->height);
             break;
         case _imagebig:
-            kdrawimagebigfile(screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
+            kdrawimagebigfile(dev,screen,((Img_File*)obj->data),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
             break;
         case _string_extra:
-            kstring(screen,(char*)extradata,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
+            kstring(dev,screen,(char*)extradata,x+obj->sdx,y+obj->sdy,obj->colorck,obj->colorbk);
             break;
         case _image_extra:
-            kdrawimagefile(screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy);
+            kdrawimagefile(dev,screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy);
             break;
         case _imagebig_extra:
-            kdrawimagebigfile(screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
+            kdrawimagebigfile(dev,screen,((Img_File*)extradata),x+obj->sdx,y+obj->sdy,(obj->d_and_r>>5));
             break;
         default:
             break;
     }
 }
 
-void kobjsdraw(KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num){
-    if(!screen || !obj || !extradata || !num)return;
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num){
+    if(!dev || !screen || !obj || !extradata || !num)return;
     for(uint8_t i=0;i<num;i++){
-        kobjdraw(screen,obj[i],x,y,extradata[i]);
+        kobjdraw(dev,screen,obj[i],x,y,extradata[i]);
     }
 }
-/*我想到了一个更好的方法
+/*我想到了一个更好的方法，以下均为废弃代码
 void KSC_menu_clear(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y){
     if(!screen || !menu || !menu->config) return;
     kfull(screen, screen->bk, x, y,

@@ -1,4 +1,5 @@
 #include "../inc/filetxt.h"
+#if KSC_TEXT_EDITOR
 #include "../inc/KSCfont.h"
 #include "../inc/key.h"
 
@@ -217,3 +218,4 @@ void filetxt_close(void) {
 int filetxt_is_active(void) {
     return txt_is_open;
 }
+#endif

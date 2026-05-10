@@ -2,6 +2,7 @@
 #define __FILETXT_H
 
 #include "KSCdraw.h"
+#if KSC_TEXT_EDITOR
 #include "../littlefs/lfs.h"
 
 // 打开文本文件并进入查看模式
@@ -20,5 +21,6 @@ void filetxt_close(void);
 
 // 查询是否处于文本查看状态
 int filetxt_is_active(void);
+#endif
 
 #endif

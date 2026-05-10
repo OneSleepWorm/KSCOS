@@ -55,29 +55,11 @@ typedef struct ksc_obj_t{
  * 1. 文件名需要加上_custom_label1,
  * 2. 文件属性需要加上_custom_label2
  */
-#define ksc_style_t ksc_obj_t
 
 
-typedef struct ksc_menu_config_t{
-    ku8 mdw;//菜单项宽度
-    ku8 mdh;//菜单项高度
-    ku8 menu_wnum;//菜单项行最大数量
-    ku8 menu_hnum;//菜单项列最大数量
-    ku8 menu_list_num;//菜单项列表缓冲区数量
-    ku8 menu_obj_num;//菜单项对象数量
-    ku8 menu_num;//菜单项数量
-    ku8 menu_index;//当前选中项索引
-} ksc_menu_config_t;//size:12
 
-typedef struct ksc_menu_t{
-    ksc_style_t** style;
-    Img_File* list;
-    ksc_menu_config_t* config;
-}ksc_menu_t;//size:12
-
-
-void kobjdraw(KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata);
-void kobjsdraw(KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num);
+void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata);
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num);
 /*
 void KSC_menu_draw(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 void KSC_menu_clear(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);
