@@ -8,24 +8,28 @@
 
 #define _circle 0
 #define _box 1
-#define _rect 1
 #define _string 2
 #define _image 3
 #define _roundrect 4
 #define _fillroundrect 5
 #define _fillbox 6
-#define _fillrect 6
 #define _fillcircle 7
 #define _line 8
 #define _imagebig 9
 #define _extra (1<<4)
 
+#define _rect _box
+#define _fillrect _fillbox
+
 #define _string_extra (_extra|_string)
 #define _image_extra (_extra|_image)
 #define _imagebig_extra (_extra|_imagebig)
 
-#define _type_mask (0x1F)
+#define _type_mask (0x0F)
 #define _custom_mask (0xE0)
+#define _r_mask (0x1F)
+#define _d_mask (0xE0)
+
 
 #define _custom_label1 (1<<5)
 #define _custom_label2 (1<<6)
@@ -36,17 +40,12 @@ typedef uint16_t ku16;
 
 //对象属性定义ksc_obj_t
 typedef struct ksc_obj_t{
-    KSCCOLOR colorck;//对象颜色
-    KSCCOLOR colorbk;//对象背景颜色
-
     void* data;//对象数据指针
+    KSCCOLOR colorck;//对象颜色
     ku8 width;//对象宽度
     ku8 height;//对象高度
     ku8 sdx;//对象x偏移量
     ku8 sdy;//对象y偏移量
-    
-    ku8 state;//对象状态,bit0:0,正常,1,隐藏
-    ku8 custom;//对象自定义属性
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
     ku8 _type;//对象类型
 }ksc_obj_t;//size:12
@@ -58,8 +57,8 @@ typedef struct ksc_obj_t{
 
 
 
-void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uintxy x,uintxy y,const void* extradata);
-void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t** obj,uintxy x,uintxy y,const void** extradata,uint8_t num);
+void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj);
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t** obj,uint8_t num);
 /*
 void KSC_menu_draw(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 void KSC_menu_clear(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);
