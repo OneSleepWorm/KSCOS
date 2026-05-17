@@ -11,13 +11,13 @@
 
 typedef struct {
     BOTTON_CALLBACK bottoncallback;
+    KSCCOLOR bk;
     uintxy  width;
     uintxy  height;
-    KSCCOLOR bk;
-    
-    uint8_t  Mode;
     uintxy  ssx;//屏幕左上角X轴位置
     uintxy  ssy;//屏幕左上角Y轴位置
+    uint8_t  Mode;
+    
 }KSC_window;
 typedef struct k_draw_device k_draw_device;
 typedef void (*SCR_INIT)(void);

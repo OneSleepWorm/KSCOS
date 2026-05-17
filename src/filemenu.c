@@ -14,37 +14,28 @@
 //文件名样式
 ksc_style_t menu_style0 = {
     .colorck = rred,
-    .colorbk = wwhite,
     .width   = 80,
     .height  = 10,
-    .state   = 0,
-    .custom  = 0,
     .sdx     = 1,
     .sdy     = 1,
     .d_and_r = 0,
-    ._type   = _string_extra,
+    ._type   = _string,
 };
 //文件类型样式
 ksc_style_t menu_style1 = {
     .colorck = rred,
-    .colorbk = wwhite,
     .width   = 80,
     .height  = 10,
-    .state   = 0,
-    .custom  = 0,
     .sdx     = 100,
     .sdy     = 1,
     .d_and_r = 0,
-    ._type   = _string_extra,
+    ._type   = _string,
 };
 //文件框样式
 ksc_style_t menu_style2 = {
     .colorck = bblue,
-    .colorbk = wwhite,
     .width   = 80,
     .height  = 10,
-    .state   = 0,
-    .custom  = 0,
     .sdx     = 0,
     .sdy     = 0,
     .d_and_r = 0,
@@ -293,51 +284,44 @@ void kmenu_clear(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
     if(menu == NULL || menu->config == NULL){
         return;
     }
-    KSCCOLOR ncolorbk = screen->bk;
-    //printf("ncolorbk:%04x\n",ncolorbk);
-    //覆盖旧的菜单框
-    kfull(dev,screen,ncolorbk,
-        0,0,screen->width,screen->height
-    );
+    //清除菜单框
 }
+static ksc_obj_t menu_obj_buf[30];
 
 void kmenu_draw(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
     if(menu == NULL || menu->config == NULL){
         return;
     }
-    KSCCOLOR ncolorck,ncolorbk;
     uint8_t nheight;
-    uint8_t nsx,nsy;
-    // 绘制菜单文件名
-    ncolorck = menu->style[0]->colorck;
-    ncolorbk = menu->style[0]->colorbk;
-    // nwidth = menu->style[0]->width;
-    nheight = menu->style[0]->height;
-    nsx = menu->style[0]->sdx;
+    uint8_t nsy;
+    //初始化菜单
+    uint8_t objnum = menu->config->menu_num;
+    uint8_t objidx = 0;
+    // nsx = menu->style[0]->sdx;
     nsy = menu->style[0]->sdy;
-    for(uint8_t i=0;i<menu->config->menu_num;i++){
-        kstring(dev,screen,menu->list[i].name,nsx,nsy+i*nheight,ncolorck,ncolorbk);
+    nheight = menu->style[0]->height;
+    for(objidx=0;objidx<objnum;objidx++){
+        //第一个对象是文件名,每个文件名占一行
+        menu_obj_buf[objidx] = *menu->style[0];
+        //menu_obj_buf[objidx].sdx = nsx;
+        menu_obj_buf[objidx].sdy = nsy+nheight*objidx;
+        menu_obj_buf[objidx].data = menu->list[objidx].name;
     }
-    // 绘制菜单类型
-    ncolorck = menu->style[1]->colorck;
-    ncolorbk = menu->style[1]->colorbk;
-    // nwidth = menu->style[1]->width;
-    nheight = menu->style[1]->height;
-    nsx = menu->style[1]->sdx;
+    //第二个对象是文件类型
+    // nsx = menu->style[1]->sdx;
     nsy = menu->style[1]->sdy;
-    for(uint8_t i=0;i<menu->config->menu_num;i++){
-        kstring(dev,screen,menu->list[i].type==LFS_TYPE_DIR?"DIR":"FILE"
-            ,nsx,nsy+i*nheight,ncolorck,ncolorbk);
+    nheight = menu->style[1]->height;
+    for(objidx=objnum;objidx<objnum*2;objidx++){
+        //第二个对象是文件类型,每个文件类型占一行
+        menu_obj_buf[objidx] = *menu->style[1];
+        //menu_obj_buf[objidx].sdx = nsx;
+        menu_obj_buf[objidx].sdy = nsy+nheight*(objidx-objnum);
+        menu_obj_buf[objidx].data = menu->list[objidx].type == LFS_TYPE_DIR ? "dir" : "file";
     }
-    
-    nsy = menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
-    //绘制新的菜单框
-    kbox(dev,screen,menu->style[2]->colorck
-        ,menu->style[2]->sdx
-        ,nsy
-        ,menu->style[2]->width
-        ,menu->style[2]->height
-    );
+    //第三个对象是菜单框
+    menu_obj_buf[objidx] = *menu->style[2];
+    kobjsdraw(dev,screen,menu_obj_buf,objidx+1);
+
 }
 void kmenu_update(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu){
     input_t* input = menu->input_func();
@@ -346,12 +330,6 @@ void kmenu_update(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu){
     if(key == KEY_NONE) return;    
     uint8_t nsy =menu->style[2]->sdy+menu->config->mdh*menu->config->menu_index;
     //覆盖旧的菜单框
-    kbox(dev,screen,menu->style[2]->colorbk
-        ,menu->style[2]->sdx
-        ,nsy
-        ,menu->style[2]->width
-        ,menu->style[2]->height
-    );
     //
     filemenu_update(menu, key);
     if(key != KEY_UP && key != KEY_DOWN) {

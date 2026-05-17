@@ -18,12 +18,12 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
         break;
     case _image:
         /* code */
-        kdrawimage(dev,screen,(Img_File*)obj->data,obj->sdx,obj->sdy
+        kdrawimage(dev,screen,obj->data,obj->sdx,obj->sdy
         ,obj->width,obj->height);
         break;
     case _imagebig:
         /* code */
-        kdrawimagebig(dev,screen,(Img_File*)obj->data,obj->sdx,obj->sdy
+        kdrawimagebig(dev,screen,obj->data,obj->sdx,obj->sdy
         ,obj->width,obj->height,obj->d_and_r&_d_mask);
         break;
     case _line:
@@ -54,10 +54,10 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
     }
 }
 
-void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t** obj,uint8_t num){
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num){
     if(!dev || !screen || !obj)return;
     for(uint8_t i=0;i<num;i++){
-        kobjdraw(dev,screen,obj[i]);
+        kobjdraw(dev,screen,&obj[i]);
     }
 }
 
