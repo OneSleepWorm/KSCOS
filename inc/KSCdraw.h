@@ -58,7 +58,7 @@ typedef enum KSC_mes{
 
 }KSC_mes;
 
-#define _circle 0
+
 #define _box 1
 #define _string 2
 #define _image 3
@@ -68,14 +68,10 @@ typedef enum KSC_mes{
 #define _fillcircle 7
 #define _line 8
 #define _imagebig 9
-#define _extra (1<<4)
-
+#define _circle 10
 #define _rect _box
 #define _fillrect _fillbox
 
-#define _string_extra (_extra|_string)
-#define _image_extra (_extra|_image)
-#define _imagebig_extra (_extra|_imagebig)
 
 #define _type_mask (0x0F)
 #define _custom_mask (0xE0)
