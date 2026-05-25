@@ -1,5 +1,6 @@
-.data/
-.main/
+.data
+.main
+build
 src/*.o
 littlefs/*.o
 inc/SDL3

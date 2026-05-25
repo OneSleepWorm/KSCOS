@@ -8,8 +8,9 @@
 #include "KSCdraw/littlefs/lfs_config.h"
 #include "KSCdraw/littlefs/lfs_util.h"
 #include "KSCconfig.h"
-#include "KSCobj.h"
-// #include "menu.h"
+
+
+#if __USE_KEY__
 #include "key.h"
 #include "filemenu.h"
 // #include "SDL3/SDL.h"
