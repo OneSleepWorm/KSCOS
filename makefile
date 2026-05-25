@@ -16,8 +16,7 @@ OBJS = \
 	build/KSCimg.o \
 	build/KSCfont.o \
 	build/KSCdisplay.o \
-	build/W25Q64.o \
-	build/KSCobj.o 
+	build/W25Q64.o 
 
 TARGET = $(BUILD_DIR)/master.exe
 
@@ -57,9 +56,6 @@ build/KSCdisplay.o: src/KSCdisplay.cpp | prebuild
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 build/W25Q64.o: src/W25Q64.c | prebuild
-	$(CC) $(CFLAGS) -c $< -o $@
-
-build/KSCobj.o: src/KSCobj.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:

@@ -8,7 +8,7 @@
 #include "../littlefs/lfs_config.h"
 #include "../littlefs/lfs_util.h"
 #include "KSCconfig.h"
-#include "KSCobj.h"
+
 
 #if __USE_KEY__
 #include "key.h"
