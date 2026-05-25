@@ -7,10 +7,24 @@
 #include "KSCdisplay.h"
 #include "KSCimg.h"
 #include "KSCfont.h"
-#include "KSCobj.h"
+
 #if __USE_KEY__
 #include "key.h"
 #endif
+typedef uint8_t ku8;
+typedef uint16_t ku16;
+
+//对象属性定义ksc_obj_t
+typedef struct ksc_obj_t{
+    void* data;//对象数据指针
+    KSCCOLOR colorck;//对象颜色
+    ku8 width;//对象宽度
+    ku8 height;//对象高度
+    ku8 sdx;//对象x偏移量
+    ku8 sdy;//对象y偏移量
+    ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
+    ku8 _type;//对象类型
+}ksc_obj_t;//size:12
 typedef struct KSC_window {
     ksc_obj_t* objbuf;
     KSCCOLOR bk;
@@ -22,7 +36,10 @@ typedef struct KSC_window {
     uint8_t objnum;
     
 }KSC_window;
+
 typedef struct k_draw_device k_draw_device;
+typedef struct KSC_window KSC_window;
+
 typedef void (*SCR_INIT)(void);
 typedef void (*SCR_SETCANVAS)(uintxy Gx,uintxy Gy, uintxy width,uintxy height);
 typedef void (*SCR_SETCOLORPIXELS)(const KSCCOLOR* color,uint16_t num);
@@ -41,6 +58,33 @@ typedef enum KSC_mes{
 
 }KSC_mes;
 
+#define _circle 0
+#define _box 1
+#define _string 2
+#define _image 3
+#define _roundrect 4
+#define _fillroundrect 5
+#define _fillbox 6
+#define _fillcircle 7
+#define _line 8
+#define _imagebig 9
+#define _extra (1<<4)
+
+#define _rect _box
+#define _fillrect _fillbox
+
+#define _string_extra (_extra|_string)
+#define _image_extra (_extra|_image)
+#define _imagebig_extra (_extra|_imagebig)
+
+#define _type_mask (0x0F)
+#define _custom_mask (0xE0)
+#define _r_mask (0x1F)
+#define _d_mask (0xE0)
+
+void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj);
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num);
+void kwindowdraw(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
 void kscreenmount(k_draw_device* dev);
