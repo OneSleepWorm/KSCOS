@@ -56,17 +56,18 @@ void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num){
 #endif
 
 #if __USE_ARMCC__
-extern "C" {
 void screen_init(){
     TFT_Init();
 }
-void screen_setcolorpixel(KSCCOLOR color){
-	TFT_Setcolor(color);
+void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num){
+    while(num--){
+        KSCCOLOR ncolor = *color++;
+        TFT_Setcolor(ncolor);
+    }
 }
 
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){
 	TFT_Setcanvas(Gx, Gy, Gx+width-1, Gy+height-1);
-}
 }
 
 #endif
