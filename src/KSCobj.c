@@ -1,4 +1,5 @@
 #include "../inc/KSCobj.h"
+#include "../inc/KSCdraw.h"
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;
@@ -57,8 +58,11 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num){
     if(!dev || !screen || !obj)return;
     for(uint8_t i=0;i<num;i++){
-        kobjdraw(dev,screen,&obj[i]);
+        kobjdraw(dev,screen,obj+i);
     }
 }
 
-
+void kwindowdraw(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+}

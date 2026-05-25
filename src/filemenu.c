@@ -108,12 +108,12 @@ static int filedir(ksc_menu_t* menu) {
             break;
         }
 
-        strncpy(menu->list[num].name, info.name,
-                sizeof(menu->list[num].name) - 1);
-        menu->list[num].name[sizeof(menu->list[num].name) - 1] = '\0';
-        menu->list[num].size = info.size;
-        menu->list[num].type = info.type;
-        menu->list[num].data = NULL;
+        // strncpy(menu->list[num].name, info.name,
+        //         sizeof(menu->list[num].name) - 1);
+        // menu->list[num].name[sizeof(menu->list[num].name) - 1] = '\0';
+        // menu->list[num].size = info.size;
+        // menu->list[num].type = info.type;
+        // menu->list[num].data = NULL;
         num++;
     }
 
@@ -297,7 +297,7 @@ void kmenu_draw(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
     //初始化菜单
     uint8_t objnum = menu->config->menu_num;
     uint8_t objidx = 0;
-    // nsx = menu->style[0]->sdx;
+    screen->objbuf = menu_obj_buf;
     nsy = menu->style[0]->sdy;
     nheight = menu->style[0]->height;
     for(objidx=0;objidx<objnum;objidx++){
@@ -320,7 +320,8 @@ void kmenu_draw(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu) {
     }
     //第三个对象是菜单框
     menu_obj_buf[objidx] = *menu->style[2];
-    kobjsdraw(dev,screen,menu_obj_buf,objidx+1);
+    screen->objnum = objidx+1;
+    kwindowdraw(dev,screen);
 
 }
 void kmenu_update(k_draw_device* dev,KSC_window* screen, ksc_menu_t* menu){

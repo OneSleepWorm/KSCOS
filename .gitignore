@@ -2,3 +2,4 @@
 .main/
 src/*.o
 littlefs/*.o
+inc/SDL3

@@ -3,6 +3,7 @@
 
 #include "KSCobj.h"
 #include "KSCimg.h"
+#include "key.h"
 
 #define ksc_style_t ksc_obj_t
 

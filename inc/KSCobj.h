@@ -2,8 +2,10 @@
 #define KSCobj_h
 
 #include "KSCconfig.h"
-#include "KSCdraw.h"
 #include "KSCimg.h"
+
+typedef struct k_draw_device k_draw_device;
+typedef struct KSC_window KSC_window;
 
 
 #define _circle 0
@@ -59,6 +61,7 @@ typedef struct ksc_obj_t{
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj);
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num);
+void kwindowdraw(k_draw_device* dev,KSC_window* screen);
 /*
 void KSC_menu_draw(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);
 void KSC_menu_clear(KSC_window* screen,ksc_menu_t* menu,uintxy x,uintxy y);

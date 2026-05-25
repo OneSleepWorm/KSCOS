@@ -138,15 +138,15 @@ void imgchange(const uint8_t* imgbuf,
 #define RightLower 0x04
 #define LeftLower 0x08
 
-void window_setcanvas(KSC_window* screen, uintxy x, uintxy y, uintxy w, uintxy h){
-    uintxy rx = x + screen->ssx;
-    uintxy ry = y + screen->ssy;
-    window_setcanvas(screen, rx, ry, w, h);
-}
+// void window_setcanvas(KSC_window* screen, uintxy x, uintxy y, uintxy w, uintxy h){
+//     uintxy rx = x + screen->ssx;
+//     uintxy ry = y + screen->ssy;
+//     window_setcanvas(screen, rx, ry, w, h);
+// }
 
 KSC_mes ksetpixel(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy x, uintxy y){
     if (!screen) return KSC_ERR;
-    window_setcanvas(screen, x, y, 1, 1);
+    dev->setwindows(dev,screen, x, y, 1, 1);
     dev->setcolorpixels(&color, 1);
     return KSC_OK;
 }
