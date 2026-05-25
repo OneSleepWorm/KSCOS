@@ -9,7 +9,7 @@
  * @Copyright: 123456789@qq.com
  */
 #include "../inc/TFTDriver.h"
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 #include "stm32f1xx_hal.h"
 
 //#include "stm32f10x.h"

@@ -1,10 +1,13 @@
 #ifndef __SERIAL_H
 #define __SERIAL_H
 
+#include "KSCconfig.h"
+
+#if __USE_UART__ == 1
 //#include "stdio.h"
 #include "main.h"
 #include "stdint.h"
-#include "KSCconfig.h"
+
 
 extern uint8_t connect_flag;
 extern uint32_t connect_write_num;
@@ -30,6 +33,12 @@ uint8_t* kfgetc_s(uint16_t size);
 #define kgetbyte serial_getbyte
 #define kfgetc serial_fgetc
 
-// #define kfgetc_s(pdata) do{HAL_Delay(1);(pdata) = kfgetc();}while((pdata) == NULL)
+#endif
+
+#if __USE_PC__
+
+#define kfget fgetc
+#define kprintf printf
+#endif
 
 #endif

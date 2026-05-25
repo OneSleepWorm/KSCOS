@@ -207,6 +207,7 @@ const uint8_t Font_7X7[665] = {
 
 };
 
+
 #endif
 
 #if __USE_CHINESE__ > 0
@@ -225,7 +226,8 @@ const uint8_t* Get7X7(char ch)
 {   
     return Font_7X7 + (ch-0x20) * 7;
 }
-KSC_Font1 Systemfont0 = {Get7X7,7,7};
+KSC_Font1 Systemfont0 = {Get7X7,8,7};
+
 #endif
 
 #if SYSTEMFONT == 8

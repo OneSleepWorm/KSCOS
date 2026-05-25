@@ -2,7 +2,7 @@
 #define _DRIVER_GUI_H_
 
 #include "KSCconfig.h"
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 // 颜色宏定义
 #define RED 0xF800
 #define GREEN 0x07E0

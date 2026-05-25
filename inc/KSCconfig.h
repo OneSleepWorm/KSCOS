@@ -2,68 +2,77 @@
 #define KSCconfig_h
 
 //编译器系统配置
-//#define __USE_GCC__ 
-#define __USE_ARMCC__ 
+#define __USE_PC__ 1
+#define __USE_ARMCC__ 0
+#define __USE_ESP32__ 0
 
 //program config
-#define __USE_CHINESE__ 1
-#define __USE_FLASH__ 1
-#define __USE_UART__ 1
-#define __USE_PRINTF__ 0
+#define __USE_LCD__ 1
+#define USE_NOT_BUFFER 1
+#define __USE_CHINESE__ 0
+#define __USE_FLASH__ 0
+#define __USE_UART__ 0
+#define __USE_LITTLEFS__ 0
+#define __USE_KEY__ 0
+//细节配置
+#define KEY_QUEUE_SIZE 5
+#define __BUTTON_SIMU__ 1
+#define __LITTLE_END_COLOR__ 1
 
-//buffer config
-#define TFTx 240
-#define TFTy 320
-
-//small config 
-//#define __USE_CLEAR_SCRREN__ 
-
-
-//data config
-#define SYSTEMFONT 8
-#define SYSTEMCHINESEFONT 16
-
-#define SYSTEMCOLOR0 BLACK
-#define SYSTEMCOLOR1 BLUE
-#define SYSTEMCOLOR2 GREEN
-#define SYSTEMCOLOR3 RED
-
-#define MAX_FLASH_WRITE_SIZE 256
-
-#include <stdint.h>
-
-#ifdef __USE_GCC__
-#include <stdint.h>
-#include <graphics.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <time.h>
-#include <windows.h>
-#define K_malloc(size) malloc(size)
-#define KSCCOLOR uint32_t
-//extern uint8_t publicdatabuf[FLASH_BUFFER_SIZE];
-
-#endif
-
-#ifdef __USE_ARMCC__
-
-#include <stdlib.h>
-#define K_malloc(size) malloc(size)
-#define KSCCOLOR uint16_t
-#endif
-
-//onlywrite config
+#define COLORBIT 2
 #define COLORBYTE 2
-#define CONNECT_BUFFER_SIZE 257
-#define FLASH_BUFFER_SIZE 257
+
+#define TFTx 240
+#define TFTy 160
+#define MAX_INPUT_SIZE 255
+#define _STATICBUF_SIZE 512
+
 #define uintxy uint16_t
 #define intxy int16_t
-extern uint8_t connect_publicdata[CONNECT_BUFFER_SIZE];
-extern uint8_t publicdatabuf[FLASH_BUFFER_SIZE];
-extern uint8_t testnum;
-void ledturn(void);
+#define KSCCOLOR uint16_t
 
+//data config
+#define SYSTEMFONT 7
+#define SYSTEMCHINESEFONT 16
 
+#define SYSTEMCOLOR0 0xFFFF
+#define SYSTEMCOLOR1 0x0000
+#define SYSTEMCOLOR2 0x001F
+#define SYSTEMCOLOR3 0xF800
+
+#include <stdint.h>
+
+#if __USE_PC__
+#include <stdlib.h>
+#include <stdio.h>
+#define log(...) 0
+#define __USE_INPUT_KEY_SIMU__
+#endif
+
+#if __USE_ARMCC__
+#include <stdlib.h>
+#define __USE_INPUT_KEY__
+#endif
+
+#if __USE_ESP32__
+#include "esp_err.h"
+#include "esp_log.h"
+
+#define PPTAG "KSCdraw"
+#define log(...) ESP_LOGW(PPTAG, __VA_ARGS__)
+#define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
+#endif
+
+#if __LITTLE_END_COLOR__ == 0
+#define rred 0xF100
+#define bblue 0x001F
+#define ggreen 0x07E0
+#else
+#define rred 0x00F1
+#define bblue 0x1F00
+#define ggreen 0xE007
+#define bblack 0x0000
+#define wwhite 0xFFFF
+#endif
 
 #endif

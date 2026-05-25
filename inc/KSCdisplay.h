@@ -2,16 +2,20 @@
 #define __KSC_DISPLAY_H__
 
 #include "KSCconfig.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#ifdef __USE_ARMCC__
+#if __USE_ARMCC__
 #include "TFTDriver.h"
 #endif
 
 void screen_init(void);
-void screen_setcolorpixel(KSCCOLOR color);
+void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num);
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height);
-// void setPix(uint8_t _pix);
-// uint8_t getPix();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
