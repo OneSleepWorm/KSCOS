@@ -7,12 +7,11 @@
 #include "KSCdisplay.h"
 #include "KSCimg.h"
 #include "KSCfont.h"
-#include "key.h"
 #include "KSCobj.h"
-
-
+#if __USE_KEY__
+#include "key.h"
+#endif
 typedef struct KSC_window {
-    BOTTON_CALLBACK bottoncallback;
     ksc_obj_t* objbuf;
     KSCCOLOR bk;
     uintxy  width;
