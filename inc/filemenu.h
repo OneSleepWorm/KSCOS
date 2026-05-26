@@ -1,7 +1,6 @@
 #ifndef _MENU_H_
 #define _MENU_H_
 
-#include "KSCobj.h"
 #include "KSCimg.h"
 #include "key.h"
 

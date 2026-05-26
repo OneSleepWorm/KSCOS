@@ -23,11 +23,19 @@ typedef struct ksc_obj_t{
     ku8 sdx;//对象x偏移量
     ku8 sdy;//对象y偏移量
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
-    ku8 _type;//对象类型
+    ku8 _type;//对象类型和状态 低4位为类型，高4位为状态
 }ksc_obj_t;//size:12
+
+typedef struct ksc_dirty_rect{
+    ku8 x;
+    ku8 y;
+    ku8 width;
+    ku8 height;//脏矩形
+}ksc_dirty_rect;
 typedef struct KSC_window {
     BOTTON_CALLBACK bottoncallback;
-    ksc_obj_t* objbuf;
+    ksc_obj_t* objbuf;//对象缓冲区
+    ksc_obj_t** objptr;//对象指针
     KSCCOLOR bk;
     uintxy  width;
     uintxy  height;
@@ -35,7 +43,9 @@ typedef struct KSC_window {
     uintxy  ssy;//屏幕左上角Y轴位置
     uint8_t  Mode;
     uint8_t objnum;
-    
+    uint8_t objptrnum;//对象指针数量
+    ksc_dirty_rect* dirty_rect_buf;//脏矩形
+    uint8_t dirty_rect_num;//脏矩形数量
 }KSC_window;
 
 typedef struct k_draw_device k_draw_device;
@@ -75,12 +85,18 @@ typedef enum KSC_mes{
 
 
 #define _type_mask (0x0F)
+#define _state_mask (0xF0)
 #define _custom_mask (0xE0)
 #define _r_mask (0x1F)
 #define _d_mask (0xE0)
 
-void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj);
-void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num);
+#define _waitingdraw 0x00//等待绘制
+#define _drawed 0xF0//已绘制
+
+
+void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
+void kobjptrdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t** objptr,uint8_t num);
 void kwindowdraw(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 

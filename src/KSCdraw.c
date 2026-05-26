@@ -465,14 +465,18 @@ KSC_mes kstringchinese(k_draw_device* dev,KSC_window* screen, const char* str, u
 }
 #endif
 
-void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
+void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;
-    switch (obj->_type&_type_mask)
+    uint8_t type = obj->_type;
+    if(type&_state_mask == _drawed)return;
+    switch (type&_type_mask)
     {
-    case _circle:
+    case _circle: {
         /* code */
-        kcircle(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width);
+        uint8_t r = obj->d_and_r&_r_mask;
+        kcircle(dev,screen,obj->colorck,obj->sdx+r,obj->sdy+r,r);
         break;
+    }
     case _box:
         /* code */
         kbox(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width,obj->height);
@@ -496,39 +500,82 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
         kline(dev,screen,obj->colorck,obj->sdx,obj->sdy
             ,obj->width,obj->height);
         break;
-    case _fillcircle:
+    case _fillcircle: {
         /* code */
-        kfillcircle(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width);
+        uint8_t r = obj->d_and_r&_r_mask;
+        kfillcircle(dev,screen,obj->colorck,obj->sdx+r,obj->sdy+r,r);
         break;
+    }
     case _fillbox:
         /* code */
         kfillbox(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width,obj->height);
         break;
-    case _roundrect:
+    case _roundrect: {
         /* code */
+        uint8_t r = obj->d_and_r&_r_mask;
         kroundrect(dev,screen,obj->colorck,obj->sdx,obj->sdy
-            ,obj->width,obj->height,obj->_type&_r_mask);
+            ,obj->width,obj->height,r);
         break;
+    }
     case _fillroundrect:
         /* code */
         kfillroundrect(dev,screen,obj->colorck,obj->sdx,obj->sdy
-            ,obj->width,obj->height,obj->_type&_r_mask);
+            ,obj->width,obj->height,obj->d_and_r&_r_mask);
         break;
     default:
         break;
     }
+    type |= _drawed;
+    obj->_type = type;
 }
 
-void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num){
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num){
     if(!dev || !screen || !obj)return;
     for(uint8_t i=0;i<num;i++){
         kobjdraw(dev,screen,obj+i);
     }
 }
-
-void kwindowdraw(k_draw_device* dev,KSC_window* screen){
-    if(!dev || !screen)return;
-    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+void kobjptrdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t** objptr,uint8_t num){
+    if(!dev || !screen || !objptr)return;
+    for(uint8_t i=0;i<num;i++){
+        kobjdraw(dev,screen,objptr[i]);
+    }
 }
+
+//绘制屏幕
+//mode:1-绘制对象缓冲区,2-绘制对象指针
+void kscreendraw(k_draw_device* dev,KSC_window* screen,uint8_t mode){
+    if(!dev || !screen)return;
+    switch (mode)
+    {
+        case 1:
+            kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+            break;
+        case 2:
+            kobjptrdraw(dev,screen,screen->objptr,screen->objptrnum);
+            break;
+        default:
+            break;
+    }
+}
+
+void kscreenupdate(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_num)return;
+    //遍历对象是否被脏矩形覆盖
+    for(uint8_t i=0;i<screen->dirty_rect_num;i++){
+        for(uint8_t j=0;j<screen->objnum;j++){
+            
+        }
+    }
+}
+
+void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_num)return;
+
+    return;
+}
+
 
 #endif
