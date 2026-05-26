@@ -4,9 +4,9 @@
 #include "KSCdraw.h"
 #include "cmd.h"
 #include "W25Q64.h"
-#include "KSCdraw/littlefs/lfs.h"
-#include "KSCdraw/littlefs/lfs_config.h"
-#include "KSCdraw/littlefs/lfs_util.h"
+#include "../littlefs/lfs.h"
+#include "../littlefs/lfs_config.h"
+#include "../littlefs/lfs_util.h"
 #include "KSCconfig.h"
 
 

@@ -468,7 +468,7 @@ KSC_mes kstringchinese(k_draw_device* dev,KSC_window* screen, const char* str, u
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;
     uint8_t type = obj->_type;
-    if(type&_state_mask == _drawed)return;
+    if((type & _state_mask) == _drawed)return;
     switch (type&_type_mask)
     {
     case _circle: {
@@ -542,39 +542,80 @@ void kobjptrdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t** objptr,uint8_
     }
 }
 
-//绘制屏幕
-//mode:1-绘制对象缓冲区,2-绘制对象指针
-void kscreendraw(k_draw_device* dev,KSC_window* screen,uint8_t mode){
-    if(!dev || !screen)return;
-    switch (mode)
-    {
-        case 1:
-            kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
-            break;
-        case 2:
-            kobjptrdraw(dev,screen,screen->objptr,screen->objptrnum);
-            break;
-        default:
-            break;
-    }
+static uint8_t kobj_intersects(ksc_obj_t* obj,ksc_dirty_rect* rect){
+    return (obj->sdx < rect->x + rect->width &&
+            obj->sdx + obj->width > rect->x &&
+            obj->sdy < rect->y + rect->height &&
+            obj->sdy + obj->height > rect->y) ? 1 : 0;
 }
 
 void kscreenupdate(k_draw_device* dev,KSC_window* screen){
     if(!dev || !screen)return;
-    if(!screen->dirty_rect_num)return;
-    //遍历对象是否被脏矩形覆盖
+    if(!screen->dirty_rect_num || !screen->objbuf)return;
+
     for(uint8_t i=0;i<screen->dirty_rect_num;i++){
+        ksc_dirty_rect* rect = &screen->dirty_rect_buf[i];
+
+        kfull(dev,screen,screen->bk,rect->x,rect->y,rect->width,rect->height);
+
         for(uint8_t j=0;j<screen->objnum;j++){
-            
+            ksc_obj_t* obj = &screen->objbuf[j];
+            if(kobj_intersects(obj,rect)){
+                obj->_type &= _type_mask;
+            }
         }
+    }
+
+    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+}
+
+static uint8_t krect_should_merge(ksc_dirty_rect* a,ksc_dirty_rect* b,uint8_t mode){
+    switch(mode){
+    case 1:{
+        uint8_t x = a->x < b->x ? a->x : b->x;
+        uint8_t y = a->y < b->y ? a->y : b->y;
+        uint8_t w = (a->x + a->width > b->x + b->width ? a->x + a->width : b->x + b->width) - x;
+        uint8_t h = (a->y + a->height > b->y + b->height ? a->y + a->height : b->y + b->height) - y;
+        return (uint16_t)w * h <= (uint16_t)a->width * a->height + (uint16_t)b->width * b->height;
+    }
+    case 2:
+    case 3:
+        return (a->x <= b->x + b->width && b->x <= a->x + a->width &&
+                a->y <= b->y + b->height && b->y <= a->y + a->height);
+    default:
+        return 0;
     }
 }
 
-void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen){
-    if(!dev || !screen)return;
-    if(!screen->dirty_rect_num)return;
+static ksc_dirty_rect krect_union(ksc_dirty_rect* a,ksc_dirty_rect* b){
+    ksc_dirty_rect r;
+    r.x = a->x < b->x ? a->x : b->x;
+    r.y = a->y < b->y ? a->y : b->y;
+    r.width  = (a->x + a->width  > b->x + b->width  ? a->x + a->width  : b->x + b->width) - r.x;
+    r.height = (a->y + a->height > b->y + b->height ? a->y + a->height : b->y + b->height) - r.y;
+    return r;
+}
 
-    return;
+void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen,uint8_t mode){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_buf || screen->dirty_rect_num < 2)return;
+    if(mode == 0 || mode > 3)return;
+
+    uint8_t passes = (mode == 3) ? 2 : 1;
+    ksc_dirty_rect* buf = screen->dirty_rect_buf;
+
+    for(uint8_t p = 0;p < passes;p++){
+        for(uint8_t i = 0;i < screen->dirty_rect_num;i++){
+            for(uint8_t j = i + 1;j < screen->dirty_rect_num;j++){
+                if(krect_should_merge(&buf[i],&buf[j],mode)){
+                    buf[i] = krect_union(&buf[i],&buf[j]);
+                    screen->dirty_rect_num--;
+                    buf[j] = buf[screen->dirty_rect_num];
+                    j--;
+                }
+            }
+        }
+    }
 }
 
 

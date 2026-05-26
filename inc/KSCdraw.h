@@ -96,8 +96,9 @@ typedef enum KSC_mes{
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
-void kobjptrdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t** objptr,uint8_t num);
-void kwindowdraw(k_draw_device* dev,KSC_window* screen);
+
+void kscreenupdate(k_draw_device* dev,KSC_window* screen);
+void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen,uint8_t mode);
 // 更新kinitscreen函数声明，添加背景色参数
 
 void kscreenmount(k_draw_device* dev);
