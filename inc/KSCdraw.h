@@ -98,7 +98,9 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
 
 void kscreenupdate(k_draw_device* dev,KSC_window* screen);
-void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen,uint8_t mode);
+void kdirtyrect_add(k_draw_device* dev,KSC_window* screen,uint8_t x,uint8_t y,uint8_t width,uint8_t height);
+void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
+void kdirtyrect_del(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
 void kscreenmount(k_draw_device* dev);

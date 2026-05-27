@@ -467,9 +467,7 @@ KSC_mes kstringchinese(k_draw_device* dev,KSC_window* screen, const char* str, u
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;
-    uint8_t type = obj->_type;
-    if((type & _state_mask) == _drawed)return;
-    switch (type&_type_mask)
+    switch (obj->_type&_type_mask)
     {
     case _circle: {
         /* code */
@@ -525,21 +523,31 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     default:
         break;
     }
-    type |= _drawed;
-    obj->_type = type;
+    obj->_type |= _drawed;
 }
 
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num){
     if(!dev || !screen || !obj)return;
     for(uint8_t i=0;i<num;i++){
+        if((obj+i)->_type & _drawed)continue;
         kobjdraw(dev,screen,obj+i);
     }
 }
-void kobjptrdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t** objptr,uint8_t num){
-    if(!dev || !screen || !objptr)return;
-    for(uint8_t i=0;i<num;i++){
-        kobjdraw(dev,screen,objptr[i]);
-    }
+
+void kdirtyrect_add(k_draw_device* dev,KSC_window* screen,uint8_t x,uint8_t y,uint8_t width,uint8_t height){
+    if(!dev || !screen)return;
+    ksc_dirty_rect rect = {x,y,width,height};
+    screen->dirty_rect_buf[screen->dirty_rect_num++] = rect;
+}
+void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
+    if(!dev || !screen || !obj)return;
+    ksc_dirty_rect rect = {obj->sdx,obj->sdy,obj->width,obj->height};
+    screen->dirty_rect_buf[screen->dirty_rect_num++] = rect;
+}
+
+void kdirtyrect_del(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    screen->dirty_rect_num = 0;
 }
 
 static uint8_t kobj_intersects(ksc_obj_t* obj,ksc_dirty_rect* rect){
@@ -549,25 +557,7 @@ static uint8_t kobj_intersects(ksc_obj_t* obj,ksc_dirty_rect* rect){
             obj->sdy + obj->height > rect->y) ? 1 : 0;
 }
 
-void kscreenupdate(k_draw_device* dev,KSC_window* screen){
-    if(!dev || !screen)return;
-    if(!screen->dirty_rect_num || !screen->objbuf)return;
 
-    for(uint8_t i=0;i<screen->dirty_rect_num;i++){
-        ksc_dirty_rect* rect = &screen->dirty_rect_buf[i];
-
-        kfull(dev,screen,screen->bk,rect->x,rect->y,rect->width,rect->height);
-
-        for(uint8_t j=0;j<screen->objnum;j++){
-            ksc_obj_t* obj = &screen->objbuf[j];
-            if(kobj_intersects(obj,rect)){
-                obj->_type &= _type_mask;
-            }
-        }
-    }
-
-    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
-}
 
 static uint8_t krect_should_merge(ksc_dirty_rect* a,ksc_dirty_rect* b,uint8_t mode){
     switch(mode){
@@ -618,5 +608,26 @@ void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen,uint8_t mode){
     }
 }
 
+//更新屏幕:合并脏矩形+绘制脏矩形+重绘对象+删除脏矩形
+void kscreenupdate(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_num || !screen->objbuf)return;
+    kdirtyrectmerge(dev,screen,screen->Mode);
+    for(uint8_t i=0;i<screen->dirty_rect_num;i++){
+        ksc_dirty_rect* rect = &screen->dirty_rect_buf[i];
+
+        kfull(dev,screen,screen->bk,rect->x,rect->y,rect->width,rect->height);
+
+        for(uint8_t j=0;j<screen->objnum;j++){
+            ksc_obj_t* obj = &screen->objbuf[j];
+            if(kobj_intersects(obj,rect)){
+                obj->_type &= _type_mask;
+            }
+        }
+    }
+
+    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+    kdirtyrect_del(dev,screen);
+}
 
 #endif

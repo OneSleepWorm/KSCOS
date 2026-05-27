@@ -43,7 +43,6 @@ int main(void){
   drect[0]=(ksc_dirty_rect){20,20,10,50};
   drect[1]=(ksc_dirty_rect){20,40,60,50};
   screen.dirty_rect_num=2;
-  kdirtyrectmerge(&dev,&screen,2);
   kscreenupdate(&dev,&screen);
 
   while(1){
