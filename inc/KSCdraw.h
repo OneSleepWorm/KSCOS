@@ -25,7 +25,7 @@ typedef struct ksc_obj_t{
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
     ku8 _type;//对象类型和状态 低4位为类型，高4位为状态
 }ksc_obj_t;//size:12
-
+typedef ksc_obj_t KSC_obj_t;
 typedef struct ksc_dirty_rect{
     ku8 x;
     ku8 y;
@@ -80,6 +80,7 @@ typedef enum KSC_mes{
 #define _line 8
 #define _imagebig 9
 #define _circle 10
+#define _char 11
 #define _rect _box
 #define _fillrect _fillbox
 
@@ -96,14 +97,16 @@ typedef enum KSC_mes{
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
+void kobjsdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);//强制绘制多个对象
 
+void kscreendraw(k_draw_device* dev,KSC_window* screen);
 void kscreenupdate(k_draw_device* dev,KSC_window* screen);
 void kdirtyrect_add(k_draw_device* dev,KSC_window* screen,uint8_t x,uint8_t y,uint8_t width,uint8_t height);
 void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kdirtyrect_del(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
-void kscreenmount(k_draw_device* dev);
+void kdevmount(k_draw_device* dev);
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
 void kscreenfree(k_draw_device* dev,KSC_window* screen);
 

@@ -16,7 +16,8 @@ OBJS = \
 	build/KSCimg.o \
 	build/KSCfont.o \
 	build/KSCdisplay.o \
-	build/W25Q64.o 
+	build/W25Q64.o \
+	build/filetxt.o
 
 TARGET = $(BUILD_DIR)/master.exe
 
@@ -57,6 +58,9 @@ build/KSCdisplay.o: src/KSCdisplay.cpp | prebuild
 
 build/W25Q64.o: src/W25Q64.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
+
+build/filetxt.o: src/filetxt.c | prebuild
+		$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"

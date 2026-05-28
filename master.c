@@ -17,8 +17,14 @@ ksc_obj_t objbox(uint8_t x,uint8_t y,uint8_t width,uint8_t height){
     };
 }
 
+char txt_big_data[700]="Key design decisions:\
+- **Static memory**: A single `static uint8_t draw_buf[_STATICBUF_SIZE]` (512 bytes) in KSCdraw.c serves all temporary buffer needs (`kfull`, `kimagebin`, `kchar`). \
+These operations are mutually exclusive (no reentrancy needed), so a single static buffer eliminates heap allocation overhead.\
+- **Fast paths**: Horizontal and vertical lines are detected in `kline` and delegated to `kfull` for batch pixel writes, avoiding per-pixel `ksetpixel` overhead.\
+- `kfillcircle` uses a fixed-size `int left[256]` stack array (no VLA) for portability.";
+
 int main(void){
-    kscreenmount(&dev);
+    kdevmount(&dev);
   static ksc_obj_t objb[20];
   static ksc_dirty_rect drect[5];
   KSC_window screen={
@@ -39,14 +45,19 @@ int main(void){
   objb[2]=objbox(0,35,30,30);
   objb[3]=objbox(35,35,30,30);
   kobjsdraw(&dev,&screen,screen.objbuf,4);
-  kfull(&dev,&screen,wwhite,0,0,240,160);
-  drect[0]=(ksc_dirty_rect){20,20,10,50};
-  drect[1]=(ksc_dirty_rect){20,40,60,50};
-  screen.dirty_rect_num=2;
-  kscreenupdate(&dev,&screen);
+  KSC_window txt_screen=txtscreeninit(&dev);
+//   kfull(&dev,&txt_screen,rred,0,0,100,100);
+ char txt_data[13]="Hello World!";
+  k_txt_config txt_config=txtconfig_set(txt_big_data);
+  
+  
+
 
   while(1){
-    //kscreenupdate(&dev,&screen);
+    sleep(2);
+    txtdataupdate(&txt_screen,&txt_config);
+
+    kscreendraw(&dev,&txt_screen);
   }
     return 0;
 }

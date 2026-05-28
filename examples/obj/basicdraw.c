@@ -7,7 +7,7 @@ k_draw_device dev={
 };
 
 int main(void){
-    kscreenmount(&dev);
+    kdevmount(&dev);
 
   KSC_window screen={
       .ssx=0,

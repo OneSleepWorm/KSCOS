@@ -2,25 +2,21 @@
 #define __FILETXT_H
 
 #include "KSCdraw.h"
-#if KSC_TEXT_EDITOR
-#include "../littlefs/lfs.h"
+#include "KSCconfig.h"
+#if __USE_TEXT__
 
-// 打开文本文件并进入查看模式
-// screen: 屏幕缓冲区
-// lfs: 已 mount 的 littlefs 实例
-// path: 文件完整路径
-// box_x, box_y: 文本框左上角坐标
-// 返回 0 成功, -1 失败
-int filetxt_open(KSC_window* screen, lfs_t* lfs, const char* path, uintxy box_x, uintxy box_y);
+typedef struct k_txt_config{
+    char* data;
+    uint16_t lenmax;
+    uint16_t index;
+}k_txt_config;
 
-// 处理按键，返回 0 继续, -1 已退出
-int filetxt_update(uint8_t key);
+k_txt_config txtconfig_set(char* data);
+KSC_window txtscreeninit(k_draw_device* dev);
+void txtdataupdate(KSC_window* screen,k_txt_config* config);
 
-// 关闭文件并清理状态
-void filetxt_close(void);
 
-// 查询是否处于文本查看状态
-int filetxt_is_active(void);
+
 #endif
 
 #endif
