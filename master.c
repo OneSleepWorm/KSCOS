@@ -1,14 +1,28 @@
 #include "inc/master.h"
 
-k_draw_device dev={
-    .init=screen_init,
-    .setcanvas=screen_setcanvas,
-    .setcolorpixels=screen_setcolorpixels,
-};
+
+
+ksc_obj_t objbox(uint8_t x,uint8_t y,uint8_t width,uint8_t height){
+    return (ksc_obj_t){
+        .sdx=x,
+        .sdy=y,
+        .width=width,
+        .height=height,
+        .colorck=rred,
+        ._type=_box,
+    };
+}
+
+char txt_big_data[700]="Key design decisions:\
+- **Static memory**: A single `static uint8_t draw_buf[_STATICBUF_SIZE]` (512 bytes) in KSCdraw.c serves all temporary buffer needs (`kfull`, `kimagebin`, `kchar`). \
+These operations are mutually exclusive (no reentrancy needed), so a single static buffer eliminates heap allocation overhead.\
+- **Fast paths**: Horizontal and vertical lines are detected in `kline` and delegated to `kfull` for batch pixel writes, avoiding per-pixel `ksetpixel` overhead.\
+- `kfillcircle` uses a fixed-size `int left[256]` stack array (no VLA) for portability.";
 
 int main(void){
-    kscreenmount(&dev);
-
+   k_draw_device* devp=k_draw_device_init();
+  static ksc_obj_t objb[20];
+  static ksc_dirty_rect drect[5];
   KSC_window screen={
       .ssx=0,
       .ssy=0,
@@ -17,34 +31,20 @@ int main(void){
       .bk=wwhite,
   };
 
-  kfull(&dev,&screen,wwhite,0,0,240,160);
-
-  kstring(&dev,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
-
-  kline(&dev,&screen,bblue,5,20,100,20);
-  kstring(&dev,&screen,"kline",5,22,bblue,wwhite);
-
-  kbox(&dev,&screen,rred,5,35,30,30);
-  kstring(&dev,&screen,"kbox",5,68,rred,wwhite);
-
-  kfull(&dev,&screen,ggreen,5,78,30,30);
-  kstring(&dev,&screen,"kfillbox",5,110,ggreen,wwhite);
-
-  kcircle(&dev,&screen,bblack,75,50,15);
-  kstring(&dev,&screen,"kcircle",55,68,bblack,wwhite);
-
-  kfillcircle(&dev,&screen,bblue,75,95,15);
-  kstring(&dev,&screen,"kfillcircle",55,112,bblue,wwhite);
-
-  kroundrect(&dev,&screen,rred,120,20,50,40,8);
-  kstring(&dev,&screen,"kroundrect",115,62,rred,wwhite);
-
-  kfillroundrect(&dev,&screen,ggreen,120,78,50,40,8);
-  kstring(&dev,&screen,"kfillroundrect",110,120,ggreen,wwhite);
-
-  kstring(&dev,&screen,"Hello World!",120,140,bblack,wwhite);
+  kfull(devp,&screen,wwhite,0,0,240,160);
+  objb[0]=objbox(0,0,30,30);
+  objb[1]=objbox(35,0,30,30);
+  objb[2]=objbox(0,35,30,30);
+  objb[3]=objbox(35,35,30,30);
+  printf("app num=%d\n",ksc_app_list());
+//   kobjsdraw(devp,&screen,screen.objbuf,4);
+  ksc_app* txt_app = ksc_app_init("txt",txt_big_data);
+  txt_app->kupdate(txt_app,txt_big_data);
 
   while(1){
+    sleep(2);
+    txt_app->kupdate(txt_app,NULL);
+    // txtdataupdate();
 
   }
     return 0;
