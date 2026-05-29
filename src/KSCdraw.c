@@ -19,7 +19,7 @@ void k_window_setcanvas(k_draw_device* dev,KSC_window* screen,uintxy Gx,uintxy G
     dev->setcanvas(Gx,Gy,width,height);
 }
 
-
+static k_draw_device sys_dev;
 static uint8_t draw_buf[_STATICBUF_SIZE];
 
 static inline intxy _abs(intxy x) {
@@ -154,7 +154,23 @@ KSC_mes ksetpixel(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy 
 void kdevmount(k_draw_device* dev){
     dev->init();
     dev->setwindows=k_window_setcanvas;
+    sys_dev=*dev;
 }
+
+k_draw_device* k_draw_device_init(void){
+    sys_dev.init=screen_init;
+    sys_dev.setcanvas=screen_setcanvas;
+    sys_dev.setcolorpixels=screen_setcolorpixels;
+    sys_dev.init();
+    sys_dev.setwindows=k_window_setcanvas;
+    return &sys_dev;
+}
+
+k_draw_device* k_draw_device_find(const char* app_name){
+    return &sys_dev;
+}
+
+
 
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOLOR bk){
     KSC_window* screen = (KSC_window*)malloc(sizeof(KSC_window));
@@ -464,6 +480,10 @@ KSC_mes kstringchinese(k_draw_device* dev,KSC_window* screen, const char* str, u
     return KSC_OK;
 }
 #endif
+void kscreenclear(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    kfull(dev,screen,screen->bk,0,0,screen->width,screen->height);
+}
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;

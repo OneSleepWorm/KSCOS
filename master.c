@@ -1,10 +1,6 @@
 #include "inc/master.h"
 
-k_draw_device dev={
-    .init=screen_init,
-    .setcanvas=screen_setcanvas,
-    .setcolorpixels=screen_setcolorpixels,
-};
+
 
 ksc_obj_t objbox(uint8_t x,uint8_t y,uint8_t width,uint8_t height){
     return (ksc_obj_t){
@@ -24,7 +20,7 @@ These operations are mutually exclusive (no reentrancy needed), so a single stat
 - `kfillcircle` uses a fixed-size `int left[256]` stack array (no VLA) for portability.";
 
 int main(void){
-    kdevmount(&dev);
+   k_draw_device* devp=k_draw_device_init();
   static ksc_obj_t objb[20];
   static ksc_dirty_rect drect[5];
   KSC_window screen={
@@ -39,25 +35,21 @@ int main(void){
       .objnum=4,
   };
 
-  kfull(&dev,&screen,wwhite,0,0,240,160);
+  kfull(devp,&screen,wwhite,0,0,240,160);
   objb[0]=objbox(0,0,30,30);
   objb[1]=objbox(35,0,30,30);
   objb[2]=objbox(0,35,30,30);
   objb[3]=objbox(35,35,30,30);
-  kobjsdraw(&dev,&screen,screen.objbuf,4);
-  KSC_window txt_screen=txtscreeninit(&dev);
-//   kfull(&dev,&txt_screen,rred,0,0,100,100);
- char txt_data[13]="Hello World!";
-  k_txt_config txt_config=txtconfig_set(txt_big_data);
-  
-  
-
+  printf("app num=%d\n",ksc_app_list());
+//   kobjsdraw(devp,&screen,screen.objbuf,4);
+  ksc_app* txt_app = ksc_app_init("txt",txt_big_data);
+  txt_app->kupdate(txt_app,txt_big_data);
 
   while(1){
     sleep(2);
-    txtdataupdate(&txt_screen,&txt_config);
+    txt_app->kupdate(txt_app,NULL);
+    // txtdataupdate();
 
-    kscreendraw(&dev,&txt_screen);
   }
     return 0;
 }

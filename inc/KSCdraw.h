@@ -35,7 +35,6 @@ typedef struct ksc_dirty_rect{
 typedef struct KSC_window {
     BOTTON_CALLBACK bottoncallback;
     ksc_obj_t* objbuf;//对象缓冲区
-    ksc_obj_t** objptr;//对象指针
     KSCCOLOR bk;
     uintxy  width;
     uintxy  height;
@@ -43,7 +42,6 @@ typedef struct KSC_window {
     uintxy  ssy;//屏幕左上角Y轴位置
     uint8_t  Mode;
     uint8_t objnum;
-    uint8_t objptrnum;//对象指针数量
     ksc_dirty_rect* dirty_rect_buf;//脏矩形
     uint8_t dirty_rect_num;//脏矩形数量
 }KSC_window;
@@ -61,6 +59,7 @@ typedef struct k_draw_device{
     SCR_SETCOLORPIXELS setcolorpixels;
     SCR_WINDOW_SETCANVAS setwindows;
 }k_draw_device;
+
 
 typedef enum KSC_mes{
     KSC_OK = 0,
@@ -94,7 +93,10 @@ typedef enum KSC_mes{
 #define _waitingdraw 0x00//等待绘制
 #define _drawed 0xF0//已绘制
 
+k_draw_device* k_draw_device_init(void);
+k_draw_device* k_draw_device_find(const char* app_name);
 
+void kscreenclear(k_draw_device* dev,KSC_window* screen);
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
 void kobjsdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);//强制绘制多个对象

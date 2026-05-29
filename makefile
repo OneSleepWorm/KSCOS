@@ -1,7 +1,12 @@
 CC = gcc
 CXX = g++
-CFLAGS = -std=c99 -O2 -Wall -I.
-CXXFLAGS = -std=c++11 -O2 -Wall -I.
+ifeq ($(DEBUG),1)
+OPT = -O0 -g
+else
+OPT = -O2
+endif
+CFLAGS = -std=c99 $(OPT) -Wall -I.
+CXXFLAGS = -std=c++11 $(OPT) -Wall -I.
 LDFLAGS = -leasyx
 
 BUILD_DIR = build
@@ -17,7 +22,8 @@ OBJS = \
 	build/KSCfont.o \
 	build/KSCdisplay.o \
 	build/W25Q64.o \
-	build/filetxt.o
+	build/txt.o \
+	build/application.o
 
 TARGET = $(BUILD_DIR)/master.exe
 
@@ -27,7 +33,7 @@ $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 prebuild:
-	mkdir $(BUILD_DIR)
+	if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
 build/master.o: master.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -59,7 +65,10 @@ build/KSCdisplay.o: src/KSCdisplay.cpp | prebuild
 build/W25Q64.o: src/W25Q64.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/filetxt.o: src/filetxt.c | prebuild
+build/txt.o: src/txt.c | prebuild
+		$(CC) $(CFLAGS) -c $< -o $@
+
+build/application.o: src/application.c | prebuild
 		$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -68,7 +77,10 @@ clean:
 reboot:
 	powershell -ExecutionPolicy Bypass -Command "make clean; make; make run"
 
-.PHONY: all clean prebuild reboot
+reboot-debug:
+	powershell -ExecutionPolicy Bypass -Command "make clean; make DEBUG=1; make run"
+
+.PHONY: all clean prebuild reboot reboot-debug
 
 run:
 	./build/master.exe

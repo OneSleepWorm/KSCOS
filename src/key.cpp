@@ -126,6 +126,8 @@ uint8_t key_scan(void){
 
 #endif
 static input_t now_input;
+
+
 //按键读取,获取按键持续状态
 uint8_t key_read(void){
     
@@ -173,3 +175,38 @@ input_t* input_get(void){
     return input;
 }
 
+uint32_t input_name_hash(char* input_name){
+    uint32_t hash = 0;
+    while(*input_name){
+        hash += *input_name++;
+        hash *= 31;
+    }
+    return hash;
+}
+input_t* input_key_get(char* input_name){
+    uint32_t hash = input_name_hash(input_name);
+    static input_t buf_input;
+    if(now_input.input_name_hash == hash){
+        buf_input.key = now_input.key;
+        buf_input.input_name_hash = hash;
+        memset(&now_input,0,sizeof(input_t));
+        return &buf_input;
+    }
+    return NULL;
+}
+
+uint8_t input_key_add(char* input_name,void* data){
+    now_input.input_name_hash = input_name_hash(input_name);
+    now_input.key = *(uint8_t*)data;
+    return 0;
+}
+
+k_key_device sys_key_device;
+k_key_device* k_key_device_init(void){
+    sys_key_device.input_get = input_key_get;
+    sys_key_device.input_add = input_key_add;
+    return &sys_key_device;
+}
+k_key_device* k_key_device_find(const char* app_name){
+    return &sys_key_device;
+}

@@ -41,6 +41,7 @@ extern "C" {
 #endif
 typedef int (* BOTTON_CALLBACK)(void);
 typedef struct {
+    uint32_t input_name_hash;
     uint8_t key;
 }input_t;
 extern input_t input_queue[KEY_QUEUE_SIZE];
@@ -49,6 +50,16 @@ uint8_t key_scan(void);
 uint8_t key_read(void);
 input_t* input_get(void);
 typedef input_t* (*INPUT_FUNC)(void);
+
+typedef input_t* (*INPUT_GET_FUNC)(char* input_name);
+typedef uint8_t (*INPUT_ADD_FUNC)(char* input_name,void* data);
+typedef struct k_key_device{
+    INPUT_GET_FUNC input_get;
+    INPUT_ADD_FUNC input_add;
+}k_key_device;
+
+k_key_device* k_key_device_init(void);
+k_key_device* k_key_device_find(const char* app_name);
 
 #ifdef __cplusplus
 }//extern "C"
