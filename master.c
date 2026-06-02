@@ -35,7 +35,7 @@ int main(void){
       .objnum=4,
   };
 
-  kfull(devp,&screen,wwhite,0,0,240,160);
+  kfull(devp,&screen,bblack,0,0,240,160);
   objb[0]=objbox(0,0,30,30);
   objb[1]=objbox(35,0,30,30);
   objb[2]=objbox(0,35,30,30);
