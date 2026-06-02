@@ -2,8 +2,8 @@
 #define KSCconfig_h
 
 //编译器系统配置
-#define __USE_PC__ 1
-#define __USE_ARMCC__ 0
+#define __USE_PC__ 0
+#define __USE_ARMCC__ 1
 #define __USE_ESP32__ 0
 
 //program config
