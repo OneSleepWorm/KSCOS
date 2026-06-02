@@ -26,7 +26,6 @@ typedef struct ksc_obj_t{
     ku8 _type;//对象类型
 }ksc_obj_t;//size:12
 typedef struct KSC_window {
-    BOTTON_CALLBACK bottoncallback;
     ksc_obj_t* objbuf;//对象缓冲区
     KSCCOLOR bk;
     uintxy  width;
@@ -103,7 +102,7 @@ void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kdirtyrect_del(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
-void kscreenmount(k_draw_device* dev);
+k_draw_device* kscreenmount(void);
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
 void kscreenfree(k_draw_device* dev,KSC_window* screen);
 

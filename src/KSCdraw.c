@@ -151,26 +151,18 @@ KSC_mes ksetpixel(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy 
     return KSC_OK;
 }
 
-void kscreenmount(k_draw_device* dev){
-    dev->init();
-    dev->setwindows=k_window_setcanvas;
-    sys_dev=*dev;
+k_draw_device* kscreenmount(void){
+    static k_draw_device dev={
+    .init=screen_init,
+    .setcanvas=screen_setcanvas,
+    .setcolorpixels=screen_setcolorpixels,
+    .setwindows=k_window_setcanvas,
+    };
+    k_draw_device* devp = &dev;
+    devp->init();
+    devp->setwindows=k_window_setcanvas;
+    return devp;
 }
-
-k_draw_device* k_draw_device_init(void){
-    sys_dev.init=screen_init;
-    sys_dev.setcanvas=screen_setcanvas;
-    sys_dev.setcolorpixels=screen_setcolorpixels;
-    sys_dev.init();
-    sys_dev.setwindows=k_window_setcanvas;
-    return &sys_dev;
-}
-
-k_draw_device* k_draw_device_find(const char* app_name){
-    return &sys_dev;
-}
-
-
 
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOLOR bk){
     KSC_window* screen = (KSC_window*)malloc(sizeof(KSC_window));
@@ -202,12 +194,18 @@ void kscreenfree(k_draw_device* dev,KSC_window* screen){
 KSC_mes kfull(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
     if (!screen) return KSC_ERR;
     if (w == 0 || h == 0) return KSC_OK;
+    // return KSC_OK;
+    // dev->setwindows(dev,screen, x1, y1, w, h);
     dev->setwindows(dev,screen, x1, y1, w, h);
+    uint16_t buf[_STATICBUF_SIZE>>1];
+    for (uint16_t i = 0; i < _STATICBUF_SIZE>>1; i++){
+        buf[i] = color;
+    }
+    
     uint32_t pixelnum = w * h;
-    uint16_t* buf = (uint16_t*)draw_buf;
+    // uint16_t* buf = (uint16_t*)draw_buf;
     uint16_t staticbuf_pixel = (_STATICBUF_SIZE >> 1);
 
-    memset_16(buf, _STATICBUF_SIZE, color);
     while (pixelnum > staticbuf_pixel){
         dev->setcolorpixels(buf, staticbuf_pixel);
         pixelnum -= staticbuf_pixel;
