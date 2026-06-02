@@ -34,7 +34,7 @@
 #define KSCCOLOR uint16_t
 
 //data config
-#define SYSTEMFONT 8
+#define SYSTEMFONT 7
 #define SYSTEMCHINESEFONT 16
 
 #define SYSTEMCOLOR0 0xFFFF

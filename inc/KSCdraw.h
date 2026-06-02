@@ -108,7 +108,7 @@ void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
 void kdirtyrect_del(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
-void kdevmount(k_draw_device* dev);
+k_draw_device* kscreenmount(void);
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
 void kscreenfree(k_draw_device* dev,KSC_window* screen);
 
