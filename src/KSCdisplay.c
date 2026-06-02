@@ -22,8 +22,9 @@ uint32_t color16to24(uint16_t color16) {
 #include <stdio.h>
 
 #define SCALE 3
-
+#ifdef __cplusplus
 extern "C" {
+#endif
 void screen_init(void){
     initgraph(TFTx*SCALE,TFTy*SCALE);
     setlinecolor(BLACK);
@@ -51,12 +52,16 @@ void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num){
             }
           return;
 }
+#ifdef __cplusplus
 }
+#endif
 
 #endif
 
 #if __USE_ARMCC__
+#ifdef __cplusplus
 extern "C" {
+#endif
 void screen_init(){
     TFT_Init();
 }
@@ -67,6 +72,8 @@ void screen_setcolorpixel(KSCCOLOR color){
 void screen_setcanvas(uintxy Gx,uintxy Gy, uintxy width,uintxy height){
 	TFT_Setcanvas(Gx, Gy, Gx+width-1, Gy+height-1);
 }
+#ifdef __cplusplus
 }
+#endif
 
 #endif

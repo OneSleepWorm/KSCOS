@@ -59,7 +59,7 @@ build/KSCimg.o: src/KSCimg.c | prebuild
 build/KSCfont.o: src/KSCfont.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/KSCdisplay.o: src/KSCdisplay.cpp | prebuild
+build/KSCdisplay.o: src/KSCdisplay.c | prebuild
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 build/W25Q64.o: src/W25Q64.c | prebuild
