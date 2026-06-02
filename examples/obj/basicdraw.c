@@ -11,7 +11,7 @@ int main(void){
       .bk=wwhite,
   };
 
-  kfull(devp,&screen,0xFFFF,0,0,240,160);
+  kfull(devp,&screen,wwhite,0,0,240,160);
 
   kstring(devp,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
 
@@ -30,12 +30,16 @@ int main(void){
   kfillcircle(devp,&screen,bblue,75,95,15);
   kstring(devp,&screen,"kfillcircle",55,112,bblue,wwhite);
 
-  kroundrect(devp,&screen,rred,130,20,60,40,8);
-  kstring(devp,&screen,"kroundrect",125,62,rred,wwhite);
+  kroundrect(devp,&screen,rred,120,20,50,40,8);
+  kstring(devp,&screen,"kroundrect",115,62,rred,wwhite);
 
-  kfillroundrect(devp,&screen,ggreen,130,78,60,40,8);
-  kstring(devp,&screen,"kfillroundrect",120,120,ggreen,wwhite);
+  kfillroundrect(devp,&screen,ggreen,120,78,50,40,8);
+  kstring(devp,&screen,"kfillroundrect",110,120,ggreen,wwhite);
 
   kstring(devp,&screen,"Hello World!",120,140,bblack,wwhite);
-  while(1);
+
+  while(1){
+
+  }
+    return 0;
 }
