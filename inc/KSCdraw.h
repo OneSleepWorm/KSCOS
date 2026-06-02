@@ -33,7 +33,6 @@ typedef struct ksc_dirty_rect{
     ku8 height;//脏矩形
 }ksc_dirty_rect;
 typedef struct KSC_window {
-    BOTTON_CALLBACK bottoncallback;
     ksc_obj_t* objbuf;//对象缓冲区
     KSCCOLOR bk;
     uintxy  width;
