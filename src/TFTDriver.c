@@ -12,7 +12,7 @@
 #if __USE_ARMCC__
 
 #include "stm32f1xx_hal.h"
-#include "stm32f1xx_hal_spi.h"
+#include "../three_party/stm32/stm32f1xx_hal_spi_1.h"
 #include "stm32f1xx_hal_dma.h"
 #include "stm32f1xx_hal_gpio.h"
 
