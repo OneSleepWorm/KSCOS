@@ -19,7 +19,7 @@ void k_window_setcanvas(k_draw_device* dev,KSC_window* screen,uintxy Gx,uintxy G
     dev->setcanvas(Gx,Gy,width,height);
 }
 
-
+static k_draw_device sys_dev;
 static uint8_t draw_buf[_STATICBUF_SIZE];
 
 static inline intxy _abs(intxy x) {
@@ -151,9 +151,29 @@ KSC_mes ksetpixel(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy 
     return KSC_OK;
 }
 
-void kscreenmount(k_draw_device* dev){
-    dev->init();
-    dev->setwindows=k_window_setcanvas;
+k_draw_device* kscreenmount(void){
+    static k_draw_device dev={
+    .init=screen_init,
+    .setcanvas=screen_setcanvas,
+    .setcolorpixels=screen_setcolorpixels,
+    .setwindows=k_window_setcanvas,
+    };
+    k_draw_device* devp = &dev;
+    devp->init();
+    devp->setwindows=k_window_setcanvas;
+    return devp;
+}
+k_draw_device* k_draw_device_init(void){
+    sys_dev.init=screen_init;
+    sys_dev.setcanvas=screen_setcanvas;
+    sys_dev.setcolorpixels=screen_setcolorpixels;
+    sys_dev.init();
+    sys_dev.setwindows=k_window_setcanvas;
+    return &sys_dev;
+}
+
+k_draw_device* k_draw_device_find(const char* app_name){
+    return &sys_dev;
 }
 
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx, uintxy ssy, uintxy width, uintxy height, KSCCOLOR bk){
@@ -186,12 +206,18 @@ void kscreenfree(k_draw_device* dev,KSC_window* screen){
 KSC_mes kfull(k_draw_device* dev,KSC_window* screen, KSCCOLOR color, uintxy x1, uintxy y1, uintxy w, uintxy h){
     if (!screen) return KSC_ERR;
     if (w == 0 || h == 0) return KSC_OK;
+    // return KSC_OK;
+    // dev->setwindows(dev,screen, x1, y1, w, h);
     dev->setwindows(dev,screen, x1, y1, w, h);
+    uint16_t buf[_STATICBUF_SIZE>>1];
+    for (uint16_t i = 0; i < _STATICBUF_SIZE>>1; i++){
+        buf[i] = color;
+    }
+    
     uint32_t pixelnum = w * h;
-    uint16_t* buf = (uint16_t*)draw_buf;
+    // uint16_t* buf = (uint16_t*)draw_buf;
     uint16_t staticbuf_pixel = (_STATICBUF_SIZE >> 1);
 
-    memset_16(buf, _STATICBUF_SIZE, color);
     while (pixelnum > staticbuf_pixel){
         dev->setcolorpixels(buf, staticbuf_pixel);
         pixelnum -= staticbuf_pixel;
@@ -464,6 +490,198 @@ KSC_mes kstringchinese(k_draw_device* dev,KSC_window* screen, const char* str, u
     return KSC_OK;
 }
 #endif
+void kscreenclear(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    kfull(dev,screen,screen->bk,0,0,screen->width,screen->height);
+}
+
+void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
+    if(!dev || !screen || !obj)return;
+    //printf("obj->_type=%02X\n",obj->_type);
+    switch (obj->_type&_type_mask)
+    {
+    case _circle: {
+        /* code */
+        uint8_t r = obj->d_and_r&_r_mask;
+        kcircle(dev,screen,obj->colorck,obj->sdx+r,obj->sdy+r,r);
+        break;
+    }
+    case _box:
+        /* code */
+        kbox(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width,obj->height);
+        break;
+    case _string:
+        /* code */
+        kstring(dev,screen,(char*)obj->data,obj->sdx,obj->sdy,obj->colorck,screen->bk);
+        break;
+    case _image:
+        /* code */
+        kdrawimage(dev,screen,obj->data,obj->sdx,obj->sdy
+        ,obj->width,obj->height);
+        break;
+    case _imagebig:
+        /* code */
+        kdrawimagebig(dev,screen,obj->data,obj->sdx,obj->sdy
+        ,obj->width,obj->height,obj->d_and_r&_d_mask);
+        break;
+    case _line:
+        /* code */
+        kline(dev,screen,obj->colorck,obj->sdx,obj->sdy
+            ,obj->width,obj->height);
+        break;
+    case _fillcircle: {
+        /* code */
+        uint8_t r = obj->d_and_r&_r_mask;
+        kfillcircle(dev,screen,obj->colorck,obj->sdx+r,obj->sdy+r,r);
+        break;
+    }
+    case _fillbox:
+        /* code */
+        kfillbox(dev,screen,obj->colorck,obj->sdx,obj->sdy,obj->width,obj->height);
+        break;
+    case _roundrect: {
+        /* code */
+        uint8_t r = obj->d_and_r&_r_mask;
+        kroundrect(dev,screen,obj->colorck,obj->sdx,obj->sdy
+            ,obj->width,obj->height,r);
+        break;
+    }
+    case _fillroundrect:
+        /* code */
+        kfillroundrect(dev,screen,obj->colorck,obj->sdx,obj->sdy
+            ,obj->width,obj->height,obj->d_and_r&_r_mask);
+        break;
+    case _char:
+        /* code */
+        kchar(dev,screen,*(char*)(obj->data),obj->sdx,obj->sdy,obj->colorck,screen->bk);
+        break;
+    default:
+        break;
+    }
+    obj->_type |= _drawed;
+}
+
+// 绘制多个对象
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num){
+    if(!dev || !screen || !obj)return;
+    for(uint8_t i=0;i<num;i++){
+        if((obj+i)->_type & _drawed)continue;
+        kobjdraw(dev,screen,obj+i);
+    }
+}
+// 绘制多个对象(强制绘制)
+void kobjsdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num){
+    if(!dev || !screen || !obj)return;
+    for(uint8_t i=0;i<num;i++){
+        //if((obj+i)->_type & _drawed)continue;
+        kobjdraw(dev,screen,obj+i);
+    }
+}
+
+void kdirtyrect_add(k_draw_device* dev,KSC_window* screen,uint8_t x,uint8_t y,uint8_t width,uint8_t height){
+    if(!dev || !screen)return;
+    ksc_dirty_rect rect = {x,y,width,height};
+    screen->dirty_rect_buf[screen->dirty_rect_num++] = rect;
+}
+void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
+    if(!dev || !screen || !obj)return;
+    ksc_dirty_rect rect = {obj->sdx,obj->sdy,obj->width,obj->height};
+    screen->dirty_rect_buf[screen->dirty_rect_num++] = rect;
+}
+
+void kdirtyrect_del(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    screen->dirty_rect_num = 0;
+}
+
+static uint8_t kobj_intersects(ksc_obj_t* obj,ksc_dirty_rect* rect){
+    return (obj->sdx < rect->x + rect->width &&
+            obj->sdx + obj->width > rect->x &&
+            obj->sdy < rect->y + rect->height &&
+            obj->sdy + obj->height > rect->y) ? 1 : 0;
+}
+
+
+
+static uint8_t krect_should_merge(ksc_dirty_rect* a,ksc_dirty_rect* b,uint8_t mode){
+    switch(mode){
+    case 1:{
+        uint8_t x = a->x < b->x ? a->x : b->x;
+        uint8_t y = a->y < b->y ? a->y : b->y;
+        uint8_t w = (a->x + a->width > b->x + b->width ? a->x + a->width : b->x + b->width) - x;
+        uint8_t h = (a->y + a->height > b->y + b->height ? a->y + a->height : b->y + b->height) - y;
+        return (uint16_t)w * h <= (uint16_t)a->width * a->height + (uint16_t)b->width * b->height;
+    }
+    case 2:
+    case 3:
+        return (a->x <= b->x + b->width && b->x <= a->x + a->width &&
+                a->y <= b->y + b->height && b->y <= a->y + a->height);
+    default:
+        return 0;
+    }
+}
+
+static ksc_dirty_rect krect_union(ksc_dirty_rect* a,ksc_dirty_rect* b){
+    ksc_dirty_rect r;
+    r.x = a->x < b->x ? a->x : b->x;
+    r.y = a->y < b->y ? a->y : b->y;
+    r.width  = (a->x + a->width  > b->x + b->width  ? a->x + a->width  : b->x + b->width) - r.x;
+    r.height = (a->y + a->height > b->y + b->height ? a->y + a->height : b->y + b->height) - r.y;
+    return r;
+}
+
+void kdirtyrectmerge(k_draw_device* dev,KSC_window* screen,uint8_t mode){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_buf || screen->dirty_rect_num < 2)return;
+    if(mode == 0 || mode > 3)return;
+
+    uint8_t passes = (mode == 3) ? 2 : 1;
+    ksc_dirty_rect* buf = screen->dirty_rect_buf;
+
+    for(uint8_t p = 0;p < passes;p++){
+        for(uint8_t i = 0;i < screen->dirty_rect_num;i++){
+            for(uint8_t j = i + 1;j < screen->dirty_rect_num;j++){
+                if(krect_should_merge(&buf[i],&buf[j],mode)){
+                    buf[i] = krect_union(&buf[i],&buf[j]);
+                    screen->dirty_rect_num--;
+                    buf[j] = buf[screen->dirty_rect_num];
+                    j--;
+                }
+            }
+        }
+    }
+}
+
+void kscreendraw(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    //绘制背景
+    kfull(dev,screen,screen->bk,0,0,screen->width,screen->height);
+    //绘制对象
+    // printf("objnum=%d\n",screen->objnum);
+    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+}
+
+//更新屏幕:合并脏矩形+绘制脏矩形+重绘对象+删除脏矩形
+void kscreenupdate(k_draw_device* dev,KSC_window* screen){
+    if(!dev || !screen)return;
+    if(!screen->dirty_rect_num || !screen->objbuf)return;
+    kdirtyrectmerge(dev,screen,screen->Mode);
+    for(uint8_t i=0;i<screen->dirty_rect_num;i++){
+        ksc_dirty_rect* rect = &screen->dirty_rect_buf[i];
+
+        kfull(dev,screen,screen->bk,rect->x,rect->y,rect->width,rect->height);
+
+        for(uint8_t j=0;j<screen->objnum;j++){
+            ksc_obj_t* obj = &screen->objbuf[j];
+            if(kobj_intersects(obj,rect)){
+                obj->_type &= _type_mask;
+            }
+        }
+    }
+
+    kobjsdraw(dev,screen,screen->objbuf,screen->objnum);
+    kdirtyrect_del(dev,screen);
+}
 
 void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj){
     if(!dev || !screen || !obj)return;

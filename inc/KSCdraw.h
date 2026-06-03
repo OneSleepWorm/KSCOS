@@ -23,10 +23,17 @@ typedef struct ksc_obj_t{
     ku8 sdx;//对象x偏移量
     ku8 sdy;//对象y偏移量
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
-    ku8 _type;//对象类型
+    ku8 _type;//对象类型和状态 低4位为类型，高4位为状态
 }ksc_obj_t;//size:12
+typedef ksc_obj_t KSC_obj_t;
+typedef struct ksc_dirty_rect{
+    ku8 x;
+    ku8 y;
+    ku8 width;
+    ku8 height;//脏矩形
+}ksc_dirty_rect;
 typedef struct KSC_window {
-    ksc_obj_t* objbuf;
+    ksc_obj_t* objbuf;//对象缓冲区
     KSCCOLOR bk;
     uintxy  width;
     uintxy  height;
@@ -34,7 +41,8 @@ typedef struct KSC_window {
     uintxy  ssy;//屏幕左上角Y轴位置
     uint8_t  Mode;
     uint8_t objnum;
-    
+    ksc_dirty_rect* dirty_rect_buf;//脏矩形
+    uint8_t dirty_rect_num;//脏矩形数量
 }KSC_window;
 
 typedef struct k_draw_device k_draw_device;
@@ -50,6 +58,7 @@ typedef struct k_draw_device{
     SCR_SETCOLORPIXELS setcolorpixels;
     SCR_WINDOW_SETCANVAS setwindows;
 }k_draw_device;
+
 
 typedef enum KSC_mes{
     KSC_OK = 0,
@@ -69,21 +78,36 @@ typedef enum KSC_mes{
 #define _line 8
 #define _imagebig 9
 #define _circle 10
+#define _char 11
 #define _rect _box
 #define _fillrect _fillbox
 
 
 #define _type_mask (0x0F)
+#define _state_mask (0xF0)
 #define _custom_mask (0xE0)
 #define _r_mask (0x1F)
 #define _d_mask (0xE0)
 
-void kobjdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj);
-void kobjsdraw(k_draw_device* dev,KSC_window* screen,const ksc_obj_t* obj,uint8_t num);
-void kwindowdraw(k_draw_device* dev,KSC_window* screen);
+#define _waitingdraw 0x00//等待绘制
+#define _drawed 0xF0//已绘制
+
+k_draw_device* k_draw_device_init(void);
+k_draw_device* k_draw_device_find(const char* app_name);
+
+void kscreenclear(k_draw_device* dev,KSC_window* screen);
+void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
+void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
+void kobjsdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);//强制绘制多个对象
+
+void kscreendraw(k_draw_device* dev,KSC_window* screen);
+void kscreenupdate(k_draw_device* dev,KSC_window* screen);
+void kdirtyrect_add(k_draw_device* dev,KSC_window* screen,uint8_t x,uint8_t y,uint8_t width,uint8_t height);
+void kdirtyrect_add_obj(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
+void kdirtyrect_del(k_draw_device* dev,KSC_window* screen);
 // 更新kinitscreen函数声明，添加背景色参数
 
-void kscreenmount(k_draw_device* dev);
+k_draw_device* kscreenmount(void);
 KSC_window* kscreeninit(k_draw_device* dev,uintxy ssx,uintxy ssy,uintxy width,uintxy height,KSCCOLOR bk);
 void kscreenfree(k_draw_device* dev,KSC_window* screen);
 

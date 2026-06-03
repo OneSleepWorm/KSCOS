@@ -2,8 +2,8 @@
 #define KSCconfig_h
 
 //编译器系统配置
-#define __USE_PC__ 1
-#define __USE_ARMCC__ 0
+#define __USE_PC__ 0
+#define __USE_ARMCC__ 1
 #define __USE_ESP32__ 0
 
 //program config
@@ -18,6 +18,8 @@
 #define KEY_QUEUE_SIZE 5
 #define __BUTTON_SIMU__ 1
 #define __LITTLE_END_COLOR__ 1
+//程序配置
+#define __USE_TEXT__ 1
 
 #define COLORBIT 2
 #define COLORBYTE 2
@@ -63,16 +65,22 @@
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif
 
+// 颜色配置:大端模式
 #if __LITTLE_END_COLOR__ == 0
 #define rred 0xF100
 #define bblue 0x001F
 #define ggreen 0x07E0
+#define bblack 0x0000
+#define wwhite 0xFFFF
+#define yyellow 0xE0FF
 #else
+// 颜色配置:小端模式
 #define rred 0x00F1
 #define bblue 0x1F00
 #define ggreen 0xE007
 #define bblack 0x0000
 #define wwhite 0xFFFF
+#define yyellow 0xE0FF
 #endif
 
 #endif
