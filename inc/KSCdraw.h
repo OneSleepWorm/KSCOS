@@ -23,8 +23,15 @@ typedef struct ksc_obj_t{
     ku8 sdx;//对象x偏移量
     ku8 sdy;//对象y偏移量
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
-    ku8 _type;//对象类型
+    ku8 _type;//对象类型和状态 低4位为类型，高4位为状态
 }ksc_obj_t;//size:12
+typedef ksc_obj_t KSC_obj_t;
+typedef struct ksc_dirty_rect{
+    ku8 x;
+    ku8 y;
+    ku8 width;
+    ku8 height;//脏矩形
+}ksc_dirty_rect;
 typedef struct KSC_window {
     ksc_obj_t* objbuf;//对象缓冲区
     KSCCOLOR bk;
@@ -60,7 +67,7 @@ typedef enum KSC_mes{
 
 }KSC_mes;
 
-#define _circle 0
+
 #define _box 1
 #define _string 2
 #define _image 3
@@ -70,16 +77,14 @@ typedef enum KSC_mes{
 #define _fillcircle 7
 #define _line 8
 #define _imagebig 9
-#define _extra (1<<4)
-
+#define _circle 10
+#define _char 11
 #define _rect _box
 #define _fillrect _fillbox
 
-#define _string_extra (_extra|_string)
-#define _image_extra (_extra|_image)
-#define _imagebig_extra (_extra|_imagebig)
 
 #define _type_mask (0x0F)
+#define _state_mask (0xF0)
 #define _custom_mask (0xE0)
 #define _r_mask (0x1F)
 #define _d_mask (0xE0)

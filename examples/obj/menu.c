@@ -4,7 +4,7 @@
 // #include "KSCdraw/littlefs/lfs.h"
 // #include "KSCdraw/littlefs/lfs_config.h"
 
-#include "KSCdraw/inc/main.h"
+#include "../inc/master.h"
 // extern void W25Q64_Init(void);
 // void littlefs_test(void);
 int main_botton_callback(void){
@@ -18,7 +18,7 @@ k_draw_device dev={
 };
 
 int main(){
-    kscreenmount(&dev);
+    kdevmount(&dev);
     W25Q64_Init();
     key_init();
     // KSC_window* screen = kscreeninit(&dev,0,0,160,160,0xFFFF);
