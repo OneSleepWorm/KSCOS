@@ -14,6 +14,11 @@
 #define __USE_UART__ 0
 #define __USE_LITTLEFS__ 0
 #define __USE_KEY__ 0
+//屏幕配置
+#if __USE_LCD__
+// #define __USE_ST7735__ 
+#define __USE_ST7789__
+#endif
 //细节配置
 #define KEY_QUEUE_SIZE 5
 #define __BUTTON_SIMU__ 1

@@ -9,7 +9,7 @@ CFLAGS = -std=c99 $(OPT) -Wall -I.
 CXXFLAGS = -std=c++11 $(OPT) -Wall -I.
 LDFLAGS = -leasyx
 
-BUILD_DIR = build
+BUILD_DIR = build/mk
 
 OBJS = \
 	build/master.o \
@@ -33,31 +33,31 @@ $(TARGET): $(OBJS)
 prebuild:
 	if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
 
-build/master.o: master.c | prebuild
+$(BUILD_DIR)/master.o: master.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/cmd.o: src/cmd.c | prebuild
+$(BUILD_DIR)/cmd.o: src/cmd.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/lfs.o: littlefs/lfs.c | prebuild
+$(BUILD_DIR)/lfs.o: littlefs/lfs.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/lfs_config.o: littlefs/lfs_config.c | prebuild
+$(BUILD_DIR)/lfs_config.o: littlefs/lfs_config.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/lfs_util.o: littlefs/lfs_util.c | prebuild
+$(BUILD_DIR)/lfs_util.o: littlefs/lfs_util.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/KSCdraw.o: src/KSCdraw.c | prebuild
+$(BUILD_DIR)/KSCdraw.o: src/KSCdraw.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/KSCimg.o: src/KSCimg.c | prebuild
+$(BUILD_DIR)/KSCimg.o: src/KSCimg.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/KSCfont.o: src/KSCfont.c | prebuild
+$(BUILD_DIR)/KSCfont.o: src/KSCfont.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-build/KSCdisplay.o: src/KSCdisplay.c | prebuild
+$(BUILD_DIR)/KSCdisplay.o: src/KSCdisplay.c | prebuild
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 build/W25Q64.o: src/W25Q64.c | prebuild
@@ -75,4 +75,4 @@ reboot-debug:
 .PHONY: all clean prebuild reboot reboot-debug
 
 run:
-	./build/master.exe
+	./$(BUILD_DIR)/master.exe
