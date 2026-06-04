@@ -1,0 +1,10 @@
+add_library(KSCDRAW_SRC 
+                        KSCdraw.c
+                        KSCdisplay.c
+                        KSCfont.c
+                        KSCimg.c
+
+)
+set_source_files_properties(KSCdisplay.c PROPERTIES LANGUAGE CXX)
+
+target_link_libraries(KSCDRAW_SRC PUBLIC easyx)

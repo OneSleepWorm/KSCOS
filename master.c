@@ -38,8 +38,7 @@ int main(void){
 
   kstring(devp,&screen,"Hello World!",120,140,bblack,wwhite);
 
-  while(1){
+  sleep(4);
 
-  }
     return 0;
 }
