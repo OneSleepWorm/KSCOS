@@ -1,7 +1,6 @@
 # KSCdraw — 跨平台 TFT 显示屏绘图库
 
-通用 TFT 显示屏驱动库，提供基本图形绘制、图像显示、文本渲染、对象系统、脏矩形增量刷新和应用程序框架等功能。
-通过预处理器宏切换平台（PC / ARM / ESP32），硬件依赖与绘图 API 分离。
+通用 TFT 显示屏驱动库，提供基本图形绘制、图像显示、文本渲染等功能（目前只实现了这些，正在努力添加更多功能）而且非常轻量。占用ram < 1024字节。
 
 ## 功能特点
 
@@ -50,52 +49,17 @@ KSC_window* screen = kscreeninit(dev, 0, 0, 240, 160, wwhite);
 ### 2. 绘制图形
 
 ```c
-kfull(dev, &screen, bblue, 0, 0, 100, 100);          // 填充矩形
-kroundrect(dev, &screen, rred, 20, 20, 50, 50, 10);  // 圆角矩形
-kfillcircle(dev, &screen, ggreen, 70, 40, 15);        // 填充圆形
-kcircle(dev, &screen, rred, 100, 40, 10);             // 圆形边框
-kdrawimagebig(dev, &screen, Wechat, 120, 40, 16, 16, 4); // 缩放图像
+kfull(dev, &screen, bblue, sx,sy,width,height);          // 填充矩形
+kroundrect(dev, &screen, rred, sx,sy,width,height,radius);  // 圆角矩形
+kfillcircle(dev, &screen, ggreen, sx,sy,radius);        // 填充圆形
+kcircle(dev, &screen, rred, sx,sy,radius);             // 圆形
+kbox(dev, &screen, bblue, sx,sy,width,height);          // 矩形
 ```
 
 ### 3. 显示文本
 
 ```c
 kstring(dev, &screen, "Hello World", 10, 0, rred, wwhite);
-```
-
-### 4. 使用对象系统 + 脏矩形刷新
-
-```c
-ksc_obj_t objs[] = {
-    { ._type = _fillbox, .colorck = bblue,
-      .sdx = 10, .sdy = 10, .width = 50, .height = 50 },
-    { ._type = _string, .colorck = rred, .data = "OK",
-      .sdx = 20, .sdy = 25, .width = 16, .height = 8 },
-};
-screen.objbuf = objs;
-screen.objnum = 2;
-
-kscreendraw(dev, &screen);     // 全屏绘制
-// ... 修改对象后 ...
-kdirtyrect_add_obj(dev, &screen, &objs[0]); // 标记脏区
-kscreenupdate(dev, &screen);                // 增量刷新
-```
-
-### 5. 注册应用程序
-
-```c
-uint8_t myapp_init(ksc_app* app, void* argv) { return 0; }
-uint8_t myapp_update(ksc_app* app, void* argv) {
-    // 绘制逻辑
-    return 0;
-}
-uint8_t myapp_deinit(ksc_app* app, void* argv) { return 0; }
-
-REGISTER_APP(my_app, myapp_init, myapp_update, myapp_deinit);
-
-// 运行时
-ksc_app_list();                          // 列出所有注册的 App
-ksc_app* app = ksc_app_init("my_app", NULL); // 初始化并运行
 ```
 
 ## 配置选项
@@ -118,6 +82,16 @@ ksc_app* app = ksc_app_init("my_app", NULL); // 初始化并运行
 | `COLORBIT` / `COLORBYTE` | 颜色位深（默认 2 字节 RGB565） |
 | `TFTx` / `TFTy` | 屏幕分辨率（默认 240×160） |
 | `_STATICBUF_SIZE` | 静态绘制缓冲区大小（默认 512 字节） |
+
+## 目前适配
+
+### 平台支持
+- **PC**：EasyX 开发环境
+- **ARM**：STM32F10x 系列微控制器
+### 显示屏支持
+- **ST7735**：支持 ST7735 显示屏（通过 TFTDriver.h 配置）
+- **ST7789**
+- **其他**：如果需要其他驱动库，可联系作者OneSleepWorm(一只瞌睡虫)，或者修改init_cmds,或者提交 Pull Request。
 
 ## 目录结构
 

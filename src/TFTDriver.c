@@ -266,7 +266,8 @@ const lcdcommand init_cmds[] = {
     {0x00, {0}, 0},
     {0x29, {0}, 0}
 };
-#elif __USE_ST7735__
+#endif
+#ifdef __USE_ST7735__
 const lcdcommand init_cmds[] = {
     {0x00, {0}, 0},
     {0x11, {0}, 0},
