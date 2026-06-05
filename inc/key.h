@@ -2,7 +2,7 @@
 #define __KEY_H
 #include "KSCconfig.h"
 
-#if __USE_KEY__ > 0
+#if __USE_KEY__
 
 #define KEY_NONE  0xFF
 
