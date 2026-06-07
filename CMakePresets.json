@@ -2,12 +2,37 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "MinGW",
+      "name": "MinGW Makefiles",
       "generator": "MinGW Makefiles",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build_make",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "MinGW Ninja",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build_ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "Debug",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build_debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Release",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build_release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]

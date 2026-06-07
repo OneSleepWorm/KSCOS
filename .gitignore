@@ -1,6 +1,10 @@
 .data
 .main
 build
+build_debug
+build_release
+build_make
+build_ninja
 src/*.o
 littlefs/*.o
 inc/SDL3

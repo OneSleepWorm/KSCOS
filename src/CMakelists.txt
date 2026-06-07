@@ -3,6 +3,7 @@ add_library(KSCDRAW_SRC
                         KSCdisplay.c
                         KSCfont.c
                         KSCimg.c
+                        clocktask.c
 
 )
 set_source_files_properties(KSCdisplay.c PROPERTIES LANGUAGE CXX)

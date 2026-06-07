@@ -1,7 +1,8 @@
 //#include "main.h"
 #include "../inc/key.h"
-#ifdef __USE_INPUT_KEY__
+#if __USE_KEY__
 
+#if __USE_ARMCC__
 void key_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -73,59 +74,63 @@ uint8_t key_scan(void)
 #endif
 
 #ifdef __USE_INPUT_KEY_SIMU__
-#include <graphics.h>
+#include "../third_party/easyx/include/graphics.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+const char* pc_key_input_name = "pc_key";
 ExMessage key_msg;
 
-void key_init(void){
-    // initgraph(160,80);
-    return;
-}
 
-uint8_t key_scan(void){
+uint8_t pc_key_scan(void){
     if (!peekmessage(&key_msg,EX_KEY)) return KEY_NONE;
     if(key_msg.message == WM_KEYDOWN){
         switch (key_msg.vkcode){
-            case VK_NUMPAD0:
-                return KEY_A0;
-                break;
-            case VK_NUMPAD1:
-                return KEY_A1;
-                break;
-            case VK_NUMPAD2:
-                return KEY_A2;
-                break;
-            case VK_NUMPAD3:
-                return KEY_A3;
-                break;
-            case VK_NUMPAD4:
-                return KEY_A4;
-                break;
-            case VK_NUMPAD5:
-                return KEY_A5;
-                break;
-            case VK_NUMPAD6:
-                return KEY_A6;
-                break;
-            case VK_NUMPAD7:
-                return KEY_A7;
-                break;
-            case VK_NUMPAD8:
-                return KEY_A8;
-                break;
-            case VK_NUMPAD9:
-                return KEY_A9;
-                break;
-            default:
-                return KEY_NONE;
-                break;
+            case '1':  return KEY_A0;break;
+            case '2':  return KEY_A1;break;
+            case '3':  return KEY_A2;break;
+            case '4':  return KEY_A3;break;
+            case 'Q':  return KEY_A4;break;
+            case 'W':  return KEY_A5;break;
+            case 'E':  return KEY_A6;break;
+            case 'R':  return KEY_A7;break;
+            case 'A':  return KEY_A8;break;
+            case 'S':  return KEY_A9;break;
+            case 'D':  return KEY_A10;break;
+            case 'F':  return KEY_A11;break;
+            case 'Z':  return KEY_A12;break;
+            case 'X':  return KEY_A13;break;
+            case 'C':  return KEY_A14;break;
+            case 'V':  return KEY_A15;break;
+            default:  return KEY_NONE;break;
         }
     }
     return KEY_NONE;
 }
-
+#ifdef __cplusplus
+}
 #endif
+
 static input_t now_input;
+INPUT_INIT pc_key_init(void){
+    return 0;
+}
+INPUT_ADD pc_key_add(char* input_name,void* data){
+    uint8_t key = pc_key_scan();
+    now_input.key = key;
+    now_input.input_name = input_name;
+    return (input_t){pc_key_input_name,key};
+}
+INPUT_GET pc_key_get(char* input_name){
+    if(strcmp(input_name,pc_key_input_name)==0){
+        return &now_input;
+    }else{
+        return NULL;
+    }
+}
+#endif
+
 
 
 //按键读取,获取按键持续状态
@@ -168,45 +173,16 @@ uint8_t key_read(void){
     return realkey;
     #endif
 }
-input_t* input_get(void){
-    key_read();
-    input_t* input = &now_input;
-    if(input->key == KEY_NONE) return NULL;
-    return input;
-}
 
-uint32_t input_name_hash(char* input_name){
-    uint32_t hash = 0;
-    while(*input_name){
-        hash += *input_name++;
-        hash *= 31;
-    }
-    return hash;
-}
-input_t* input_key_get(char* input_name){
-    uint32_t hash = input_name_hash(input_name);
-    static input_t buf_input;
-    if(now_input.input_name_hash == hash){
-        buf_input.key = now_input.key;
-        buf_input.input_name_hash = hash;
-        memset(&now_input,0,sizeof(input_t));
-        return &buf_input;
-    }
-    return NULL;
-}
 
-uint8_t input_key_add(char* input_name,void* data){
-    now_input.input_name_hash = input_name_hash(input_name);
-    now_input.key = *(uint8_t*)data;
-    return 0;
-}
-
-k_key_device sys_key_device;
-k_key_device* k_key_device_init(void){
+input_device sys_key_device;
+input_device* k_key_device_init(void){
     sys_key_device.input_get = input_key_get;
     sys_key_device.input_add = input_key_add;
     return &sys_key_device;
 }
-k_key_device* k_key_device_find(const char* app_name){
+input_device* k_key_device_find(const char* app_name){
     return &sys_key_device;
 }
+
+#endif
