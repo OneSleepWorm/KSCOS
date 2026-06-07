@@ -1,48 +1,39 @@
-cmake_minimum_required(VERSION 3.20)
-project(KSCdraw VERSION 1.0 LANGUAGES C CXX)
+cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+project(KSCdraw)
+
+# 设置全局 C++ 标准（要求至少 C++17）
 set(CMAKE_CXX_STANDARD 11)
+# 要求必须使用这个标准，不可降级
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# 可选：不要编译器自己的扩展（保持标准一致）
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-set_source_files_properties(src/KSCdisplay.c PROPERTIES LANGUAGE CXX)
+add_library(easyx STATIC IMPORTED)
 
-set(KSCDRAW_SOURCES
-    master.c
-    src/application.c
-    src/cmd.c
-    src/KSCdisplay.c
-    src/KSCdraw.c
-    src/KSCfont.c
-    src/KSCimg.c
-    src/txt.c
-    src/W25Q64.c
-    littlefs/lfs.c
-    littlefs/lfs_config.c
-    littlefs/lfs_util.c
+
+set_target_properties(easyx PROPERTIES
+    IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/third_party/easyx/lib/libeasyx.a"
+    # 同时指定头文件目录，让链接 easyx 的目标自动找到 easyx.h
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/third_party/easyx/include"
 )
 
-find_library(EASYX_LIB easyx
-    HINTS ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}
-)
-if(NOT EASYX_LIB)
-    message(FATAL_ERROR "EasyX library not found. "
-        "Set CMAKE_PREFIX_PATH or EASYX_LIB to the EasyX library path.")
-endif()
+add_executable(KSCdraw master.c)
 
-add_executable(master ${KSCDRAW_SOURCES})
+target_compile_options(KSCdraw PRIVATE -Wall -Wextra)
 
-target_include_directories(master PRIVATE .)
-target_link_libraries(master PRIVATE ${EASYX_LIB})
-target_compile_options(master PRIVATE -Wall)
+target_compile_definitions(KSCdraw PRIVATE __USE_PC__=1)
 
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+add_subdirectory(src)
 
-add_custom_target(run
-    COMMAND master
-    DEPENDS master
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running master.exe..."
-)
+target_link_libraries(KSCdraw PRIVATE KSCDRAW_SRC easyx)
+
+# target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
+#     # Add user defined include paths
+#     KSCdraw/inc
+#     KSCdraw/three_party/easyx/include
+# )
+
+# target_compile_definitions(KSCdraw PRIVATE __USE_PC__=1)
+set_source_files_properties(KSCdisplay.c PROPERTIES LANGUAGE CXX)
+

@@ -1,3 +1,8 @@
+# 项目协议说明
+1. 本项目 **src/ 目录下所有自研代码：MIT License（见根目录LICENSE）**
+2. third_party/stm32/ 内 STM32 HAL库源码：版权归STMicroelectronics，遵循 **BSD 3-Clause License**，协议文件位于 third_party/stm32/LICENSE
+3. 分发本项目时，第三方HAL库需保留原有BSD协议与版权信息。
+
 # KSCdraw — 跨平台 TFT 显示屏绘图库
 
 通用 TFT 显示屏驱动库，提供基本图形绘制、图像显示、文本渲染等功能（目前只实现了这些，正在努力添加更多功能）而且非常轻量。占用ram < 1024字节。

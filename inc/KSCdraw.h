@@ -11,8 +11,7 @@
 #if __USE_KEY__
 #include "key.h"
 #endif
-typedef uint8_t ku8;
-typedef uint16_t ku16;
+
 
 //对象属性定义ksc_obj_t
 typedef struct ksc_obj_t{

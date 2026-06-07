@@ -2,12 +2,12 @@
 #define __KSC_DISPLAY_H__
 
 #include "KSCconfig.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if __USE_ARMCC__
 #include "TFTDriver.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 void screen_init(void);

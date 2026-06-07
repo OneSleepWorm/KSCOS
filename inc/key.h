@@ -2,7 +2,7 @@
 #define __KEY_H
 #include "KSCconfig.h"
 
-#if __USE_KEY__ > 0
+#if __USE_KEY__
 
 #define KEY_NONE  0xFF
 
@@ -39,27 +39,41 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-typedef int (* BOTTON_CALLBACK)(void);
+/**
+ * @brief 输入结构体
+ * @note input_name:输入名称指针
+ * @note key:按键值
+ */
 typedef struct {
-    uint32_t input_name_hash;
+    const char* input_name;
     uint8_t key;
 }input_t;
 extern input_t input_queue[KEY_QUEUE_SIZE];
-void key_init(void);
+
+ki8 key_init(void);
 uint8_t key_scan(void);
 uint8_t key_read(void);
 input_t* input_get(void);
 typedef input_t* (*INPUT_FUNC)(void);
 
+typedef ki8 (*INPUT_INIT_FUNC)(input_t* input);
 typedef input_t* (*INPUT_GET_FUNC)(char* input_name);
-typedef uint8_t (*INPUT_ADD_FUNC)(char* input_name,void* data);
-typedef struct k_key_device{
+typedef input_t (*INPUT_ADD_FUNC)(char* input_name,void* data);
+typedef ki8 INPUT_INIT;
+typedef input_t INPUT_ADD;
+typedef input_t* INPUT_GET;
+
+INPUT_GET_FUNC key_get(char* input_name);
+INPUT_ADD_FUNC key_add(char* input_name,void* data);
+typedef struct input_device{
+    char* input_name;
+    INPUT_INIT_FUNC input_init;
     INPUT_GET_FUNC input_get;
     INPUT_ADD_FUNC input_add;
-}k_key_device;
+}input_device;
 
-k_key_device* k_key_device_init(void);
-k_key_device* k_key_device_find(const char* app_name);
+input_device* input_device_init(void);
+input_device* input_device_find(const char* app_name);
 
 #ifdef __cplusplus
 }//extern "C"

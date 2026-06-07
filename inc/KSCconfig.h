@@ -2,13 +2,13 @@
 #define KSCconfig_h
 
 //编译器系统配置
-#define __USE_PC__ 0
-#define __USE_ARMCC__ 1
+#define __USE_PC__ 1
+#define __USE_ARMCC__ 0
 #define __USE_ESP32__ 0
 
 //program config
 #define __USE_LCD__ 1
-#define USE_NOT_BUFFER 1
+#define __USE_CLOCK_TASK__ 1
 #define __USE_CHINESE__ 0
 #define __USE_FLASH__ 0
 #define __USE_UART__ 0
@@ -33,11 +33,14 @@
 #define TFTy 160
 #define MAX_INPUT_SIZE 255
 #define _STATICBUF_SIZE 512
-
+#include <stdint.h>
 #define uintxy uint16_t
 #define intxy int16_t
 #define KSCCOLOR uint16_t
-
+typedef uint8_t ku8;
+typedef uint16_t ku16;
+typedef int8_t ki8;
+typedef int16_t ki16;
 //data config
 #define SYSTEMFONT 7
 #define SYSTEMCHINESEFONT 16
@@ -46,8 +49,6 @@
 #define SYSTEMCOLOR1 0x0000
 #define SYSTEMCOLOR2 0x001F
 #define SYSTEMCOLOR3 0xF800
-
-#include <stdint.h>
 
 #if __USE_PC__
 #include <stdlib.h>

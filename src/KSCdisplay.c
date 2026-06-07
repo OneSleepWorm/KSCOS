@@ -17,8 +17,7 @@ uint32_t color16to24(uint16_t color16) {
 }
 
 #if __USE_PC__
-#include <graphics.h>
-#include <conio.h>
+#include "../third_party/easyx/include/graphics.h"
 #include <stdio.h>
 
 #define SCALE 3

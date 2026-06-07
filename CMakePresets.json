@@ -1,35 +1,39 @@
 {
-    "version": 6,
-    "configurePresets": [
-        {
-            "name": "debug",
-            "displayName": "Debug",
-            "description": "Debug build with -O0 -g",
-            "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/cmake",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "release",
-            "displayName": "Release",
-            "description": "Release build with -O2",
-            "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/cmake",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        }
-    ],
-    "buildPresets": [
-        {
-            "name": "debug",
-            "configurePreset": "debug"
-        },
-        {
-            "name": "release",
-            "configurePreset": "release"
-        }
-    ]
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "MinGW Makefiles",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build_make",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "MinGW Ninja",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build_ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "Debug",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build_debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "Release",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build_release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
 }
