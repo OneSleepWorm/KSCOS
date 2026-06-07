@@ -4,6 +4,7 @@
 #include "stm32f103xb.h"
 #include "stm32f1xx_hal_rcc.h"
 
+__volatile uint32_t KSCOSsystem_Clock = 0;
 const RCC_OscInitTypeDef LOW_RCC_OscInitStruct = {
     .OscillatorType = RCC_OSCILLATORTYPE_HSI,
     .HSIState = RCC_HSI_ON,
@@ -51,7 +52,7 @@ const RCC_ClkInitTypeDef HIGH_RCC_ClkInitStruct = {
     .APB2CLKDivider = RCC_HCLK_DIV1,
 };
 
-static void sys_Error_Handler(void);
+void KSCOS_Error_Handler(void);
 
 void KSCOSsystem_Init(void)
 {
@@ -67,33 +68,37 @@ void KSCOSSystemClock_Init(unsigned char clock_type)
   case KSCOS_LOW_CLOCK:
     RCC_OscInitStruct = LOW_RCC_OscInitStruct;
     RCC_ClkInitStruct = LOW_RCC_ClkInitStruct;
+    KSCOSsystem_Clock = 8000000;
     break;
   case KSCOS_NORMAL_CLOCK:
     RCC_OscInitStruct = NORMAL_RCC_OscInitStruct;
     RCC_ClkInitStruct = NORMAL_RCC_ClkInitStruct;
+    KSCOSsystem_Clock = 72000000;
     break;
   case KSCOS_HIGH_CLOCK:
     RCC_OscInitStruct = HIGH_RCC_OscInitStruct;
     RCC_ClkInitStruct = HIGH_RCC_ClkInitStruct;
+    KSCOSsystem_Clock = 168000000;
     break;
   default:
     RCC_OscInitStruct = LOW_RCC_OscInitStruct;
     RCC_ClkInitStruct = LOW_RCC_ClkInitStruct;
+    KSCOSsystem_Clock = 8000000;
     break;
   }
 
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    sys_Error_Handler();
+    KSCOS_Error_Handler();
   }
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_ACR_LATENCY_2) != HAL_OK)
   {
-    sys_Error_Handler();
+    KSCOS_Error_Handler();
   }
 }
 
-static void sys_Error_Handler(void)
+void KSCOS_Error_Handler(void)
 {
   __disable_irq();
   while (1)

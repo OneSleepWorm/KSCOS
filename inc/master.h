@@ -9,6 +9,8 @@
 #include "../third_party/littlefs/lfs_util.h"
 #include "KSCconfig.h"
 #include "application.h"
+#include "KSCOSsystem.h"
+
 #include "clocktask.h"
 #if __USE_KEY__
 #include "key.h"

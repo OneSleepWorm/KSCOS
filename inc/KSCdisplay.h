@@ -2,7 +2,7 @@
 #define __KSC_DISPLAY_H__
 
 #include "KSCconfig.h"
-#if __USE_ARMCC__
+#if __USE_STM32__
 #include "TFTDriver.h"
 #endif
 

@@ -2,7 +2,7 @@
 #include "../inc/key.h"
 #if __USE_KEY__
 
-#if __USE_ARMCC__
+#if __USE_STM32__
 void key_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};

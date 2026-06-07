@@ -30,6 +30,11 @@ typedef struct clock_task_t {
     void* user_data;
 }clock_task_t;
 
-extern clock_task_t pc_clock_task;
+#if __USE_PC__
+extern __volatile clock_task_t pc_clock_task;
+#endif
+#if __USE_STM32__
+extern __volatile clock_task_t stm_clock_task;
+#endif
 
 #endif

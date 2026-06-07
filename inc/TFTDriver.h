@@ -2,7 +2,7 @@
 #define _DRIVER_GUI_H_
 
 #include "KSCconfig.h"
-#if __USE_ARMCC__
+#if __USE_STM32__
 // 颜色宏定义
 
 void TFT_Init(void);

@@ -2,10 +2,13 @@
 #define KSCconfig_h
 
 //编译器系统配置
-#define __USE_PC__ 1
-#define __USE_ARMCC__ 0
+#ifndef __USE_AUTO__
+
+#define __USE_PC__ 0
+#define __USE_STM32__ 1
 #define __USE_ESP32__ 0
 
+#endif
 //program config
 #define __USE_LCD__ 1
 #define __USE_CLOCK_TASK__ 1
@@ -18,6 +21,7 @@
 #if __USE_LCD__
 // #define __USE_ST7735__ 
 #define __USE_ST7789__
+// #define __USE_OTHER_LCD__
 #endif
 //细节配置
 #define KEY_QUEUE_SIZE 5
@@ -42,7 +46,7 @@ typedef uint16_t ku16;
 typedef int8_t ki8;
 typedef int16_t ki16;
 //data config
-#define SYSTEMFONT 7
+#define SYSTEMFONT 8
 #define SYSTEMCHINESEFONT 16
 
 #define SYSTEMCOLOR0 0xFFFF
@@ -57,9 +61,9 @@ typedef int16_t ki16;
 #define __USE_INPUT_KEY_SIMU__
 #endif
 
-#if __USE_ARMCC__
+#if __USE_STM32__
 #include <stdlib.h>
-#define __USE_INPUT_KEY__
+
 #endif
 
 #if __USE_ESP32__

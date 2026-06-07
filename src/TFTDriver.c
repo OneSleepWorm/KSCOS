@@ -9,10 +9,10 @@
  * @Copyright: 123456789@qq.com
  */
 #include "../inc/TFTDriver.h"
-#if __USE_ARMCC__
+#if __USE_STM32__
 
 #include "stm32f1xx_hal.h"
-#include "../three_party/stm32/stm32f1xx_hal_spi.h"
+#include "../third_party/stm32/inc/stm32f1xx_hal_spi.h"
 #include "stm32f1xx_hal_dma.h"
 #include "stm32f1xx_hal_gpio.h"
 
@@ -41,43 +41,9 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 
 void my_Error_Handler(void);
 
-void FastSystemClock(void)
-{
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-  /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL8;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    my_Error_Handler();
-  }
-
-  /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    my_Error_Handler();
-  }
-}
 
 void spi_init(void)
 {
-    FastSystemClock();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_SPI2_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
@@ -291,8 +257,30 @@ const lcdcommand init_cmds[] = {
     {0x29, {0}, 0}
 };
 #endif
-
-
+#ifdef __USE_OTHER_LCD__
+const lcdcommand init_cmds[] = {
+    {0x00, {0}, 0},
+    {0x11, {0}, 0},
+    {0x00, {0}, 0},
+    {0x21, {0}, 0},
+    {0x21, {0}, 0},
+    {0xB1, {0x05,0x3A,0x3A}, 3},
+    {0xB2, {0x05,0x3A,0x3A}, 3},
+    {0xB3, {0x05,0x3A,0x3A,0x05,0x3A,0x3A}, 6},
+    {0xB4, {0x03}, 1},
+    {0xC0, {0x62,0x02,0x04}, 3},
+    {0xC1, {0xC0}, 1},
+    {0xC2, {0x0D,0x00}, 2},
+    {0xC3, {0x8D,0x6A}, 2},
+    {0xC4, {0x8D,0xEE}, 2},
+    {0xC5, {0x0E}, 1},
+    {0xE0, {0x10, 0x0E, 0x02, 0x03, 0x0E, 0x07, 0x02, 0x07, 0x0A, 0x12, 0x27, 0x37, 0x00, 0x0D, 0x0E, 0x10}, 16},
+    {0xE1, {0x10, 0x0E, 0x03, 0x03, 0x0F, 0x06, 0x02, 0x08, 0x0A, 0x13, 0x26, 0x36, 0x00, 0x0D, 0x0E, 0x10}, 16},
+    {0x3A, {0x05}, 1},
+    {0x36, {0x68}, 1},
+    {0x29, {0}, 0}
+};
+#endif
 void TFT_Setcanvas(uint16_t sx, uint16_t sy, uint16_t ex, uint16_t ey)
 {
     lcdcommand cmd_col[3] = {

@@ -57,7 +57,7 @@ void screen_setcolorpixels(const KSCCOLOR* color,uint16_t num){
 
 #endif
 
-#if __USE_ARMCC__
+#if __USE_STM32__
 #ifdef __cplusplus
 extern "C" {
 #endif

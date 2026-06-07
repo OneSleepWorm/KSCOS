@@ -3,5 +3,6 @@
 
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
+#define HAL_TIM_MODULE_ENABLED
 
 #endif

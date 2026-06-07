@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#if __USE_ARMCC__
+#if __USE_STM32__
 void W25Q64_Init(void);
 void W25Q64_DeInit(void);
 void W25Q64_ReadID(uint8_t *MID, uint16_t *DID);

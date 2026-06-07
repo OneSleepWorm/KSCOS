@@ -3,7 +3,82 @@
 #if __USE_CLOCK_TASK__
 #include "../inc/clocktask.h"
 
-#if __USE_ARMCC__
+#if __USE_STM32__
+#include "stm32f1xx_hal.h"
+#include "../third_party/stm32/inc/stm32f1xx_hal_tim.h"
+#include "../third_party/stm32/inc/stm32f1xx_hal_tim_ex.h"
+#include "../inc/KSCOSsystem.h"
+
+// 任务周期，单位：毫秒
+static const uint32_t stm_clock_task_cycle = 1000;
+// 任务名称
+const uint32_t stm_clock_task_id =0x00000001;
+// 任务结束标志
+static ki8 stm_clock_task_running_flag = 0;
+
+#define KDelay HAL_Delay
+
+TIM_HandleTypeDef htim2;
+extern __volatile clock_task_t stm_clock_task;
+
+CTASK_INIT MX_TIM2_Init(clock_task_t* task)
+{
+    __HAL_RCC_TIM2_CLK_ENABLE();        // 使能TIM2时钟
+
+    htim2.Instance = TIM2;
+    
+    htim2.Init.Prescaler = KSCOSsystem_Clock / 10000 - 1;    // 预分频器：72MHz / 7200 = 10kHz
+    htim2.Init.Period = 10*stm_clock_task_cycle - 1;      // 自动重载值：10kHz / 10000 = 1Hz (1秒)
+
+    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+    htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+
+    if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+    {
+        KSCOS_Error_Handler();
+    }
+
+    // 使能定时器更新中断
+    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM2_IRQn);
+    return 0;
+}
+
+// 弱回调函数，在中断发生时调用
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2)
+    {
+        stm_clock_task.callback(stm_clock_task.user_data);
+    }
+}
+
+// 中断服务函数（在 startup 文件中已定义，需实现）
+void TIM2_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim2);   // 进入HAL库统一中断处理，内部会调用回调
+}
+
+CTASK_RUN clock_task_run(clock_task_t* task){
+    HAL_TIM_Base_Start_IT(&htim2);
+    stm_clock_task_running_flag = 1;
+    return 0;
+}
+
+CTASK_STOP clock_task_stop(clock_task_t* task){
+    HAL_TIM_Base_Stop_IT(&htim2);
+    stm_clock_task_running_flag = 0;
+    return 0;
+}
+
+__volatile clock_task_t stm_clock_task={
+    .task_id = stm_clock_task_id,
+    .init = MX_TIM2_Init,
+    .run = clock_task_run,
+    .callback = NULL,
+    .stop = clock_task_stop,
+};
 
 #endif
 #if __USE_PC__
@@ -40,7 +115,7 @@ CTASK_STOP clock_task_stop(clock_task_t* task){
     return 0;
 }
 
-clock_task_t pc_clock_task={
+ __volatile clock_task_t pc_clock_task={
     .task_id = pc_clock_task_id,
     .init = NULL,
     .run = clock_task_run,

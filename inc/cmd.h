@@ -28,7 +28,7 @@ void list_cmds(void);
     static const cmd_t _cmd_##func \
     __attribute__((section("cmd_table"), used)) = { name, func }
 
-#elif __USE_ARMCC__
+#elif __USE_STM32__
 // 声明来自链接脚本的符号
 
 // 注册宏
