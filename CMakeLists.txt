@@ -22,7 +22,7 @@ add_executable(KSCdraw master.c)
 
 target_compile_options(KSCdraw PRIVATE -Wall -Wextra)
 
-target_compile_definitions(KSCdraw PRIVATE __USE_AUTO__=1 __USE_PC__=1)
+
 
 add_subdirectory(src)
 
