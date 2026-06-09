@@ -1,5 +1,6 @@
-#include "KSCOSsystem.h"
+#include "../inc/KSCOSsystem.h"
 
+#if __USE_STM32__
 #include "stm32f1xx_hal.h"
 #include "stm32f103xb.h"
 #include "stm32f1xx_hal_rcc.h"
@@ -105,4 +106,20 @@ void KSCOS_Error_Handler(void)
   {
     
   }
+}
+#endif
+#if __USE_PC__
+#include <stdio.h>
+void KSCOS_Error_Handler(void)
+{
+  printf("KSCOS_Error_Handler\n");
+  while (1)
+  {
+    
+  }
+}
+#endif
+void KSCOS_default_Error_Handler(void* data)
+{
+  KSCOS_Error_Handler();
 }

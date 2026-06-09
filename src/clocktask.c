@@ -2,7 +2,9 @@
 
 #if __USE_CLOCK_TASK__
 #include "../inc/clocktask.h"
+#include "../inc/KSCOSsystem.h"
 
+#define default_clock_task_cycle 1000
 #if __USE_STM32__
 #include "stm32f1xx_hal.h"
 #include "../third_party/stm32/inc/stm32f1xx_hal_tim.h"
@@ -71,23 +73,16 @@ CTASK_STOP clock_task_stop(clock_task_t* task){
     stm_clock_task_running_flag = 0;
     return 0;
 }
-
-__volatile clock_task_t stm_clock_task={
-    .task_id = stm_clock_task_id,
-    .init = MX_TIM2_Init,
-    .run = clock_task_run,
-    .callback = NULL,
-    .stop = clock_task_stop,
-};
+static const CTASK_INIT_FUNC default_init = MX_TIM2_Init;
+static const CTASK_CALLBACK_FUNC default_callback = KSCOS_default_Error_Handler;
+const clock_task_t clock_default_task = (clock_task_t){default_init,clock_task_run,default_callback
+    ,clock_task_stop,0,default_clock_task_cycle,0};
 
 #endif
 #if __USE_PC__
 #include <windows.h>
 #include <pthread.h>
 // 任务周期，单位：毫秒
-static const uint32_t pc_clock_task_cycle = 1000;
-// 任务名称
-const uint32_t pc_clock_task_id =0x00000001;
 // 任务结束标志
 static ki8 pc_clock_task_running_flag = 0;
 
@@ -96,7 +91,7 @@ static void* task_funtion(void* task){
     clock_task_t* taskp = (clock_task_t*)task;
     printf("task start:%d\n",taskp->task_id);
     while(pc_clock_task_running_flag){
-        Sleep(pc_clock_task_cycle);
+        Sleep(taskp->task_cycle);
         taskp->callback(taskp->user_data);
     }
 }
@@ -115,13 +110,34 @@ CTASK_STOP clock_task_stop(clock_task_t* task){
     return 0;
 }
 
- __volatile clock_task_t pc_clock_task={
-    .task_id = pc_clock_task_id,
-    .init = NULL,
-    .run = clock_task_run,
-    .callback = NULL,
-    .stop = clock_task_stop,
-};
+// static ki8 pc_default_handler(void* data) { (void)data; return -1; }
+static const CTASK_INIT_FUNC default_init = KSCOS_default_Error_Handler;
+static const CTASK_CALLBACK_FUNC default_callback = KSCOS_default_Error_Handler;
+const clock_task_t clock_default_task = (clock_task_t){default_init,clock_task_run,default_callback
+    ,clock_task_stop,0,default_clock_task_cycle,0};
+
 #endif
+static uint8_t default_task_id = 1;
+#define default_task_id() default_task_id++
+clock_task_t  clock_task_create(CTASK_INIT_FUNC init,CTASK_CALLBACK_FUNC callback
+    ,void* user_data,uint16_t task_cycle){
+        if(init == NULL){
+            init = default_init;
+        }
+        if(callback == NULL){
+            callback = default_callback;
+        }
+               clock_task_t task={
+            .task_id = default_task_id(),
+            .init = init,
+            .run = clock_task_run,
+            .callback = callback,
+            .stop = clock_task_stop,
+            .user_data = user_data,
+            .task_cycle = task_cycle,
+        };
+        return task;
+}
+
 
 #endif
