@@ -73,17 +73,17 @@ uint8_t key_scan(void)
 }
 #endif
 
-#ifdef __USE_INPUT_KEY_SIMU__
+#ifdef __USE_PC__
 #include "../third_party/easyx/include/graphics.h"
-
+#include "../third_party/easyx/include/easyx.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char* pc_key_input_name = "pc_key";
+// const uint32_t pc_key_device_id = PC_KEY_DEVICE_ID;
 ExMessage key_msg;
 
 
-uint8_t pc_key_scan(void){
+uint16_t pc_key_scan(void){
     if (!peekmessage(&key_msg,EX_KEY)) return KEY_NONE;
     if(key_msg.message == WM_KEYDOWN){
         switch (key_msg.vkcode){
@@ -108,81 +108,30 @@ uint8_t pc_key_scan(void){
     }
     return KEY_NONE;
 }
+
+input_t pc_key_create(void){
+    return input_add((input_t){pc_key_scan(),PC_KEY_DEVICE_ID});
+}
+#define key_create pc_key_create
 #ifdef __cplusplus
 }
 #endif
-
-static input_t now_input;
-INPUT_INIT pc_key_init(void){
+ki8 key_init(void){
+    return 0;
+}    
+ki8 key_deinit(void){
     return 0;
 }
-INPUT_ADD pc_key_add(char* input_name,void* data){
-    uint8_t key = pc_key_scan();
-    now_input.key = key;
-    now_input.input_name = input_name;
-    return (input_t){pc_key_input_name,key};
-}
-INPUT_GET pc_key_get(char* input_name){
-    if(strcmp(input_name,pc_key_input_name)==0){
-        return &now_input;
-    }else{
-        return NULL;
-    }
-}
-#endif
+#endif //__USE_PC__ > 0
 
 
-
-//按键读取,获取按键持续状态
-uint8_t key_read(void){
-    
-    #if __BUTTON_SIMU__
-    
-    now_input.key = key_scan();
-    
-    return 0;
-    #else 
-    static uint8_t lastkey= KEY_NONE;
-    static uint8_t nowkey=KEY_NONE;
-    static uint8_t realkey=KEY_NONE;
-    static uint16_t timer =0;
-    nowkey = key_scan();
-    if(nowkey != lastkey){
-        if(nowkey != KEY_NONE){
-            realkey = nowkey|KEY_PRESS;
-        }else if(nowkey == KEY_NONE && lastkey != KEY_NONE){
-            realkey = lastkey|KEY_RELEASE;
-            timer =0;
-        }
-    }else{
-        if(nowkey == KEY_NONE){realkey = nowkey;
-        }else{
-            timer++;
-            #if _USE_KEY_KEEP_ > 0
-            if(timer >= _USE_KEY_KEEP_){
-                realkey = nowkey|KEY_KEEP_FULL;
-            }else{
-                realkey = nowkey|KEY_KEEP_NOFULL;
-            }
-            #else
-            realkey = nowkey|KEY_KEEP_NOFULL;
-            #endif
-        }
-    }
-    lastkey = nowkey;
-    return realkey;
-    #endif
-}
+input_device key_default_device{
+    .device_id = KEY_DEVICE_ID,
+    .input_init = key_init,
+    .input_create = key_create,
+    .input_deinit = key_deinit,
+};
 
 
-input_device sys_key_device;
-input_device* k_key_device_init(void){
-    sys_key_device.input_get = input_key_get;
-    sys_key_device.input_add = input_key_add;
-    return &sys_key_device;
-}
-input_device* k_key_device_find(const char* app_name){
-    return &sys_key_device;
-}
 
 #endif

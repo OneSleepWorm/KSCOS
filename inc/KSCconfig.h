@@ -16,7 +16,7 @@
 #define __USE_FLASH__ 0
 #define __USE_UART__ 0
 #define __USE_LITTLEFS__ 0
-#define __USE_KEY__ 0
+#define __USE_KEY__ 1
 //屏幕配置
 #if __USE_LCD__
 // #define __USE_ST7735__ 
@@ -24,7 +24,7 @@
 // #define __USE_OTHER_LCD__
 #endif
 //细节配置
-#define KEY_QUEUE_SIZE 5
+#define INPUT_QUEUE_SIZE 4
 #define __BUTTON_SIMU__ 1
 #define __LITTLE_END_COLOR__ 1
 //程序配置
