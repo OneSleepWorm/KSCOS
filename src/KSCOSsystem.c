@@ -119,7 +119,8 @@ void KSCOS_Error_Handler(void)
   }
 }
 #endif
-void KSCOS_default_Error_Handler(void* data)
+ki8 KSCOS_default_Error_Handler(void* data)
 {
   KSCOS_Error_Handler();
+  return -1;
 }

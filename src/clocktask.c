@@ -113,7 +113,8 @@ CTASK_STOP clock_task_stop(clock_task_t* task){
 // static ki8 pc_default_handler(void* data) { (void)data; return -1; }
 static const CTASK_INIT_FUNC default_init = KSCOS_default_Error_Handler;
 static const CTASK_CALLBACK_FUNC default_callback = KSCOS_default_Error_Handler;
-const clock_task_t clock_default_task = (clock_task_t){default_init,clock_task_run,default_callback
+const clock_task_t clock_default_task = (clock_task_t){KSCOS_default_Error_Handler
+    ,clock_task_run ,KSCOS_default_Error_Handler
     ,clock_task_stop,0,default_clock_task_cycle,0};
 
 #endif
