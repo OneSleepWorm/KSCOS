@@ -6,12 +6,12 @@
 typedef struct clock_task_t clock_task_t;
 typedef ki8 (*CTASK_INIT_FUNC)(clock_task_t* task);
 typedef ki8 (*CTASK_RUN_FUNC)(clock_task_t* task);
-typedef void (*CTASK_CALLBACK_FUNC)(void* user_data);
+typedef ki8 (*CTASK_CALLBACK_FUNC)(void* user_data);
 typedef ki8 (*CTASK_STOP_FUNC)(clock_task_t* task);
 
 typedef ki8 CTASK_INIT;
 typedef ki8 CTASK_RUN;
-typedef void CTASK_CALLBACK;
+typedef ki8 CTASK_CALLBACK;
 typedef ki8 CTASK_STOP;
 
 
