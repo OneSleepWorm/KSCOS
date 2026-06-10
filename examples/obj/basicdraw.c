@@ -13,7 +13,7 @@ int main(void){
 
   kfull(devp,&screen,wwhite,0,0,240,160);
 
-  kstring(devp,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
+  kstring(devp,&screen,"KSCOS Basic Shapes",5,2,rred,wwhite);
 
   kline(devp,&screen,bblue,5,20,100,20);
   kstring(devp,&screen,"kline",5,22,bblue,wwhite);

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(KSCdraw)
+project(KSCOS)
 
 # 设置全局 C++ 标准（要求至少 C++17）
 set(CMAKE_CXX_STANDARD 11)
@@ -18,20 +18,20 @@ set_target_properties(easyx PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/third_party/easyx/include"
 )
 
-add_executable(KSCdraw master.c)
+add_executable(KSCOS master.c)
 
-target_compile_options(KSCdraw PRIVATE -Wall -Wextra)
+target_compile_options(KSCOS PRIVATE -Wall -Wextra)
 
 
 
 add_subdirectory(src)
 
-target_link_libraries(KSCdraw PRIVATE KSCDRAW_SRC easyx)
+target_link_libraries(KSCOS PRIVATE KSCDRAW_SRC easyx)
 
 # target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 #     # Add user defined include paths
-#     KSCdraw/inc
-#     KSCdraw/three_party/easyx/include
+#     KSCOS/inc
+#     KSCOS/third_party/easyx/include
 # )
 
 # target_compile_definitions(KSCdraw PRIVATE __USE_PC__=1)

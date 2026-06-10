@@ -70,7 +70,7 @@ typedef int16_t ki16;
 #include "esp_err.h"
 #include "esp_log.h"
 
-#define PPTAG "KSCdraw"
+#define PPTAG "KSCOS"
 #define log(...) ESP_LOGW(PPTAG, __VA_ARGS__)
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif
