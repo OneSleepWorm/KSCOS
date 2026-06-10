@@ -27,15 +27,15 @@
 #ifdef __USE_PC__
 #define PC_KEY_DEVICE_ID (1+1<<8)
 #define KEY_DEVICE_ID PC_KEY_DEVICE_ID
-#endif
+#endif //__USE_PC__
 
 #ifdef __USE_STM32__
 
-#endif
+#endif //__USE_STM32__
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif //__cplusplus
 
 extern input_device key_default_device;
 

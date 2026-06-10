@@ -21,10 +21,12 @@ static ki8 stm_clock_task_running_flag = 0;
 #define KDelay HAL_Delay
 
 TIM_HandleTypeDef htim2;
-extern __volatile clock_task_t stm_clock_task;
+__volatile clock_task_t stm_clock_task;
+__volatile clock_task_t* now_clock_task;
 
 CTASK_INIT MX_TIM2_Init(clock_task_t* task)
 {
+    now_clock_task = task;
     __HAL_RCC_TIM2_CLK_ENABLE();        // 使能TIM2时钟
 
     htim2.Instance = TIM2;
@@ -52,7 +54,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2)
     {
-        stm_clock_task.callback(stm_clock_task.user_data);
+        now_clock_task->callback(now_clock_task->user_data);
     }
 }
 

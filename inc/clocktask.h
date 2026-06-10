@@ -4,7 +4,7 @@
 #include "KSCconfig.h"
 
 typedef struct clock_task_t clock_task_t;
-typedef ki8 (*CTASK_INIT_FUNC)(void* user_data);
+typedef ki8 (*CTASK_INIT_FUNC)(clock_task_t* task);
 typedef ki8 (*CTASK_RUN_FUNC)(clock_task_t* task);
 // 回调函数,这里的返回值实际上没有意义,只是为了保持一致的接口
 typedef ki8 (*CTASK_CALLBACK_FUNC)(void* user_data);
