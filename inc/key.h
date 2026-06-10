@@ -4,27 +4,29 @@
 
 #if __USE_KEY__
 #include "input.h"
-#define KEY_NONE  0xFF
+#define KEY_DEVICE_ID (1+(1<<8))
 
-#define KEY_A0    (1<<0)
-#define KEY_A1    (1<<1)
-#define KEY_A2    (1<<2)
-#define KEY_A3    (1<<3)
-#define KEY_A4    (1<<4)
-#define KEY_A5    (1<<5)
-#define KEY_A6    (1<<6)
-#define KEY_A7    (1<<7)
-#define KEY_A8    (1<<8)
-#define KEY_A9    (1<<9)
-#define KEY_A10   (1<<10)
-#define KEY_A11   (1<<11)
-#define KEY_A12   (1<<12)
-#define KEY_A13   (1<<13)
-#define KEY_A14   (1<<14)
-#define KEY_A15   (1<<15)
+#define KEY_NONE  0U
+
+#define KEY_A0    (1U<<0)
+#define KEY_A1    (1U<<1)
+#define KEY_A2    (1U<<2)
+#define KEY_A3    (1U<<3)
+#define KEY_A4    (1U<<4)
+#define KEY_A5    (1U<<5)
+#define KEY_A6    (1U<<6)
+#define KEY_A7    (1U<<7)
+#define KEY_A8    (1U<<8)
+#define KEY_A9    (1U<<9)
+#define KEY_A10   (1U<<10)
+#define KEY_A11   (1U<<11)
+#define KEY_A12   (1U<<12)
+#define KEY_A13   (1U<<13)
+#define KEY_A14   (1U<<14)
+#define KEY_A15   (1U<<15)
 
 
-#ifdef __USE_PC__
+#if __USE_PC__
 #define PC_KEY_DEVICE_ID (1+1<<8)
 #define KEY_DEVICE_ID PC_KEY_DEVICE_ID
 #endif //__USE_PC__

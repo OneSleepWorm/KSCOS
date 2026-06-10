@@ -3,74 +3,103 @@
 #if __USE_KEY__
 
 #if __USE_STM32__
-// void key_init(void)
-// {
-//     GPIO_InitTypeDef GPIO_InitStruct = {0};
+#include "stm32f1xx_hal.h"
 
-//     __HAL_RCC_GPIOA_CLK_ENABLE();
 
-//     // PA0~PA3：推挽输出
-//     GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
-//     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-//     GPIO_InitStruct.Pull = GPIO_NOPULL;
-//     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-//     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#define KEY_TICK_TIME 10
 
-//     // PA4~PA7：上拉输入
-//     GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
-//     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-//     GPIO_InitStruct.Pull = GPIO_PULLUP;
-//     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#define keyrow0 GPIO_PIN_0
+#define keyrow1 GPIO_PIN_1
+#define keyrow2 GPIO_PIN_2
+#define keyrow3 GPIO_PIN_3
+#define keycol0 GPIO_PIN_4
+#define keycol1 GPIO_PIN_5
+#define keycol2 GPIO_PIN_6
+#define keycol3 GPIO_PIN_7
 
-//     // 所有行输出高
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
-// }
+#define keysetgpio(pin,level) HAL_GPIO_WritePin(GPIOA, pin, level)
+#define keygetgpio(pin) HAL_GPIO_ReadPin(GPIOA, pin)
+ki8 key_init(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-// //按键扫描,获取按键物理状态
-// uint8_t key_scan(void)
-// {
-//     uint8_t key = KEY_NONE;
+    __HAL_RCC_GPIOA_CLK_ENABLE();
 
-//     // 行0（PA0）→ A0 A1 A2 A3
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
-//     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A0;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A4;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A8;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A12;
+    // PA0~PA3：推挽输出
+    GPIO_InitStruct.Pin = keyrow0|keyrow1|keyrow2|keyrow3;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-//     if(key != KEY_NONE) return key;
+    // PA4~PA7：下拉输入
+    GPIO_InitStruct.Pin = keycol0|keycol1|keycol2|keycol3;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    // 所有行输出低
+    keysetgpio(keyrow0|keyrow1|keyrow2|keyrow3,0);
+    return 0;
+}
 
-//     // 行1（PA1）→ A4 A5 A6 A7
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
-//     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A1;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A5;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A9;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A13;
+//按键扫描,获取按键物理状态
+uint32_t key_scan(void)
+{
+    uint32_t key = 0;
 
-//     if(key != KEY_NONE) return key;
+    // 行0（PA0）→ A0 A1 A2 A3
+    keysetgpio(keyrow0,1);
+    keysetgpio(keyrow1|keyrow2|keyrow3,0);
+    key|=keygetgpio(keycol0)<<0;
+    key|=keygetgpio(keycol1)<<1;
+    key|=keygetgpio(keycol2)<<2;
+    key|=keygetgpio(keycol3)<<3;
+    keysetgpio(keyrow1,1);
+    keysetgpio(keyrow0|keyrow2|keyrow3,0);
+    key|=keygetgpio(keycol0)<<4;
+    key|=keygetgpio(keycol1)<<5;
+    key|=keygetgpio(keycol2)<<6;
+    key|=keygetgpio(keycol3)<<7;
+    keysetgpio(keyrow2,1);
+    keysetgpio(keyrow0|keyrow1|keyrow3,0);
+    key|=keygetgpio(keycol0)<<8;
+    key|=keygetgpio(keycol1)<<9;
+    key|=keygetgpio(keycol2)<<10;
+    key|=keygetgpio(keycol3)<<11;
+    keysetgpio(keyrow3,1);
+    keysetgpio(keyrow0|keyrow1|keyrow2,0);
+    key|=keygetgpio(keycol0)<<12;
+    key|=keygetgpio(keycol1)<<13;
+    key|=keygetgpio(keycol2)<<14;
+    key|=keygetgpio(keycol3)<<15;
+    return key;
+}
+uint32_t key_scan_ex(void){
+    static uint32_t lastkey0 = 0;
+    static uint32_t lastkey1 = 0;
+    static uint32_t statekey0 = 0;
+    static uint32_t statekey1 = 0;
+    uint32_t nowkey = key_scan();
+    // 状态机获取,得到消抖后的按键状态
+    statekey0 = lastkey1 & lastkey0 & nowkey;
+    // 状态机更新,得到按键状态变化
+    uint32_t realkey = statekey0 ^ statekey1;
+    // 状态机复位
+    lastkey1 = lastkey0;
+    lastkey0 = nowkey;
 
-//     // 行2（PA2）→ A8 A9 A10 A11
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3, GPIO_PIN_SET);
-//     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A2;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A6;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A10;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A14;
+    statekey1 = statekey0;
+    // 状态机返回按键状态变化
+    return realkey;
+}
+input_t key_create(void){
+    // 扫描按键,获取按键状态变化
+    return input_add((input_t){key_scan_ex(),KEY_DEVICE_ID});
 
-//     if(key != KEY_NONE) return key;
-
-//     // 行3（PA3）→ A12 A13 A14 A15
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
-//     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2, GPIO_PIN_SET);
-//     if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A3;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A7;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A11;
-//     else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A15;
-
-//     return key;
-// }
+}
+ki8 key_deinit(void){
+    return 0;
+}
 #endif
 
 #if __USE_PC__
@@ -125,12 +154,12 @@ ki8 key_deinit(void){
 #endif //__USE_PC__ > 0
 
 
-// input_device key_default_device ={
-//     .device_id = KEY_DEVICE_ID,
-//     .input_init = key_init,
-//     .input_create = key_create,
-//     .input_deinit = key_deinit,
-// };
+input_device key_default_device ={
+    .device_id = KEY_DEVICE_ID,
+    .input_init = key_init,
+    .input_create = key_create,
+    .input_deinit = key_deinit,
+};
 
 
 

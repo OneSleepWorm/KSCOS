@@ -25,7 +25,7 @@ typedef struct input_device{
     INPUT_CREATE_FUNC input_create;
     INPUT_DEINIT_FUNC input_deinit;
 }input_device;
-
+typedef input_device input_device_t;
 #ifdef __cplusplus
 extern "C" {
 #endif
