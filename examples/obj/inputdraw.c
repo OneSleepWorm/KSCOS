@@ -62,7 +62,7 @@ int main(void)
 {
 
   // 初始化系统
-  KSCOSsystem_Init();
+  KSCOSSystem_Init();
 
   KSCOSSystemClock_Init(KSCOS_NORMAL_CLOCK);
 

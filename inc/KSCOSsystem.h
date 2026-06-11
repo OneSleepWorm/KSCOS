@@ -9,7 +9,7 @@
 #define KSCOS_HIGH_CLOCK 2
 
 extern __volatile uint32_t KSCOSsystem_Clock;
-void KSCOSsystem_Init(void);
+void KSCOSSystem_Init(void);
 void KSCOSSystemClock_Init(uint8_t clock_type);
 void KSCOS_Error_Handler(void);
 ki8 KSCOS_default_Error_Handler(void* data);

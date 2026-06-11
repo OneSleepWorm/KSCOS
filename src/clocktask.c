@@ -78,7 +78,7 @@ CTASK_STOP clock_task_stop(clock_task_t* task){
 static const CTASK_INIT_FUNC default_init = MX_TIM2_Init;
 static const CTASK_CALLBACK_FUNC default_callback = KSCOS_default_Error_Handler;
 const clock_task_t clock_default_task = (clock_task_t){default_init,clock_task_run,default_callback
-    ,clock_task_stop,0,default_clock_task_cycle,0};
+    ,clock_task_stop,0,default_clock_task_cycle,0,0};
 
 #endif
 #if __USE_PC__
@@ -92,32 +92,40 @@ static ki8 pc_clock_task_running_flag = 0;
 static void* task_funtion(void* task){
     clock_task_t* taskp = (clock_task_t*)task;
     printf("task start:%d\n",taskp->task_id);
-    while(pc_clock_task_running_flag){
+    while(taskp->state == 1){
         Sleep(taskp->task_cycle);
         taskp->callback(taskp->user_data);
     }
+    printf("task end:%d\n",taskp->task_id);
 }
 
 CTASK_RUN clock_task_run(clock_task_t* task){
         pthread_t thread_id;
         pthread_create(&thread_id, NULL
         , task_funtion, (void*)task);
-        pc_clock_task_running_flag = 1;
+        task->state = 1;
         pthread_detach(thread_id);
         return 0;
 }
 
 CTASK_STOP clock_task_stop(clock_task_t* task){
-    pc_clock_task_running_flag = 0;
+    task->state = 0;
     return 0;
 }
 
 // static ki8 pc_default_handler(void* data) { (void)data; return -1; }
-static const CTASK_INIT_FUNC default_init = KSCOS_default_Error_Handler;
-static const CTASK_CALLBACK_FUNC default_callback = KSCOS_default_Error_Handler;
-const clock_task_t clock_default_task = (clock_task_t){KSCOS_default_Error_Handler
-    ,clock_task_run ,KSCOS_default_Error_Handler
-    ,clock_task_stop,0,default_clock_task_cycle,0};
+static const ki8 clock_task_init(clock_task_t* task){
+    return 0;
+}
+static const ki8 clock_task_callback(void* data){
+    return 0;
+}
+#define default_init clock_task_init
+#define default_callback clock_task_callback
+
+const clock_task_t clock_default_task = (clock_task_t){clock_task_init
+    ,clock_task_run ,clock_task_callback
+    ,clock_task_stop,0,default_clock_task_cycle,0,0};
 
 #endif
 static uint8_t default_task_id = 1;

@@ -1,6 +1,42 @@
 #include "inc/master.h"
-#include <windows.h>
 
+/////////////////////////////////////////////////////////
+/**
+ * @antuor   OneSleepWorm(一只瞌睡虫)
+ * @brief    定时任务,扫描按键,获取按键状态变化
+ * @note     使用定时器1实现10ms的矩阵按键扫描并获取按键状态变化
+ */
+/////////////////////////////////////////////////////////
+
+// 定时任务回调函数
+ki8 myclocktask_callback(void* user_data){
+    // 扫描按键,获取按键状态变化
+     ((input_device_t*)user_data)->input_create();
+    // testkey ++;
+    return 0;
+}
+// 数字转换为字符串
+char* numtostr(uint32_t num){
+    static char str[16];
+    char* p = str + sizeof(str) - 1;
+    *p = '\0';
+    do {
+        *--p = '0' + num % 10;
+        num /= 10;
+    } while (num);
+    return p;
+}
+// 数字转换为二进制字符串
+char* numtobin(uint32_t num, uint8_t bits){
+    static char str[40];
+    char* p = str;
+    for(int i=bits-1; i>=0; i--){
+        if(i!=bits-1 && (i+1)%4==0) *p++ = ' ';
+        *p++ = (num >> i) & 1 ? '1' : '0';
+    }
+    *p = '\0';
+    return str;
+}
 char diskey(uint32_t keydata){
     switch(keydata){
         case KEY_A0:return '0';
@@ -19,64 +55,74 @@ char diskey(uint32_t keydata){
         case KEY_A13:return 'D';    
         case KEY_A14:return 'E';
         case KEY_A15:return 'F';
-        default:printf("keydata:%d\n",keydata);return '?';
+        default:return '?';
     }
 }
+int main(void)
+{
 
-// 输入回调函数
-ki8 keycallback(void* user_data){
-    input_device* keydevice=(input_device*)user_data;
-    keydevice->input_create();
-    // printf("keyinput:%d,%d\n",keyinput.input_id,keyinput.data);
-    return 1;
-}
+  // 初始化系统
+  KSCOSSystem_Init();
 
+  KSCOSSystemClock_Init(KSCOS_NORMAL_CLOCK);
 
-int main(void){
-    k_draw_device* devp = kscreenmount();
+  /* USER CODE BEGIN 2 */
+k_draw_device* devp = kscreenmount();
+KSC_window screen={0};
+// kfull(devp,&screen,wwhite,0,0,240,160);
+  screen.ssx=0;
+  screen.ssy=0;
+  screen.width=160;
+  screen.height=80;
+  screen.bk=wwhite;
 
-  KSC_window screen={
-      .ssx=0,
-      .ssy=0,
-      .width=240,
-      .height=160,
-      .bk=wwhite,
-  };
+  kfull(devp,&screen,wwhite,0,0,160,81);
 
-  kfull(devp,&screen,wwhite,0,0,240,160);
-  // 初始化显示字符对象
-  char cdata = '1';
+  // kstring(devp,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
+
+  // char cdata = '3';
+  char cdatastr1[40] ="hello world";
   ksc_obj_t obj1;
-  obj1._type = _char;
+  obj1._type = _string;
   obj1.colorck = bblack;
-  obj1.data = (void*)&cdata;
+  obj1.data = (void*)&cdatastr1;
   obj1.sdx = 10;
   obj1.sdy = 10;
-  kobjdraw(devp,&screen,&obj1);
-  // 初始化输入设备
-  input_device keydevice= key_default_device;
-  uint32_t keyid = key_default_device.device_id;
-  printf("keyid:%d\n",keyid);
+  char cdatastr2[40] ="hello world";
+  ksc_obj_t obj2;
+  obj2._type = _string;
+  obj2.colorck = bblack;
+  obj2.data = (void*)&cdatastr2;
+  obj2.sdx = 10;
+  obj2.sdy = 30;
+  // 创建按键输入结构体
+  input_device_t keydevice = key_default_device;
   keydevice.input_init();
-  // 创建输入任务
-  clock_task_t clocktask=
-  clock_task_create(NULL,keycallback,(void*)&keydevice,100);
-  clocktask.run(&clocktask);//绑定自己编写的输入回调函数，里面应input_create()
-  cdata = '1';
-  input_t keyinput;
-  // 主循环
-  while(1){
-    Sleep(10);
-    // 获取输入
-    keyinput = input_get(keyid);
-    // 显示输入字符
-    if(keyinput.input_id==keyid && keyinput.data!=255){
-      cdata = diskey(keyinput.data);
+  // 创建定时任务初始化
+  clock_task_t clocktask1= clock_default_task;
+  clocktask1.task_cycle = 30;
+  // 定时任务回调函数绑定create函数
+  clocktask1.callback = myclocktask_callback;
+  clocktask1.user_data = (void*)&keydevice;
+  clocktask1.init(&clocktask1);
+  clocktask1.run(&clocktask1);
 
-    printf("[main] id:%d,data:%d\n",keyinput.input_id,keyinput.data);
+  while (1)
+  {
+    // keydevice.input_create();
+    // sysdelay(10);
+    input_t keyinput = input_get(KEY_DEVICE_ID);
+    if(keyinput.input_id == KEY_DEVICE_ID){
+        strcpy(cdatastr1,numtobin(keyinput.data,16));
+        // if(keyinput.data>>16)
+        strcpy(cdatastr2,numtobin(keyinput.data>>16,16));
+        // strcpy(cdatastr3,numtobin(testkey,16));
     }
+    
     kobjdraw(devp,&screen,&obj1);
+    kobjdraw(devp,&screen,&obj2);
+    // kobjdraw(devp,&screen,&obj3);
+
+
   }
-  // clocktask.stop(&clocktask);
-    return 0;
 }

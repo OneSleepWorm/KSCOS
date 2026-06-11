@@ -57,8 +57,9 @@ typedef int16_t ki16;
 #if __USE_PC__
 #include <stdlib.h>
 #include <stdio.h>
+#include <windows.h>
 #define log(...) 0
-#define __USE_INPUT_KEY_SIMU__
+
 #endif
 
 #if __USE_STM32__
