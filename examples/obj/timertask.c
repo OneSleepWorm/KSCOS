@@ -9,8 +9,9 @@
 /////////////////////////////////////////////////////////
 
 // 定时任务回调函数
-void myclocktask_callback(void* user_data){
+ki8 myclocktask_callback(void* user_data){
     (*(char*)user_data)++;
+    return 0;
 }
 
 int main(void)
@@ -48,6 +49,7 @@ KSC_window screen={0};
   clock_task_t clocktask1= clock_default_task;
   clocktask1.callback = myclocktask_callback;
   clocktask1.user_data = (void*)&cdata;
+  clocktask1.init(&clocktask1);
   clocktask1.run((clock_task_t*)&clocktask1);
 
   while (1)
