@@ -100,7 +100,7 @@ KSC_window screen={0};
   keydevice.input_init();
   // 创建定时任务初始化
   clock_task_t clocktask1= clock_default_task;
-  clocktask1.task_cycle = 100;
+  clocktask1.task_cycle = 30;
   // 定时任务回调函数绑定create函数
   clocktask1.callback = myclocktask_callback;
   clocktask1.user_data = (void*)&keydevice;
