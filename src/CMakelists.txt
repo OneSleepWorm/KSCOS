@@ -3,11 +3,15 @@ add_library(KSCDRAW_SRC
                         KSCdisplay.c
                         KSCfont.c
                         KSCimg.c
+                        KSCOSsystem.c
                         clocktask.c
-
+                        key.c
+                        input.c
 )
-set_source_files_properties(KSCdisplay.c PROPERTIES LANGUAGE CXX)
+set_source_files_properties(KSCdisplay.c key.c PROPERTIES LANGUAGE CXX)
 
 target_compile_definitions(KSCDRAW_SRC PUBLIC __USE_AUTO__=1 __USE_PC__=1 __USE_STM32__=0)
+
+target_include_directories(KSCDRAW_SRC PUBLIC ../third_party/easyx/include)
 
 target_link_libraries(KSCDRAW_SRC PUBLIC easyx)

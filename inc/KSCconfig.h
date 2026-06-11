@@ -16,7 +16,7 @@
 #define __USE_FLASH__ 0
 #define __USE_UART__ 0
 #define __USE_LITTLEFS__ 0
-#define __USE_KEY__ 0
+#define __USE_KEY__ 1
 //屏幕配置
 #if __USE_LCD__
 // #define __USE_ST7735__ 
@@ -24,7 +24,7 @@
 // #define __USE_OTHER_LCD__
 #endif
 //细节配置
-#define KEY_QUEUE_SIZE 5
+#define INPUT_QUEUE_SIZE 4
 #define __BUTTON_SIMU__ 1
 #define __LITTLE_END_COLOR__ 1
 //程序配置
@@ -70,7 +70,7 @@ typedef int16_t ki16;
 #include "esp_err.h"
 #include "esp_log.h"
 
-#define PPTAG "KSCdraw"
+#define PPTAG "KSCOS"
 #define log(...) ESP_LOGW(PPTAG, __VA_ARGS__)
 #define co(color) (((color)&0xFF)<<8)|((color)&0xFF00)
 #endif

@@ -1,12 +1,36 @@
 #include "inc/master.h"
 #include <windows.h>
 
-ksc_obj_t obj1;
-
-void myclocktask_callback(void* user_data){
-    (*(char*)user_data)+=2;
-    printf("data:%c\n",*(char*)user_data);
+char diskey(uint32_t keydata){
+    switch(keydata){
+        case KEY_A0:return '0';
+        case KEY_A1:return '1';
+        case KEY_A2:return '2';
+        case KEY_A3:return '3';
+        case KEY_A4:return '4';
+        case KEY_A5:return '5';
+        case KEY_A6:return '6';
+        case KEY_A7:return '7';
+        case KEY_A8:return '8'; 
+        case KEY_A9:return '9';
+        case KEY_A10:return 'A';  
+        case KEY_A11:return 'B';  
+        case KEY_A12:return 'C';  
+        case KEY_A13:return 'D';    
+        case KEY_A14:return 'E';
+        case KEY_A15:return 'F';
+        default:printf("keydata:%d\n",keydata);return '?';
+    }
 }
+
+// 输入回调函数
+ki8 keycallback(void* user_data){
+    input_device* keydevice=(input_device*)user_data;
+    keydevice->input_create();
+    // printf("keyinput:%d,%d\n",keyinput.input_id,keyinput.data);
+    return 0;
+}
+
 
 int main(void){
     k_draw_device* devp = kscreenmount();
@@ -20,33 +44,7 @@ int main(void){
   };
 
   kfull(devp,&screen,wwhite,0,0,240,160);
-
-  // kstring(devp,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
-
-  // kline(devp,&screen,bblue,5,20,100,20);
-  // kstring(devp,&screen,"kline",5,22,bblue,wwhite);
-
-  // kbox(devp,&screen,rred,5,35,30,30);
-  // kstring(devp,&screen,"kbox",5,68,rred,wwhite);
-
-  // kfull(devp,&screen,ggreen,5,78,30,30);
-  // kstring(devp,&screen,"kfillbox",5,110,ggreen,wwhite);
-
-  // kcircle(devp,&screen,bblack,75,50,15);
-  // kstring(devp,&screen,"kcircle",55,68,bblack,wwhite);
-
-  // kfillcircle(devp,&screen,bblue,75,95,15);
-  // kstring(devp,&screen,"kfillcircle",55,112,bblue,wwhite);
-
-  // kroundrect(devp,&screen,rred,120,20,50,40,8);
-  // kstring(devp,&screen,"kroundrect",115,62,rred,wwhite);
-
-  // kfillroundrect(devp,&screen,ggreen,120,78,50,40,8);
-  // kstring(devp,&screen,"kfillroundrect",110,120,ggreen,wwhite);
-
-  // kstring(devp,&screen,"Hello World!",120,140,bblack,wwhite);
-
-  // sleep(4);
+  // 初始化显示字符对象
   char cdata = '1';
   ksc_obj_t obj1;
   obj1._type = _char;
@@ -55,17 +53,30 @@ int main(void){
   obj1.sdx = 10;
   obj1.sdy = 10;
   kobjdraw(devp,&screen,&obj1);
-  clock_task_t clocktask=pc_clock_task;
-  // clocktask.init(&clocktask);
-  clocktask.callback = myclocktask_callback;
-  clocktask.user_data = (void*)&cdata;
-  clocktask.run(&clocktask);
-  // clocktask.stop(&clocktask);
+  // 初始化输入设备
+  input_device keydevice= key_default_device;
+  uint32_t keyid = key_default_device.device_id;
+  printf("keyid:%d\n",keyid);
+  keydevice.input_init();
+  // 创建输入任务
+  clock_task_t clocktask=
+  clock_task_create(NULL,keycallback,(void*)&keydevice,100);
+  clocktask.run(&clocktask);//绑定自己编写的输入回调函数，里面应input_create()
+  cdata = '1';
+  input_t keyinput;
+  // 主循环
   while(1){
-    Sleep(1000);
-    printf("[main]data:%s\n",&cdata);
+    Sleep(10);
+    // 获取输入
+    keyinput = input_get(keyid);
+    // 显示输入字符
+    if(keyinput.input_id==keyid && keyinput.data!=255){
+      cdata = diskey(keyinput.data);
+
+    printf("[main] id:%d,data:%d\n",keyinput.input_id,keyinput.data);
+    }
     kobjdraw(devp,&screen,&obj1);
   }
-  clocktask.stop(&clocktask);
+  // clocktask.stop(&clocktask);
     return 0;
 }

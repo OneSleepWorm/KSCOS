@@ -3,87 +3,117 @@
 #if __USE_KEY__
 
 #if __USE_STM32__
-void key_init(void)
+#include "stm32f1xx_hal.h"
+
+
+#define KEY_TICK_TIME 10
+
+#define keyrow0 GPIO_PIN_0
+#define keyrow1 GPIO_PIN_1
+#define keyrow2 GPIO_PIN_2
+#define keyrow3 GPIO_PIN_3
+#define keycol0 GPIO_PIN_4
+#define keycol1 GPIO_PIN_5
+#define keycol2 GPIO_PIN_6
+#define keycol3 GPIO_PIN_7
+
+#define keysetgpio(pin,level) HAL_GPIO_WritePin(GPIOA, pin, level)
+#define keygetgpio(pin) HAL_GPIO_ReadPin(GPIOA, pin)
+ki8 key_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
 
     // PA0~PA3：推挽输出
-    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Pin = keyrow0|keyrow1|keyrow2|keyrow3;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    // PA4~PA7：上拉输入
-    GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
+    // PA4~PA7：下拉输入
+    GPIO_InitStruct.Pin = keycol0|keycol1|keycol2|keycol3;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-    // 所有行输出高
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
+    // 所有行输出低
+    keysetgpio(keyrow0|keyrow1|keyrow2|keyrow3,0);
+    return 0;
 }
 
 //按键扫描,获取按键物理状态
-uint8_t key_scan(void)
+uint32_t key_scan(void)
 {
-    uint8_t key = KEY_NONE;
+    uint32_t key = 0;
 
     // 行0（PA0）→ A0 A1 A2 A3
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
-    if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A0;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A4;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A8;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A12;
-
-    if(key != KEY_NONE) return key;
-
-    // 行1（PA1）→ A4 A5 A6 A7
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_SET);
-    if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A1;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A5;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A9;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A13;
-
-    if(key != KEY_NONE) return key;
-
-    // 行2（PA2）→ A8 A9 A10 A11
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_3, GPIO_PIN_SET);
-    if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A2;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A6;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A10;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A14;
-
-    if(key != KEY_NONE) return key;
-
-    // 行3（PA3）→ A12 A13 A14 A15
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2, GPIO_PIN_SET);
-    if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_4)==0) key=KEY_A3;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_5)==0) key=KEY_A7;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_6)==0) key=KEY_A11;
-    else if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_7)==0) key=KEY_A15;
-
+    keysetgpio(keyrow0,1);
+    keysetgpio(keyrow1|keyrow2|keyrow3,0);
+    key|=keygetgpio(keycol0)<<0;
+    key|=keygetgpio(keycol1)<<1;
+    key|=keygetgpio(keycol2)<<2;
+    key|=keygetgpio(keycol3)<<3;
+    keysetgpio(keyrow1,1);
+    keysetgpio(keyrow0|keyrow2|keyrow3,0);
+    key|=keygetgpio(keycol0)<<4;
+    key|=keygetgpio(keycol1)<<5;
+    key|=keygetgpio(keycol2)<<6;
+    key|=keygetgpio(keycol3)<<7;
+    keysetgpio(keyrow2,1);
+    keysetgpio(keyrow0|keyrow1|keyrow3,0);
+    key|=keygetgpio(keycol0)<<8;
+    key|=keygetgpio(keycol1)<<9;
+    key|=keygetgpio(keycol2)<<10;
+    key|=keygetgpio(keycol3)<<11;
+    keysetgpio(keyrow3,1);
+    keysetgpio(keyrow0|keyrow1|keyrow2,0);
+    key|=keygetgpio(keycol0)<<12;
+    key|=keygetgpio(keycol1)<<13;
+    key|=keygetgpio(keycol2)<<14;
+    key|=keygetgpio(keycol3)<<15;
     return key;
+}
+uint32_t key_scan_ex(void){
+    static uint32_t lastkey0 = 0;
+    static uint32_t lastkey1 = 0;
+    static uint32_t statekey0 = 0;
+    static uint32_t statekey1 = 0;
+    uint32_t nowkey = key_scan();
+    // 状态机获取,得到三次消抖后的按键状态
+    statekey0 = lastkey0 & nowkey;
+    // statekey0 = nowkey;
+    // 状态机更新,得到按键状态变化,低十六位记录按键状态，高十六位记录按键上下沿
+    uint32_t realkey = ((statekey1^statekey0)<<16)|(statekey0&0xFFFF);
+    // 状态机复位
+    lastkey1 = lastkey0;
+    lastkey0 = nowkey;
+
+    statekey1 = statekey0;
+    // 状态机返回按键状态变化
+    return realkey;
+}
+input_t key_create(void){
+    // 扫描按键,获取按键状态变化
+    return input_add((input_t){key_scan_ex(),KEY_DEVICE_ID});
+
+}
+ki8 key_deinit(void){
+    return 0;
 }
 #endif
 
-#ifdef __USE_INPUT_KEY_SIMU__
+#if __USE_PC__
 #include "../third_party/easyx/include/graphics.h"
-
+#include "../third_party/easyx/include/easyx.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char* pc_key_input_name = "pc_key";
+// const uint32_t pc_key_device_id = PC_KEY_DEVICE_ID;
 ExMessage key_msg;
 
 
-uint8_t pc_key_scan(void){
+uint16_t pc_key_scan(void){
     if (!peekmessage(&key_msg,EX_KEY)) return KEY_NONE;
     if(key_msg.message == WM_KEYDOWN){
         switch (key_msg.vkcode){
@@ -108,81 +138,30 @@ uint8_t pc_key_scan(void){
     }
     return KEY_NONE;
 }
+
+input_t pc_key_create(void){
+    return input_add((input_t){pc_key_scan(),PC_KEY_DEVICE_ID});
+}
+#define key_create pc_key_create
 #ifdef __cplusplus
 }
 #endif
-
-static input_t now_input;
-INPUT_INIT pc_key_init(void){
+ki8 key_init(void){
+    return 0;
+}    
+ki8 key_deinit(void){
     return 0;
 }
-INPUT_ADD pc_key_add(char* input_name,void* data){
-    uint8_t key = pc_key_scan();
-    now_input.key = key;
-    now_input.input_name = input_name;
-    return (input_t){pc_key_input_name,key};
-}
-INPUT_GET pc_key_get(char* input_name){
-    if(strcmp(input_name,pc_key_input_name)==0){
-        return &now_input;
-    }else{
-        return NULL;
-    }
-}
-#endif
+#endif //__USE_PC__ > 0
 
 
-
-//按键读取,获取按键持续状态
-uint8_t key_read(void){
-    
-    #if __BUTTON_SIMU__
-    
-    now_input.key = key_scan();
-    
-    return 0;
-    #else 
-    static uint8_t lastkey= KEY_NONE;
-    static uint8_t nowkey=KEY_NONE;
-    static uint8_t realkey=KEY_NONE;
-    static uint16_t timer =0;
-    nowkey = key_scan();
-    if(nowkey != lastkey){
-        if(nowkey != KEY_NONE){
-            realkey = nowkey|KEY_PRESS;
-        }else if(nowkey == KEY_NONE && lastkey != KEY_NONE){
-            realkey = lastkey|KEY_RELEASE;
-            timer =0;
-        }
-    }else{
-        if(nowkey == KEY_NONE){realkey = nowkey;
-        }else{
-            timer++;
-            #if _USE_KEY_KEEP_ > 0
-            if(timer >= _USE_KEY_KEEP_){
-                realkey = nowkey|KEY_KEEP_FULL;
-            }else{
-                realkey = nowkey|KEY_KEEP_NOFULL;
-            }
-            #else
-            realkey = nowkey|KEY_KEEP_NOFULL;
-            #endif
-        }
-    }
-    lastkey = nowkey;
-    return realkey;
-    #endif
-}
+input_device key_default_device ={
+    .device_id = KEY_DEVICE_ID,
+    .input_init = key_init,
+    .input_create = key_create,
+    .input_deinit = key_deinit,
+};
 
 
-input_device sys_key_device;
-input_device* k_key_device_init(void){
-    sys_key_device.input_get = input_key_get;
-    sys_key_device.input_add = input_key_add;
-    return &sys_key_device;
-}
-input_device* k_key_device_find(const char* app_name){
-    return &sys_key_device;
-}
 
 #endif

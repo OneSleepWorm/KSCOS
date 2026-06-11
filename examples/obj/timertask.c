@@ -8,19 +8,20 @@
  */
 /////////////////////////////////////////////////////////
 
-void myclocktask_callback(void* user_data){
+// 定时任务回调函数
+ki8 myclocktask_callback(void* user_data){
     (*(char*)user_data)++;
+    return 0;
 }
 
 int main(void)
 {
 
-
+  // 初始化系统
   KSCOSsystem_Init();
 
   KSCOSSystemClock_Init(KSCOS_NORMAL_CLOCK);
-  
-  MX_GPIO_Init();
+
   /* USER CODE BEGIN 2 */
 k_draw_device* devp = kscreenmount();
 KSC_window screen={0};
@@ -43,10 +44,13 @@ KSC_window screen={0};
   obj1.sdx = 10;
   obj1.sdy = 10;
   kobjdraw(devp,&screen,&obj1);
-  stm_clock_task.init((clock_task_t*)&stm_clock_task);
-  stm_clock_task.callback = myclocktask_callback;
-  stm_clock_task.user_data = (void*)&cdata;
-  stm_clock_task.run((clock_task_t*)&stm_clock_task);
+  // 创建定时任务
+  // 初始化定时任务
+  clock_task_t clocktask1= clock_default_task;
+  clocktask1.callback = myclocktask_callback;
+  clocktask1.user_data = (void*)&cdata;
+  clocktask1.init(&clocktask1);
+  clocktask1.run((clock_task_t*)&clocktask1);
 
   while (1)
   {

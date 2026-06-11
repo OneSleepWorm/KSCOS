@@ -6,6 +6,7 @@
 typedef struct clock_task_t clock_task_t;
 typedef ki8 (*CTASK_INIT_FUNC)(clock_task_t* task);
 typedef ki8 (*CTASK_RUN_FUNC)(clock_task_t* task);
+// 回调函数,这里的返回值实际上没有意义,只是为了保持一致的接口
 typedef ki8 (*CTASK_CALLBACK_FUNC)(void* user_data);
 typedef ki8 (*CTASK_STOP_FUNC)(clock_task_t* task);
 
@@ -22,19 +23,18 @@ typedef ki8 CTASK_STOP;
 // 回调函数
 // 停止函数
 typedef struct clock_task_t {
-    const uint32_t task_id;
     CTASK_INIT_FUNC init;
     CTASK_RUN_FUNC run;
     CTASK_CALLBACK_FUNC callback;
     CTASK_STOP_FUNC stop;
     void* user_data;
+    uint16_t task_cycle;
+    const uint8_t task_id;
 }clock_task_t;
 
-#if __USE_PC__
-extern __volatile clock_task_t pc_clock_task;
-#endif
-#if __USE_STM32__
-extern __volatile clock_task_t stm_clock_task;
-#endif
+clock_task_t  clock_task_create(CTASK_INIT_FUNC init,CTASK_CALLBACK_FUNC callback
+    ,void* user_data,uint16_t task_cycle);
+
+extern const clock_task_t clock_default_task;
 
 #endif

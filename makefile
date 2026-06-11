@@ -17,13 +17,13 @@ OBJS = \
 	build/lfs.o \
 	build/lfs_config.o \
 	build/lfs_util.o \
-	build/KSCdraw.o \
+	build/KSCOS.o \
 	build/KSCimg.o \
 	build/KSCfont.o \
 	build/KSCdisplay.o \
 	build/W25Q64.o 
 
-TARGET = $(BUILD_DIR)/master.exe
+TARGET = $(BUILD_DIR)/KSCOS.exe
 
 all: prebuild $(OBJS) $(TARGET)
 
@@ -48,7 +48,7 @@ $(BUILD_DIR)/lfs_config.o: littlefs/lfs_config.c | prebuild
 $(BUILD_DIR)/lfs_util.o: littlefs/lfs_util.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD_DIR)/KSCdraw.o: src/KSCdraw.c | prebuild
+$(BUILD_DIR)/KSCOS.o: src/KSCdraw.c | prebuild
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/KSCimg.o: src/KSCimg.c | prebuild
@@ -75,4 +75,4 @@ reboot-debug:
 .PHONY: all clean prebuild reboot reboot-debug
 
 run:
-	./$(BUILD_DIR)/master.exe
+	./$(TARGET)
