@@ -32,7 +32,7 @@ CTASK_INIT MX_TIM2_Init(clock_task_t* task)
     htim2.Instance = TIM2;
     
     htim2.Init.Prescaler = KSCOSsystem_Clock / 10000 - 1;    // 预分频器：72MHz / 7200 = 10kHz
-    htim2.Init.Period = 10*stm_clock_task_cycle - 1;      // 自动重载值：10kHz / 10000 = 1Hz (1秒)
+    htim2.Init.Period = 10*task->task_cycle - 1;      // 自动重载值：10kHz / 10000 = 1Hz (1秒)
 
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;

@@ -1,4 +1,4 @@
-#include "inc/master.h"
+#include "../inc/master.h"
 
 /////////////////////////////////////////////////////////
 /**
@@ -7,11 +7,12 @@
  * @note     使用定时器1实现10ms的矩阵按键扫描并获取按键状态变化
  */
 /////////////////////////////////////////////////////////
-
+static uint32_t testkey =0;
 // 定时任务回调函数
 ki8 myclocktask_callback(void* user_data){
     // 扫描按键,获取按键状态变化
-    ((input_device_t*)user_data)->input_create();
+     ((input_device_t*)user_data)->input_create();
+    // testkey ++;
     return 0;
 }
 // 数字转换为字符串
@@ -80,20 +81,26 @@ KSC_window screen={0};
   // kstring(devp,&screen,"KSCdraw Basic Shapes",5,2,rred,wwhite);
 
   // char cdata = '3';
-  char cdatastr[40] ="hello world";
+  char cdatastr1[40] ="hello world";
   ksc_obj_t obj1;
   obj1._type = _string;
   obj1.colorck = bblack;
-  obj1.data = (void*)&cdatastr;
+  obj1.data = (void*)&cdatastr1;
   obj1.sdx = 10;
   obj1.sdy = 10;
-  // kobjdraw(devp,&screen,&obj1);
+  char cdatastr2[40] ="hello world";
+  ksc_obj_t obj2;
+  obj2._type = _string;
+  obj2.colorck = bblack;
+  obj2.data = (void*)&cdatastr2;
+  obj2.sdx = 10;
+  obj2.sdy = 30;
   // 创建按键输入结构体
   input_device_t keydevice = key_default_device;
   keydevice.input_init();
   // 创建定时任务初始化
   clock_task_t clocktask1= clock_default_task;
-  clocktask1.task_cycle = 10;
+  clocktask1.task_cycle = 100;
   // 定时任务回调函数绑定create函数
   clocktask1.callback = myclocktask_callback;
   clocktask1.user_data = (void*)&keydevice;
@@ -102,13 +109,19 @@ KSC_window screen={0};
 
   while (1)
   {
-  
+    // keydevice.input_create();
+    // sysdelay(10);
     input_t keyinput = input_get(KEY_DEVICE_ID);
-    if(keyinput.data!=0){
-        strcpy(cdatastr,numtobin(keyinput.data,16));
+    if(keyinput.input_id == KEY_DEVICE_ID){
+        strcpy(cdatastr1,numtobin(keyinput.data,16));
+        // if(keyinput.data>>16)
+        strcpy(cdatastr2,numtobin(keyinput.data>>16,16));
+        // strcpy(cdatastr3,numtobin(testkey,16));
     }
     
     kobjdraw(devp,&screen,&obj1);
+    kobjdraw(devp,&screen,&obj2);
+    // kobjdraw(devp,&screen,&obj3);
 
 
   }

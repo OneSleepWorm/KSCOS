@@ -107,6 +107,10 @@ void KSCOS_Error_Handler(void)
     
   }
 }
+void sysdelay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
 #endif
 #if __USE_PC__
 #include <stdio.h>
@@ -117,6 +121,10 @@ void KSCOS_Error_Handler(void)
   {
     
   }
+}
+void sysdelay(uint32_t ms)
+{
+  Sleep(ms);
 }
 #endif
 ki8 KSCOS_default_Error_Handler(void* data)

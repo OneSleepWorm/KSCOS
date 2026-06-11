@@ -80,10 +80,11 @@ uint32_t key_scan_ex(void){
     static uint32_t statekey0 = 0;
     static uint32_t statekey1 = 0;
     uint32_t nowkey = key_scan();
-    // 状态机获取,得到消抖后的按键状态
-    statekey0 = lastkey1 & lastkey0 & nowkey;
-    // 状态机更新,得到按键状态变化
-    uint32_t realkey = statekey0 ^ statekey1;
+    // 状态机获取,得到三次消抖后的按键状态
+    statekey0 = lastkey0 & nowkey;
+    // statekey0 = nowkey;
+    // 状态机更新,得到按键状态变化,低十六位记录按键状态，高十六位记录按键上下沿
+    uint32_t realkey = ((statekey1^statekey0)<<16)|(statekey0&0xFFFF);
     // 状态机复位
     lastkey1 = lastkey0;
     lastkey0 = nowkey;
