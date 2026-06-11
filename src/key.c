@@ -140,7 +140,7 @@ uint16_t pc_key_scan(void){
 }
 
 input_t pc_key_create(void){
-    return input_add((input_t){pc_key_scan(),PC_KEY_DEVICE_ID});
+    return input_add((input_t){pc_key_scan(),KEY_DEVICE_ID});
 }
 #define key_create pc_key_create
 #ifdef __cplusplus

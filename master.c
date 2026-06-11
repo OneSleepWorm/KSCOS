@@ -28,7 +28,7 @@ ki8 keycallback(void* user_data){
     input_device* keydevice=(input_device*)user_data;
     keydevice->input_create();
     // printf("keyinput:%d,%d\n",keyinput.input_id,keyinput.data);
-    return 0;
+    return 1;
 }
 
 

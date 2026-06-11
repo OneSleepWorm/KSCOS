@@ -27,8 +27,7 @@
 
 
 #if __USE_PC__
-#define PC_KEY_DEVICE_ID (1+1<<8)
-#define KEY_DEVICE_ID PC_KEY_DEVICE_ID
+
 #endif //__USE_PC__
 
 #ifdef __USE_STM32__
