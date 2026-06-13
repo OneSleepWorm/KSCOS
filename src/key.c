@@ -76,7 +76,6 @@ uint32_t key_scan(void)
 }
 uint32_t key_scan_ex(void){
     static uint32_t lastkey0 = 0;
-    static uint32_t lastkey1 = 0;
     static uint32_t statekey0 = 0;
     static uint32_t statekey1 = 0;
     uint32_t nowkey = key_scan();
@@ -86,7 +85,6 @@ uint32_t key_scan_ex(void){
     // 状态机更新,得到按键状态变化,低十六位记录按键状态，高十六位记录按键上下沿
     uint32_t realkey = ((statekey1^statekey0)<<16)|(statekey0&0xFFFF);
     // 状态机复位
-    lastkey1 = lastkey0;
     lastkey0 = nowkey;
 
     statekey1 = statekey0;

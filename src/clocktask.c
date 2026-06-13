@@ -11,8 +11,6 @@
 #include "../third_party/stm32/inc/stm32f1xx_hal_tim_ex.h"
 #include "../inc/KSCOSsystem.h"
 
-// 任务周期，单位：毫秒
-static const uint32_t stm_clock_task_cycle = 1000;
 // 任务名称
 const uint32_t stm_clock_task_id =0x00000001;
 // 任务结束标志
