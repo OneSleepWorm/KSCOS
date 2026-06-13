@@ -560,6 +560,10 @@ void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
     }
     obj->_type |= _drawed;
 }
+void kobjdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj){
+    kobjdraw(dev,screen,obj);
+    obj->_type &= ~_drawed;
+}
 
 // 绘制多个对象
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num){

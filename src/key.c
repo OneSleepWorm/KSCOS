@@ -76,7 +76,6 @@ uint32_t key_scan(void)
 }
 uint32_t key_scan_ex(void){
     static uint32_t lastkey0 = 0;
-    static uint32_t lastkey1 = 0;
     static uint32_t statekey0 = 0;
     static uint32_t statekey1 = 0;
     uint32_t nowkey = key_scan();
@@ -86,7 +85,6 @@ uint32_t key_scan_ex(void){
     // 状态机更新,得到按键状态变化,低十六位记录按键状态，高十六位记录按键上下沿
     uint32_t realkey = ((statekey1^statekey0)<<16)|(statekey0&0xFFFF);
     // 状态机复位
-    lastkey1 = lastkey0;
     lastkey0 = nowkey;
 
     statekey1 = statekey0;
@@ -140,7 +138,7 @@ uint16_t pc_key_scan(void){
 }
 
 input_t pc_key_create(void){
-    return input_add((input_t){pc_key_scan(),PC_KEY_DEVICE_ID});
+    return input_add((input_t){pc_key_scan(),KEY_DEVICE_ID});
 }
 #define key_create pc_key_create
 #ifdef __cplusplus
@@ -154,7 +152,17 @@ ki8 key_deinit(void){
 }
 #endif //__USE_PC__ > 0
 
-
+/* @brief    默认按键驱动
+ * @note  每次调用input_create()函数，都会将当前按键状态添加到输入队列中
+ *           并返回一个input_t结构体，包含按键状态和设备ID，key值为32位，
+ *           但通常我们会将create函数调用在定时任务上，
+ *           因此可以调用input_get()函数统一获取按键状态
+ * @details  pc端的key位定义与stm不同，PC端的key值实际为16位，高16位不会被使用，
+ *           且按键状态为第三方库插值后的逻辑状态，无需处理，
+ *           而stm端的key值实际为32位，低16位为按键物理状态，高16位为按键上下沿
+ *           每次调用都是物理按键状态，需要额外用户端处理状态机
+ * 
+ */
 input_device key_default_device ={
     .device_id = KEY_DEVICE_ID,
     .input_init = key_init,

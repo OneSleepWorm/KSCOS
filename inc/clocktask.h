@@ -30,6 +30,7 @@ typedef struct clock_task_t {
     void* user_data;
     uint16_t task_cycle;
     const uint8_t task_id;
+    uint8_t state;
 }clock_task_t;
 
 clock_task_t  clock_task_create(CTASK_INIT_FUNC init,CTASK_CALLBACK_FUNC callback

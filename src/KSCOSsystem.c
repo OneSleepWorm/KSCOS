@@ -55,7 +55,7 @@ const RCC_ClkInitTypeDef HIGH_RCC_ClkInitStruct = {
 
 void KSCOS_Error_Handler(void);
 
-void KSCOSsystem_Init(void)
+void KSCOSSystem_Init(void)
 {
   HAL_Init();
 }
@@ -126,6 +126,8 @@ void sysdelay(uint32_t ms)
 {
   Sleep(ms);
 }
+void KSCOSSystem_Init(){return;}
+void KSCOSSystemClock_Init(uint8_t clock_type){return;}
 #endif
 ki8 KSCOS_default_Error_Handler(void* data)
 {
