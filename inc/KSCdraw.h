@@ -17,9 +17,9 @@
 typedef struct ksc_obj_t{
     void* data;//对象数据指针
     KSCCOLOR colorck;//对象颜色
-    ku8 width;//对象宽度
+    ku8 width;//对象宽度(这个参数有时无需预定义,根据对象类型而定)
     ku8 height;//对象高度
-    ku8 sdx;//对象x偏移量
+    ku8 sdx;//对象x偏移量(相对于屏幕左上角，下同)
     ku8 sdy;//对象y偏移量
     ku8 d_and_r;//对象半径和深度 低5位为半径，高3位为深度
     ku8 _type;//对象类型和状态 低4位为类型，高4位为状态
@@ -96,6 +96,7 @@ k_draw_device* k_draw_device_find(const char* app_name);
 
 void kscreenclear(k_draw_device* dev,KSC_window* screen);
 void kobjdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);
+void kobjdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj);//强制绘制对象
 void kobjsdraw(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);
 void kobjsdraw_f(k_draw_device* dev,KSC_window* screen,ksc_obj_t* obj,uint8_t num);//强制绘制多个对象
 
