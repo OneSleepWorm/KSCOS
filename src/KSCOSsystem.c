@@ -17,15 +17,6 @@ void* oscalloc(size_t num, size_t size)
     return calloc(num, size);
 }
 
-void* osrealloc(void* ptr, size_t size)
-{
-    return realloc(ptr, size);
-}
-
-void* osmemmove(void* dst, const void* src, size_t len)
-{
-    return memmove(dst, src, len);
-}
 
 #if __USE_STM32__
 #include "stm32f1xx_hal.h"
@@ -137,6 +128,10 @@ void KSCOS_Error_Handler(void)
 void sysdelay(uint32_t ms)
 {
   HAL_Delay(ms);
+}
+uint32_t sysgettime(void)
+{
+  return (uint32_t)HAL_GetTick();
 }
 #endif
 #if __USE_PC__

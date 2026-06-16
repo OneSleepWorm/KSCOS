@@ -189,7 +189,7 @@ typedef struct pdev_base_t{
  * @brief 设备完整结构
  * @note  包含基类 + 总线匹配到的驱动指针
  */
-typedef struct pdev_t {
+typedef struct __attribute__((aligned(8))) pdev_t {
     pdev_base_t base;
     pdrv_t* driver;      // 由 bus_init 填充
 }pdev_t;
@@ -254,8 +254,8 @@ typedef struct dd_t{
 
 typedef int (*driver_open_func)(struct dd_t* dd);
 typedef int (*driver_close_func)(struct dd_t* dd);
-typedef int (*driver_read_func)(struct dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
-typedef int (*driver_write_func)(struct dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
+typedef int (*driver_read_func)(struct dd_t* dd, void* data, uint32_t count, uint32_t kreigster);
+typedef int (*driver_write_func)(struct dd_t* dd, void* data, uint32_t count, uint32_t kreigster);
 typedef int (*driver_ioctl_func)(struct dd_t* dd, const char* fmt, va_list ap);
 
 /**
@@ -288,7 +288,7 @@ typedef struct driver_ops_t{
  */
 #define REGISTER_DEVICE(devname) \
     static const pdev_t _CONCAT(_DEV_, __COUNTER__) \
-    __attribute__((section("pdev_table"), used)) = \
+    __attribute__((section("pdev_table"), used, aligned(8))) = \
     {{devname}, NULL}
 
 /**
@@ -304,17 +304,62 @@ typedef struct driver_ops_t{
  */
 #define REGISTER_DRIVER(drvname, ops_ptr) \
     static const pdrv_t _CONCAT(_DRV_, __COUNTER__) \
-    __attribute__((section("pdrv_table"), used)) = \
+    __attribute__((section("pdrv_table"), used, aligned(16))) = \
     {{drvname}, ops_ptr}
 
 // 链接器自动生成的段边界符号 (由 __attribute__((section)) 配合 ld 产生)
-extern const pdev_t __start_pdev_table[];
+extern const pdev_t __start_pdev_table[] __attribute__((aligned(8)));
 extern const pdev_t __stop_pdev_table[];
 
-extern const pdrv_t __start_pdrv_table[];
+extern const pdrv_t __start_pdrv_table[] __attribute__((aligned(16)));
 extern const pdrv_t __stop_pdrv_table[];
-#endif // __USE_PC__
+#else // __USE_STM32__
 
+// 辅助宏：用于展开 __COUNTER__ 后再进行拼接
+#define _CONCAT_IMPL(a, b) a##b
+#define _CONCAT(a, b)      _CONCAT_IMPL(a, b)
+
+/**
+ * @brief 静态注册设备
+ * @param devname  设备名字符串 (如 "tim1", "sys0")
+ * @note  生成的结构体被编入 "pdev_table" 链接段, bus_init 时拷贝到总线
+ *        必须确保该 .c 文件不被链接器丢弃 (参见静态库注意事项)
+ *        所有 REGISTER_DEVICE 调用集中放在 device.c 中
+ */
+#define REGISTER_DEVICE(devname) \
+    static const pdev_t _CONCAT(_DEV_, __COUNTER__) \
+    __attribute__((section("pdev_table"), used, aligned(8))) = \
+    {{devname}, NULL}
+
+/**
+ * @brief 静态注册驱动
+ * @param drvname  驱动名字符串 (如 "tim_clocktask", "sys_systime")
+ * @param ops_ptr  驱动操作集指针 (driver_ops_t*)
+ * @note  生成的结构体被编入 "pdrv_table" 链接段, bus_init 时拷贝到总线
+ *        必须确保该 .c 文件不被链接器丢弃 (参见静态库注意事项)
+ *        驱动通常注册在其实现文件(如 timer.c)中
+ *        用法示例:
+ *          static const driver_ops_t my_ops = { .ops_name = "...", ... };
+ *          REGISTER_DRIVER("tim_clocktask", &my_ops);
+ */
+#define REGISTER_DRIVER(drvname, ops_ptr) \
+    static const pdrv_t _CONCAT(_DRV_, __COUNTER__) \
+    __attribute__((section("pdrv_table"), used, aligned(16))) = \
+    {{drvname}, ops_ptr}
+
+// 链接器自动生成的段边界符号 (由 __attribute__((section)) 配合 ld 产生)
+extern const pdev_t __start_pdev_table[] __attribute__((aligned(8)));
+extern const pdev_t __stop_pdev_table[];
+
+extern const pdrv_t __start_pdrv_table[] __attribute__((aligned(16)));
+extern const pdrv_t __stop_pdrv_table[];
+
+// 编译时校验结构体尺寸符合段布局预期
+_Static_assert(sizeof(pdev_t) == 8, "pdev_t must be 8 bytes");
+_Static_assert(sizeof(pdrv_t) == 16, "pdrv_t must be 16 bytes");
+_Static_assert(__alignof__(pdev_t) == 8, "pdev_t alignment must be 8");
+_Static_assert(__alignof__(pdrv_t) == 16, "pdrv_t alignment must be 16");
+#endif // __USE_STM32__
 int null_func(struct dd_t* dev);  
 int null_rw_func(struct dd_t* dev, void* data, uint32_t size, uint32_t kreigster);
 int null_ioctl_func(struct dd_t* dev, const char* fmt, va_list ap);

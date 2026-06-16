@@ -1,4 +1,5 @@
 #include "../inc/dd.h"
+#if __USE_PC__
 #include <stdio.h>
 
 static int console_ioctl(dd_t* dd, const char* fmt, va_list ap) {
@@ -19,3 +20,5 @@ static const driver_ops_t console_ops = {
 };
 
 REGISTER_DRIVER("sys_console", &console_ops);
+
+#endif

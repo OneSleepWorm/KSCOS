@@ -18,8 +18,6 @@ void sysdelay(uint32_t ms);
 void* osmalloc(size_t size);
 void osfree(void* ptr);
 void* oscalloc(size_t num, size_t size);
-void* osrealloc(void* ptr, size_t size);
-void* osmemmove(void* dst, const void* src, size_t len);
 
 uint32_t sysgettime(void);
 

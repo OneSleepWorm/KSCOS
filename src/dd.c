@@ -62,19 +62,19 @@ int bus_init(void)
     if(KSC_bus.drv_table == NULL) return -1;
     memcpy(KSC_bus.drv_table, __start_pdrv_table, KSC_bus.drv_count * sizeof(pdrv_t));
 
-    //调试：打印数量
-    printf("dev_count: %d\n", KSC_bus.dev_count);
-    printf("drv_count: %d\n", KSC_bus.drv_count);
-    //调试：打印设备名
-    for(const pdev_t* dev = KSC_bus.dev_table; dev < KSC_bus.dev_table + KSC_bus.dev_count; dev++)
-    {
-        printf("dev_name: %s\n", dev->base.device_name);
-    }
-    //调试：打印驱动名
-    for(const pdrv_t* drv = KSC_bus.drv_table; drv < KSC_bus.drv_table + KSC_bus.drv_count; drv++)
-    {
-        printf("drv_name: %s\n", drv->base.driver_name);
-    }
+    // //调试：打印数量
+    // printf("dev_count: %d\n", KSC_bus.dev_count);
+    // printf("drv_count: %d\n", KSC_bus.drv_count);
+    // //调试：打印设备名
+    // for(const pdev_t* dev = KSC_bus.dev_table; dev < KSC_bus.dev_table + KSC_bus.dev_count; dev++)
+    // {
+    //     printf("dev_name: %s\n", dev->base.device_name);
+    // }
+    // //调试：打印驱动名
+    // for(const pdrv_t* drv = KSC_bus.drv_table; drv < KSC_bus.drv_table + KSC_bus.drv_count; drv++)
+    // {
+    //     printf("drv_name: %s\n", drv->base.driver_name);
+    // }
     //调试结束
     return 0;
 }
@@ -103,6 +103,11 @@ dd_t* bus_getdriver(char* device_name, char* driver_ops_name)
             bus_dev = dev;
         }
     }
+    if(bus_dev == NULL)
+    {
+        return NULL;
+    }
+
     // 查找驱动：遍历所有匹配设备名的驱动，按注册顺序返回第一个匹配的
     for(const pdrv_t* drv = KSC_bus.drv_table; drv < KSC_bus.drv_table + KSC_bus.drv_count; drv++)
     {

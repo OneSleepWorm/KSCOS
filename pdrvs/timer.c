@@ -1,5 +1,6 @@
 #include "../inc/dd.h"
 #include "../inc/KSCOSsystem.h"
+#if __USE_PC__
 #include <pthread.h>
 #include <windows.h>
 
@@ -56,3 +57,5 @@ static const driver_ops_t timer_ops = {
 };
 
 REGISTER_DRIVER("tim_clocktask", &timer_ops);
+
+#endif
