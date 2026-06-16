@@ -12,6 +12,7 @@
 #include "KSCOSsystem.h"
 #include "input.h"
 #include "key.h"
+#include "dd.h"
 
 #include "clocktask.h"
 #if __USE_KEY__

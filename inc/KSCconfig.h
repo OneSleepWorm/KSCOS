@@ -16,7 +16,7 @@
 #define __USE_FLASH__ 0
 #define __USE_UART__ 0
 #define __USE_LITTLEFS__ 0
-#define __USE_KEY__ 1
+#define __USE_KEY__ 0
 //屏幕配置
 #if __USE_LCD__
 // #define __USE_ST7735__ 

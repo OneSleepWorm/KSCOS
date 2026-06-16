@@ -1,4 +1,33 @@
 #include "../inc/KSCOSsystem.h"
+#include "../inc/dd.h"
+#include "stdlib.h"
+
+void* osmalloc(size_t size)
+{
+    printf("osmalloc:%d\n",size);
+    return malloc(size);
+}
+
+void osfree(void* ptr)
+{
+    free(ptr);
+}
+
+void* oscalloc(size_t num, size_t size)
+{
+    printf("oscalloc:%d %d\n",num,size);
+    return calloc(num, size);
+}
+
+void* osrealloc(void* ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+void* osmemmove(void* dst, const void* src, size_t len)
+{
+    return memmove(dst, src, len);
+}
 
 #if __USE_STM32__
 #include "stm32f1xx_hal.h"
@@ -121,6 +150,10 @@ void KSCOS_Error_Handler(void)
   {
     
   }
+}
+uint32_t sysgettime(void)
+{
+  return (uint32_t)GetTickCount();
 }
 void sysdelay(uint32_t ms)
 {

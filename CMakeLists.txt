@@ -26,6 +26,8 @@ target_compile_options(KSCOS PRIVATE -Wall -Wextra)
 
 add_subdirectory(src)
 
+add_subdirectory(pdrvs)
+
 target_link_libraries(KSCOS PRIVATE KSCDRAW_SRC easyx)
 
 # target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
