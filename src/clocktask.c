@@ -89,12 +89,10 @@ static ki8 pc_clock_task_running_flag = 0;
 // 任务线程函数
 static void* task_funtion(void* task){
     clock_task_t* taskp = (clock_task_t*)task;
-    printf("task start:%d\n",taskp->task_id);
     while(taskp->state == 1){
         Sleep(taskp->task_cycle);
         taskp->callback(taskp->user_data);
     }
-    printf("task end:%d\n",taskp->task_id);
 }
 
 CTASK_RUN clock_task_run(clock_task_t* task){

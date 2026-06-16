@@ -5,4 +5,5 @@ target_sources(KSCOS PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/timer.c
     ${CMAKE_CURRENT_SOURCE_DIR}/sys_systime.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/console.c
 )

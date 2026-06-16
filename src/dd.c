@@ -11,16 +11,12 @@
  * 
  * @note 该示例仅用于说明设备驱动注册的流程，实际应用中需要根据具体需求进行修改。
  *
- *  const pdev_base_t sys_dev={"sys"};
- *  REGISTER_DEVICE(sys_dev);
- *  const pdrv_base_t sys_drv={"sys_drv"};
- * 
     int systime_read(dd_t* dd, void* time,uint32_t ms,uint32_t kreighter){
     *((uint32_t*)time) = sysgettime();
     return 0;
     }
  
-    driver_ops_t sys_drv_ops0 = {
+    static const driver_ops_t sys_drv_ops0 = {
     .ops_name="systime",
     .open=OPEN_NULL_FUNC,
     .close=CLOSE_NULL_FUNC,
@@ -28,8 +24,7 @@
     .read=systime_read,
     .ioctl=IOCTL_NULL_FUNC,
     };
-    static const driver_ops_t* sys_drv_dd_ops[] = {&sys_drv_ops0};
-    REGISTER_DRIVER(sys_drv, sys_drv_dd_ops, 1);
+    REGISTER_DRIVER("sys_systime", &sys_drv_ops0);
  */
 
 #include "../inc/dd.h"
@@ -58,30 +53,29 @@ int bus_init(void)
     //初始化驱动表
     size_t drv_section_bytes = (const char*)__stop_pdrv_table - (const char*)__start_pdrv_table;
     KSC_bus.drv_count = drv_section_bytes / sizeof(pdrv_t);
-    size_t drv_stride = drv_section_bytes / KSC_bus.drv_count;
 
     //拷贝设备数据到总线
     memcpy(KSC_bus.dev_table, __start_pdev_table, KSC_bus.dev_count * sizeof(pdev_t));
 
-    //拷贝驱动数据到总线（需考虑链接器对齐间距）
+    //拷贝驱动数据到总线（sizeof(pdrv_t)=16 为 2 的幂，linker 按 sizeof 连续排布）
     KSC_bus.drv_table = oscalloc(KSC_bus.drv_count, sizeof(pdrv_t));
     if(KSC_bus.drv_table == NULL) return -1;
-    const char* src = (const char*)__start_pdrv_table;
-    pdrv_t* dst = KSC_bus.drv_table;
-    for(uint32_t i = 0; i < KSC_bus.drv_count; i++) {
-        memcpy(dst++, src, sizeof(pdrv_t));
-        src += drv_stride;
-    }
-    printf("KSC_bus.dev_count = %d\n", KSC_bus.dev_count);
-    for(uint32_t i = 0; i < KSC_bus.dev_count; i++)
+    memcpy(KSC_bus.drv_table, __start_pdrv_table, KSC_bus.drv_count * sizeof(pdrv_t));
+
+    //调试：打印数量
+    printf("dev_count: %d\n", KSC_bus.dev_count);
+    printf("drv_count: %d\n", KSC_bus.drv_count);
+    //调试：打印设备名
+    for(const pdev_t* dev = KSC_bus.dev_table; dev < KSC_bus.dev_table + KSC_bus.dev_count; dev++)
     {
-        printf("KSC_bus.dev_table[%d] = %s\n", i, KSC_bus.dev_table[i].base.device_name);
+        printf("dev_name: %s\n", dev->base.device_name);
     }
-    printf("KSC_bus.drv_count = %d\n", KSC_bus.drv_count);
-    // 打印驱动表(驱动名称)
-    for(uint32_t i = 0; i < KSC_bus.drv_count; i++){
-        printf("KSC_bus.drv_table[%d] = %s\n", i, KSC_bus.drv_table[i].base.driver_name);
+    //调试：打印驱动名
+    for(const pdrv_t* drv = KSC_bus.drv_table; drv < KSC_bus.drv_table + KSC_bus.drv_count; drv++)
+    {
+        printf("drv_name: %s\n", drv->base.driver_name);
     }
+    //调试结束
     return 0;
 }
 /**
@@ -104,55 +98,35 @@ dd_t* bus_getdriver(char* device_name, char* driver_ops_name)
     const pdev_t* bus_dev = NULL;
     for(const pdev_t* dev = KSC_bus.dev_table; dev < KSC_bus.dev_table + KSC_bus.dev_count; dev++)
     {
-        // 比较设备名称
         if(strncmp(device_name, dev->base.device_name, strlen(device_name)) == 0)
         {
             bus_dev = dev;
         }
     }
-    // 再查找驱动是否存在(从总线驱动表查找)
-    const pdrv_t* bus_drv = NULL;
+    // 查找驱动：遍历所有匹配设备名的驱动，按注册顺序返回第一个匹配的
     for(const pdrv_t* drv = KSC_bus.drv_table; drv < KSC_bus.drv_table + KSC_bus.drv_count; drv++)
     {
-        // 比较驱动名称(驱动名称的前缀必须与设备名称相同)
-        if(strncmp(device_name, drv->base.driver_name, strlen(device_name)) == 0)
-        {
-            bus_drv = drv;
-        }
-    }
-    if(bus_drv == NULL) return NULL;
-    dd_t* dd = osmalloc(sizeof(dd_t));
-    if(dd == NULL) return NULL;
-    // 如果driver_ops_name为空，获取第一个驱动描述符操作集,否则匹配driver_ops_name
-    if(driver_ops_name == NULL)
-    {
-        dd->dd_ops = bus_drv->dd_ops[0];
+        if(strncmp(device_name, drv->base.driver_name, strlen(device_name)) != 0)
+            continue;
+
+        if(driver_ops_name != NULL && strncmp(driver_ops_name, drv->ops->ops_name, strlen(driver_ops_name)) != 0)
+            continue;
+
+        dd_t* dd = osmalloc(sizeof(dd_t));
+        if(dd == NULL) return NULL;
+        dd->dd_ops = drv->ops;
         dd->callback = CALLBACK_NULL_FUNC;
         dd->driver_data = NULL;
         dd->user_data = NULL;
         return dd;
     }
-    else{
-        for(int i =0;i<bus_drv->dd_count;i++){
-            if(strncmp(driver_ops_name, bus_drv->dd_ops[i]->ops_name, strlen(driver_ops_name)) == 0)
-            {
-                dd->dd_ops = bus_drv->dd_ops[i];
-                dd->callback = CALLBACK_NULL_FUNC;
-                dd->driver_data = NULL;
-                dd->user_data = NULL;
-                return dd;
-            }
-        }
-    }
-    
-    // 如果没有找到匹配的驱动描述符，返回NULL
-    osfree(dd);
+
     return NULL;
 }
 
 int null_func(struct dd_t* dev){return 0;}
 int null_rw_func(struct dd_t* dev, void* data, uint32_t size, uint32_t kreigster){return 0;}
-int null_ioctl_func(struct dd_t* dev, uint8_t argc, const char** argv){return 0;}
+int null_ioctl_func(struct dd_t* dev, const char* fmt, va_list ap){(void)dev;(void)fmt;(void)ap;return 0;}
 void* null_callback(void* data){return NULL;}
 
 int ddopen(dd_t* dd){
@@ -172,34 +146,15 @@ int ddwrite(dd_t* dd, void* data, uint32_t size, uint32_t kreigster){
     return dd->dd_ops->write(dd, data, size, kreigster);
 }
 
-#include <stdarg.h>
-#include <stdlib.h>
-
-int ddioctl(dd_t* dd, uint8_t argc, ...) {
-    if (argc == 0 || dd == NULL || dd->dd_ops == NULL) {
-        return -1;
-    }
-    
-    va_list args;
-    va_start(args, argc);
-    
-    // 分配字符串指针数组
-    const char** argv = malloc(argc * sizeof(const char*));
-    if (!argv) {
-        va_end(args);
-        return -1;
-    }
-    
-    // 逐个取出字符串指针
-    for (uint8_t i = 0; i < argc; i++) {
-        argv[i] = va_arg(args, const char*);  // 取 char*，注意不是 uint8_t*
-    }
-    
-    va_end(args);
-    
-    int ret = dd->dd_ops->ioctl(dd, argc, argv);
-    
-    free(argv);
+int ddioctl(dd_t* dd, const char* fmt, ...) {
+    if (!dd || !dd->dd_ops || !dd->dd_ops->ioctl) return -1;
+    va_list ap;
+    va_start(ap, fmt);
+    va_list ap_copy;
+    va_copy(ap_copy, ap);
+    int ret = dd->dd_ops->ioctl(dd, fmt, ap_copy);
+    va_end(ap_copy);
+    va_end(ap);
     return ret;
 }
 

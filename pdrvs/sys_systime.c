@@ -15,7 +15,4 @@ static const driver_ops_t sys_drv_ops0 = {
     .read = systime_read,
     .ioctl = IOCTL_NULL_FUNC,
 };
-static const driver_ops_t* sys_drv_dd_ops[] = {&sys_drv_ops0};
-
-static const pdrv_base_t sys_drv = {"sys_systime"};
-REGISTER_DRIVER(sys_drv, sys_drv_dd_ops, 1);
+REGISTER_DRIVER("sys_systime", &sys_drv_ops0);

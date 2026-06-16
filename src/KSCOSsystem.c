@@ -4,7 +4,6 @@
 
 void* osmalloc(size_t size)
 {
-    printf("osmalloc:%d\n",size);
     return malloc(size);
 }
 
@@ -15,7 +14,6 @@ void osfree(void* ptr)
 
 void* oscalloc(size_t num, size_t size)
 {
-    printf("oscalloc:%d %d\n",num,size);
     return calloc(num, size);
 }
 
@@ -145,7 +143,6 @@ void sysdelay(uint32_t ms)
 #include <stdio.h>
 void KSCOS_Error_Handler(void)
 {
-  printf("KSCOS_Error_Handler\n");
   while (1)
   {
     

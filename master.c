@@ -1,8 +1,10 @@
 #include "inc/master.h"
 
+static dd_t* console = NULL;
+
 static void* timer_tick(void* arg) { (void)arg;
     static int count = 0;
-    printf("tick %d\n", count++);
+    ddioctl(console, "tick %d\n", count++);
     return NULL;
 }
 
@@ -10,12 +12,14 @@ int main(void)
 {
     bus_init();
 
+    console = bus_getdriver("sys", "console");
+
     dd_t* tmr = bus_getdriver("tim", "clock");
     if (!tmr) {
-        printf("timer driver not found\n");
+        ddioctl(console, "timer driver not found\n");
         return -1;
     }
-    printf("timer driver: %s\n", tmr->dd_ops->ops_name);
+    ddioctl(console, "timer driver: %s\n", tmr->dd_ops->ops_name);
 
     tmr->user_data = (void*)(uintptr_t)500;
     tmr->callback = timer_tick;
@@ -23,13 +27,13 @@ int main(void)
     Sleep(3000);
     ddclose(tmr);
     Sleep(500);
-    printf("timer stopped\n");
+    ddioctl(console, "timer stopped\n");
 
     dd_t* sys = bus_getdriver("sys", "systime");
     if (sys) {
         uint32_t t = 0;
         ddread(sys, &t, sizeof(t), 0);
-        printf("systime: %u\n", t);
+        ddioctl(console, "systime: %u\n", t);
     }
 
     return 0;

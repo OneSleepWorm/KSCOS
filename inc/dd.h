@@ -2,6 +2,7 @@
 #define __dd_h__
 
 #include "KSCconfig.h"
+#include <stdarg.h>
 
 /**
  * @brief KSCOS 设备-驱动(Device-Driver)总线框架
@@ -22,11 +23,11 @@
  * ============================================================
  *
  * ┌─────────────────────────────────────────────────────────┐
- * │  第1层: pdev_t (设备)                                    │
- * │  作用: 声明外设实例的存在                                 │
- * │  内容: 设备名 + 指向驱动的指针(由总线填充)                 │
- * │  注册: REGISTER_DEVICE("tim1") → 编入 pdev_table 段     │
- * │  命名: 类型+实例号, 如 sys0 / tim1 / spi1 / uart3       │
+ * │  第2层: pdrv_t (驱动)                                    │
+ * │  作用: 描述一类驱动程序的能力                             │
+ * │  内容: 驱动名 + 单个 ops 操作集                           │
+ * │  注册: REGISTER_DRIVER(...) → 编入 pdrv_table 段        │
+ * │  命名: 设备前缀_功能名, 如 tim_clocktask / sys_systime    │
  * │                                                         │
  * │  第2层: pdrv_t (驱动)                                    │
  * │  作用: 描述一类驱动程序的能力                             │
@@ -50,13 +51,13 @@
  *          例: "tim" → 匹配 "tim1", "tim2", "tim3", "tim4"
  *          总是匹配最后一个(若同一个前缀有多个, 取最后注册的)
  *
- *   第2步: 遍历驱动表, 用 同一个 device_name 前缀匹配驱动
+ *   第2步: 遍历驱动表, 找 device_name 前缀匹配的驱动
  *          例: "tim" → 匹配 "tim_clocktask"
- *          也是取最后一个匹配
+ *          按注册顺序返回第一个匹配的驱动
  *
- *   第3步: 在该驱动的 dd_ops[] 中, 匹配 driver_ops_name
+ *   第3步: 匹配 driver_ops_name 与驱动内 ops_name
  *          例: "clock" → 匹配 ops_name="clock"
- *          若 driver_ops_name 为 NULL, 默认取 dd_ops[0]
+ *          若 driver_ops_name 为 NULL, 返回第一个匹配的驱动
  *
  *   返回: 新分配的 dd_t* (需用后释放由总线管理, 暂由用户保证生命周期)
  *
@@ -111,10 +112,12 @@
  * 六、注意事项
  * ============================================================
  *
- * 1. PE (MinGW) 链接器对齐问题
- *    在 Windows/MinGW 平台下, 链接器在 pdrv_table 段中插入额外
- *    填充, 导致段总字节数 / sizeof(pdrv_t) ≠ 条目数. bus_init()
- *    内部已做 stride 修正, 开发者无需关心.
+ * 1. pdrv_t 对齐
+ *    pdrv_t 的 sizeof(=16) 是 2 的幂，与 aligned(16) 一致，
+ *    链接器在 section 中以 sizeof 为单位连续排布，stride = sizeof，
+ *    section 字节数可精确用于计数。
+ *
+ *    pdev_t 同理，sizeof(=16) 也是 2 的幂，无需特殊处理。
  *
  * 2. 静态库链接丢弃问题
  *    若一个 .c 文件只包含 REGISTER_DEVICE / REGISTER_DRIVER 而
@@ -158,9 +161,7 @@
  *       .close = timer_close,
  *       .read = timer_read,
  *   };
- *   static const driver_ops_t* timer_dd_ops[] = {&timer_ops};
- *   static const pdrv_base_t timer_drv = {"tim_clocktask"};
- *   REGISTER_DRIVER(timer_drv, timer_dd_ops, 1);
+ *   REGISTER_DRIVER("tim_clocktask", &timer_ops);
  *
  *   // === 用户使用 ===
  *   dd_t* tmr = bus_getdriver("tim", "clock");
@@ -218,12 +219,13 @@ typedef struct driver_ops_t driver_ops_t;
 
 /**
  * @brief 驱动完整结构
- * @note  基类 + 操作集数组(dd_ops[]) + 数组长度
+ * @note  基类 + 指向单个驱动操作集的指针
+ *        sizeof=16（2 的幂），与 16 字节对齐一致，
+ *        确保链接器在 section 中按 sizeof 为单位连续排布
  */
-typedef struct pdrv_t {
+typedef struct __attribute__((aligned(16))) pdrv_t {
     pdrv_base_t base;
-    const driver_ops_t* const* dd_ops;  // 操作集数组
-    uint8_t dd_count;                    // 数组元素个数
+    const driver_ops_t* ops;            // 指向单个 ops
 } pdrv_t;
 
 typedef struct dd_t dd_t;
@@ -254,7 +256,7 @@ typedef int (*driver_open_func)(struct dd_t* dd);
 typedef int (*driver_close_func)(struct dd_t* dd);
 typedef int (*driver_read_func)(struct dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
 typedef int (*driver_write_func)(struct dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
-typedef int (*driver_ioctl_func)(struct dd_t* dd, uint8_t argc, const char** argv);
+typedef int (*driver_ioctl_func)(struct dd_t* dd, const char* fmt, va_list ap);
 
 /**
  * @brief 驱动操作集
@@ -291,17 +293,19 @@ typedef struct driver_ops_t{
 
 /**
  * @brief 静态注册驱动
- * @param drvbase   驱动基类变量 (pdrv_base_t 类型, 用 {名} 初始化)
- * @param dd_ops_s  驱动操作集数组名 (driver_ops_t*[] 类型)
- * @param dd_count  操作集数组元素个数
+ * @param drvname  驱动名字符串 (如 "tim_clocktask", "sys_systime")
+ * @param ops_ptr  驱动操作集指针 (driver_ops_t*)
  * @note  生成的结构体被编入 "pdrv_table" 链接段, bus_init 时拷贝到总线
  *        必须确保该 .c 文件不被链接器丢弃 (参见静态库注意事项)
  *        驱动通常注册在其实现文件(如 timer.c)中
+ *        用法示例:
+ *          static const driver_ops_t my_ops = { .ops_name = "...", ... };
+ *          REGISTER_DRIVER("tim_clocktask", &my_ops);
  */
-#define REGISTER_DRIVER(drvbase, dd_ops_s, dd_count) \
+#define REGISTER_DRIVER(drvname, ops_ptr) \
     static const pdrv_t _CONCAT(_DRV_, __COUNTER__) \
     __attribute__((section("pdrv_table"), used)) = \
-    {drvbase, dd_ops_s, dd_count}
+    {{drvname}, ops_ptr}
 
 // 链接器自动生成的段边界符号 (由 __attribute__((section)) 配合 ld 产生)
 extern const pdev_t __start_pdev_table[];
@@ -313,7 +317,7 @@ extern const pdrv_t __stop_pdrv_table[];
 
 int null_func(struct dd_t* dev);  
 int null_rw_func(struct dd_t* dev, void* data, uint32_t size, uint32_t kreigster);
-int null_ioctl_func(struct dd_t* dev, uint8_t argc, const char** argv);
+int null_ioctl_func(struct dd_t* dev, const char* fmt, va_list ap);
 void* null_callback(void* data);
 
 #define OPEN_NULL_FUNC null_func
@@ -332,6 +336,8 @@ int ddopen(dd_t* dd);
 int ddclose(dd_t* dd);
 int ddread(dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
 int ddwrite(dd_t* dd, void* data, uint32_t size, uint32_t kreigster);
+
+int ddioctl(dd_t* dd, const char* fmt, ...);
 
 
 #endif // __dd_h__

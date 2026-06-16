@@ -48,14 +48,11 @@ static int timer_read(dd_t* dd, void* data, uint32_t size, uint32_t kreigster) {
     return 0;
 }
 
-static driver_ops_t timer_ops = {
+static const driver_ops_t timer_ops = {
     .ops_name = "clock",
     .open = timer_open,
     .close = timer_close,
     .read = timer_read,
 };
 
-static const driver_ops_t* timer_dd_ops[] = {&timer_ops};
-
-static const pdrv_base_t timer_drv = {"tim_clocktask"};
-REGISTER_DRIVER(timer_drv, timer_dd_ops, 1);
+REGISTER_DRIVER("tim_clocktask", &timer_ops);
